@@ -8,7 +8,7 @@ from t2wml.mapping.statement_mapper import YamlMapper, StatementMapper
 from t2wml.wikification.wikifier_service import WikifierService
 from t2wml.wikification.wikidata_provider import SparqlProvider, DictionaryProvider, WikidataProvider
 from t2wml.knowledge_graph import KnowledgeGraph, create_output_from_files
-from t2wml.project import Project
+from t2wml.project import Project, ProjectRunner
 
 def set_wikidata_provider(wp: WikidataProvider):
     """set the wikidata provider to be used by the script

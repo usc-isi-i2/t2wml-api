@@ -40,7 +40,7 @@ class TestHomicideData(JsonTest):
             dataset_folder, "wikifier_general.csv")
         self.yaml_folder = os.path.join(dataset_folder, "homicide", "t2mwl")
         self.expected_result_dir = os.path.join(
-            unit_test_folder, "homicide_results")
+            unit_test_folder, "homicide", "results")
         add_properties_from_file(os.path.join(
             unit_test_folder, "property_type_map.json"))
 

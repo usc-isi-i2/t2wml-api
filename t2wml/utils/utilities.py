@@ -52,7 +52,9 @@ def translate_precision_to_integer(precision: str) -> int:
 
 
 
-def parse_datetime(value, additional_formats=[], precisions=[]):
+def parse_datetime(value, additional_formats=None, precisions=None):
+    additional_formats=additional_formats or []
+    precisions= precisions or []
     # check if additional formats is a string and convert to single entry array:
     if isinstance(additional_formats, str):
         additional_formats = [additional_formats]

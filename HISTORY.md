@@ -4,6 +4,7 @@ T2WML API History
 Changes in version 0.0.6:
 -------------------------
 * complete overhaul of region definition, added support for 'columns'/'rows'/'cells'
+* added Project class
 * backwards incompatible: 
      * changed 'skip_column/row/cell' to 'skip_columns/rows/cells'
      * renamed BaseStatementMapper to StatementMapper

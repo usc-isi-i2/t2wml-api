@@ -61,11 +61,13 @@ class TestScripts(unittest.TestCase):
         import os
         from t2wml.api import KnowledgeGraph, Wikifier, YamlMapper, SpreadsheetFile, add_properties_from_file
 
-        properties_file = os.path.join(
-            unit_test_folder, "property_type_map.json")
-        add_properties_from_file(properties_file)
+
 
         test_folder = os.path.join(unit_test_folder, "loop")
+        properties_file = os.path.join(
+            test_folder, "kgtk_properties.tsv")
+        add_properties_from_file(properties_file)
+
         data_file = os.path.join(test_folder, "oecd.xlsx")
         wikifier_filepath1 = os.path.join(test_folder, "country-wikifier.csv")
         yaml_filepath = os.path.join(test_folder, "oecd.yaml")

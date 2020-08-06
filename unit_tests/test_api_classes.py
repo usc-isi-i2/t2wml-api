@@ -3,11 +3,12 @@ import unittest
 from pathlib import Path
 
 repo_folder = Path(__file__).parents[2]
+dataset_folder = os.path.join(repo_folder, "Datasets")
 unit_test_folder = os.path.join(
     repo_folder, "t2wml-api", "unit_tests", "ground_truth")
 
 
-class JsonTest(unittest.TestCase):
+class ClassesTest(unittest.TestCase):
     def test_wikifier(self):
         import pandas as pd
         from t2wml.api import Wikifier
@@ -94,6 +95,59 @@ class JsonTest(unittest.TestCase):
         wf.add_file(w_file)
         kg = KnowledgeGraph.generate(ym, sheet, wf)
 
+class ProjectTest(unittest.TestCase):
+    def test_project_single(self):
+        from t2wml.api import ProjectRunner
+        project_folder=os.path.join(unit_test_folder, "homicide")
+        property_file=(os.path.join(
+            unit_test_folder, "property_type_map.json"))
+        sp=ProjectRunner(project_folder)
+        sp.add_data_file("homicide_report_total_and_sex.xlsx")
+        sp.add_property_file(property_file, copy_from_elsewhere=True, overwrite=True)
+        sp.add_wikifier_file("wikifier_general.csv")
+        sp.add_yaml_file(os.path.join("t2mwl","table-1a.yaml"))
+        sp.associate_yaml_with_sheet(os.path.join("t2mwl","table-1a.yaml"), "homicide_report_total_and_sex.xlsx", "table-1a")
+        save_file=sp.save()
+        sp2=ProjectRunner.load(save_file)
+        kg=sp2.generate_old_style_single_file_knowledge_graph("table-1a")
+    
+    def test_project_multi(self):
+        import os
+        from t2wml.api import ProjectRunner, SpreadsheetFile
 
+        #part one:
+        project_folder=os.path.join(unit_test_folder, "homicide")
+        yaml_folder = os.path.join(project_folder, "t2mwl")
+        property_file=(os.path.join(
+            unit_test_folder, "property_type_map.json"))
+        sp=ProjectRunner(project_folder)
+        data_file1=sp.add_data_file("homicide_report_total_and_sex.xlsx")
+        sp.add_property_file(property_file, copy_from_elsewhere=True, overwrite=True)
+        sp.add_wikifier_file("wikifier_general.csv")
+        for file_name in os.listdir(yaml_folder):
+            yaml_file=os.path.join("t2mwl", file_name)
+            sheet_name=file_name.split(".")[0]
+            sp.add_yaml_file(yaml_file, data_file1, sheet_name)
+        
+        #part 2:
+        test_folder = os.path.join(unit_test_folder, "loop")
+        properties_file = os.path.join(test_folder, "kgtk_properties.tsv")
+        sp.add_property_file(properties_file, copy_from_elsewhere=True, overwrite=True)
+        data_file2 = sp.add_data_file(os.path.join(test_folder, "oecd.xlsx"), copy_from_elsewhere=True, overwrite=True)
+        wikifier_filepath1 = os.path.join(test_folder, "country-wikifier.csv")
+        sp.add_specific_wikifier_file(wikifier_filepath1, data_file2, copy_from_elsewhere=True, overwrite=True)
+        yaml_filepath = sp.add_yaml_file(os.path.join(test_folder, "oecd.yaml"), copy_from_elsewhere=True, overwrite=True)
+        spreadsheet_file=SpreadsheetFile(os.path.join(project_folder, "oecd.xlsx"))
+        for sheet_name in spreadsheet_file:
+            sp.associate_yaml_with_sheet(yaml_filepath, data_file2, sheet_name)
+
+        save_file=sp.save()
+        sp2=ProjectRunner.load(save_file)
+        kgs=sp2.generate_all_knowledge_graphs()
+
+        
+        
+
+        
 if __name__ == '__main__':
     unittest.main()

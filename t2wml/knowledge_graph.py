@@ -18,10 +18,10 @@ class KnowledgeGraph:
             followed by a dictionary with the internal key within the qualifier (value, property, unit, etc)
         metadata (dict): information about the input usede to create the knowledge graph. (data_file, sheet_name)
     """
-    def __init__(self, statements, errors=[], metadata={}):
+    def __init__(self, statements, errors=None, metadata=None):
         self.statements = statements
-        self.errors = errors
-        self.metadata = metadata
+        self.errors = errors or []
+        self.metadata = metadata or {}
 
     @classmethod
     def load_json(cls, filename: str):
