@@ -3,4 +3,5 @@
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
     "editor.detectIndentation": false,
+    "python.testing.unittestEnabled": true,
 }
