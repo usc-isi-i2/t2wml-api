@@ -10,6 +10,8 @@ try:
 except ImportError:
     raise ImportError(
         "Missing optional dependency 'etk'. Install etk to enable triplet generation")
+except OSError as e:
+    raise ImportError(str(e))
 from t2wml.wikification.utility_functions import get_property_type
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.utils.utilities import translate_precision_to_integer

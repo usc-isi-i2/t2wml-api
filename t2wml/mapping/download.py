@@ -7,10 +7,11 @@ from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 try:
     from t2wml.mapping.triple_generator import generate_triples
-except ImportError:
+except (ImportError, OSError):
     def generate_triplets(*args, **kwargs):
         raise ImportError(
-            "Missing optional dependency 'etk'. Install etk to enable triplet generation")
+            "Missing optional dependency 'etk' or its requirement, spacey. Install etk to enable triplet generation")
+
 from t2wml.wikification.utility_functions import get_property_type
 
 
