@@ -1,0 +1,37 @@
+name: Run API Tests
+on: push
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    name: Run API Tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: Setup env
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run Tests
+        run: |
+          python -m unittest unit_tests.test_api_classes
+          python -m unittest unit_tests.test_json_results 
+          python -m unittest unit_tests.test_kgtk_results
+          python -m unittest unit_tests.test_api_scripts
+      # This sterp should be enabled when SLACK_WEBHOOK_URL is added to the repo
+      # - name: Report to Slack
+      #   uses: 8398a7/action-slack@v3
+      #   with:
+      #     status: ${{ job.status }}
+      #     fields: repo,message,commit,author,action,eventName,ref,workflow,job,took # selectable (default: repo,message)
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }} # optional
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+      #   if: always() # Pick up events even if the job fails or is canceled.
+
+
+
