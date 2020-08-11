@@ -15,14 +15,14 @@ try:
 except ImportError:
     raise ImportError(
         "Missing optional dependency 'etk'. Install etk to enable generate_nodes")
-
+except OSError as e:
+    raise ImportError(str(e))
 
 def model_data(properties_file_path, output_file_path) -> None:
     """
     This function generates triples for user defined properties for uploading them to wikidata
     :return:
     """
-    # stream = open(Path.cwd().parent / "Datasets/new-property-configuration.yaml", 'r', encoding='utf8')
     with open(properties_file_path, 'r', encoding='utf8') as f:
         yaml_data = yaml.safe_load(f)
     # initialize

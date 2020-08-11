@@ -6,7 +6,6 @@ from t2wml.api import KnowledgeGraph
 from t2wml.wikification.utility_functions import add_properties_from_file
 
 repo_folder = Path(__file__).parents[2]
-dataset_folder = os.path.join(repo_folder, "Datasets")
 unit_test_folder = os.path.join(
     repo_folder, "t2wml-api", "unit_tests", "ground_truth")
 add_properties_from_file(os.path.join(
@@ -35,10 +34,10 @@ class JsonTest(unittest.TestCase):
 class TestHomicideData(JsonTest):
     def setUp(self):
         self.data_file = os.path.join(
-            dataset_folder, "homicide", "homicide_report_total_and_sex.xlsx")
+            unit_test_folder, "homicide", "homicide_report_total_and_sex.xlsx")
         self.wikifier_file = os.path.join(
-            dataset_folder, "wikifier_general.csv")
-        self.yaml_folder = os.path.join(dataset_folder, "homicide", "t2mwl")
+            unit_test_folder, "homicide", "wikifier_general.csv")
+        self.yaml_folder = os.path.join(unit_test_folder, "homicide", "t2mwl")
         self.expected_result_dir = os.path.join(
             unit_test_folder, "homicide", "results")
         add_properties_from_file(os.path.join(

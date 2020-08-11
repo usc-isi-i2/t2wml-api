@@ -3,7 +3,7 @@ import pandas
 try:
     from etk.wikidata.utils import parse_datetime_string
     has_etk = True
-except ImportError:
+except (ImportError, OSError):
     has_etk = False
 
 VALID_PROPERTY_TYPES=["globecoordinate", "quantity", "time", "string", "monolingualtext",
