@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 import pandas as pd
 from t2wml.spreadsheets.utilities import PandasLoader
-
+from t2wml.settings import t2wml_settings
 
 class FakeCacher:
     def __init__(self, data_file_path, sheet_name):
@@ -24,8 +24,11 @@ class PickleCacher:
 
     @property
     def pickle_folder(self):
-        parent = Path(self.data_file_path).parent
-        folder_path = parent/"pf"
+        storage_folder=Path(t2wml_settings.cache_data_files_folder)
+        parts = Path(self.data_file_path).parts
+        parts=parts[1:-1]
+        underscored="_".join(parts)
+        folder_path = storage_folder/underscored
         return folder_path
 
     @property
