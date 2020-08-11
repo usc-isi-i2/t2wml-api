@@ -10,6 +10,7 @@
   + [YamlMapper](#yamlmapper)
   + [A custom mapper class](#custommapper)
 * [The WikidataProvider](#wikiprovider)
+* [T2WML settings](#settings)
 
 ## Examples of code
 
@@ -66,8 +67,6 @@ for sheet_name, sheet in spreadsheet_file.items():
 
 <span id="convenience"></span>
 
-* `set_wikidata_provider(wikidata_provider)` : set the wikidata provider for t2wml to the provided argument (should be an initialized class instance)
-* `set_sparql_endpoint(sparql_endpoint)` : set the sparql endpoint used throughout the code for wikidata queries
 * `add_properties_from_file(properties_file_path)` : add properties to the wikidata provider from the provided file path, which must be in json or kgtk format
 * `create_output_from_files(data_file_path, sheet_name, yaml_file_path, wikifier_filepath, output_filepath=None, output_format="json")` : 
 
@@ -332,4 +331,24 @@ class DatabaseProvider(FallbackSparql):
         except:
             db.session.rollback()
             raise ValueError("Failed to commit to database session")
+```
+
+## T2WML Settings
+
+<span id="settings"></span>
+
+The t2wml api has some settings that you can change that take effect all over the calculations. These settings are stored in t2wml_settings, an instance of a T2WMLSettings class.
+
+The settings are:
+
+* `sparql_endpoint`: the endpoint used to make sparql queries. The default sparql endpoint is 'https://dsbox02.isi.edu:8888/bigdata/namespace/wdq/sparql'
+* `wikidata_provider`: As discussed above in the WikidataProvider section. When set to None, a default wikidata_provider instance will be created, using the SparqlProvider class with a sparql_endpoint set to the sparql_endpoint in settings
+* `cache_data_files`: enables caching pickled files for spreadsheets. If set to True, storage location must be specified
+* `cache_data_files_folder`: storage location for cached data files. Only used if cache_data_files is set to True
+
+example code:
+
+```python
+from t2wml.api import t2wml_settings
+t2wml_settings.sparql_endpoint='https://query.wikidata.org/bigdata/namespace/wdq/sparql'
 ```
