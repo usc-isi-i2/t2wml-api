@@ -1,10 +1,11 @@
-from pathlib import Path
+DEFAULT_SPARQL_ENDPOINT ='https://dsbox02.isi.edu:8888/bigdata/namespace/wdq/sparql'
+# DEFAULT_SPARQL_ENDPOINT= 'https://query.wikidata.org/bigdata/namespace/wdq/sparql'
 
-DEFAULT_SPARQL_ENDPOINT ='https://dsbox02.isi.edu:8888/bigdata/namespace/wdq/sparql'# 'https://query.wikidata.org/bigdata/namespace/wdq/sparql'#
+class T2WMLSettings:
+    def __init__(self):
+        self.cache_data_files=False
+        self.cache_data_files_folder=None
+        self.sparql_endpoint=DEFAULT_SPARQL_ENDPOINT
+        self.wikidata_provider=None #default is SparqlProvider
 
-t2wml_settings={
-    "cache_data_files":False,
-    "sparql_endpoint": DEFAULT_SPARQL_ENDPOINT,
-    "wikidata_provider": None, #default is SparqlProvider
-    "storage_folder": (Path.cwd() / "storage")
-    }
+t2wml_settings=T2WMLSettings()

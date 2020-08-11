@@ -31,7 +31,7 @@ class SparqlProvider(WikidataProvider):
             If None, the sparql endpoint from t2wml_settings is used.
         """
         if sparql_endpoint is None:
-            sparql_endpoint = t2wml_settings["sparql_endpoint"]
+            sparql_endpoint = t2wml_settings.sparql_endpoint
         self.sparql_endpoint = sparql_endpoint
         self.cache = {}
 

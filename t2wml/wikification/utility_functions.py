@@ -9,10 +9,10 @@ from t2wml.settings import t2wml_settings
 
 
 def get_provider():
-    wikidata_provider = t2wml_settings["wikidata_provider"]
+    wikidata_provider = t2wml_settings.wikidata_provider
     if wikidata_provider is None:
-        wikidata_provider = SparqlProvider(t2wml_settings["sparql_endpoint"])
-        t2wml_settings["wikidata_provider"] = wikidata_provider
+        wikidata_provider = SparqlProvider(t2wml_settings.sparql_endpoint)
+        t2wml_settings.wikidata_provider = wikidata_provider
     return wikidata_provider
 
 

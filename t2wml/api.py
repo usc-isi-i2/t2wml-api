@@ -16,7 +16,7 @@ def set_wikidata_provider(wp: WikidataProvider):
     Args:
         wp (WikidataProvider): an initialized instance (not class) of soem subclass of WikidataProvider
     """
-    t2wml_settings["wikidata_provider"] = wp
+    t2wml_settings.wikidata_provider = wp
 
 
 def set_sparql_endpoint(se: str):
@@ -25,5 +25,5 @@ def set_sparql_endpoint(se: str):
     Args:
         se (str): valid sparql endpoint eg: 'https://query.wikidata.org/bigdata/namespace/wdq/sparql'
     """
-    t2wml_settings["sparql_endpoint"] = se
+    t2wml_settings.sparql_endpoint = se
 

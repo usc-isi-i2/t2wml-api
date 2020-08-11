@@ -40,7 +40,7 @@ def ends_with(input, section):
 @boolean_modifer
 def instance_of(input, qnode):
     query = "ASK {wd:"+str(input)+" wdt:P31/wdt:P279* wd:" + str(qnode) + "}"
-    sparql = SPARQLWrapper(t2wml_settings[sparql_endpoint])
+    sparql = SPARQLWrapper(t2wml_settings.sparql_endpoint)
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()

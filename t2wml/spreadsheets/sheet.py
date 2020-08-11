@@ -9,7 +9,7 @@ from collections.abc import Mapping
 
 def get_cache_class():
     cache_class = FakeCacher
-    if t2wml_settings["cache_data_files"]:
+    if t2wml_settings.cache_data_files:
         cache_class = PickleCacher
     return cache_class
 
