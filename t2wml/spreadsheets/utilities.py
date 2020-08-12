@@ -8,7 +8,7 @@ class PandasLoader:
         self.file_path = file_path
         file_extension = Path(file_path).suffix
         self.is_csv = True if file_extension.lower() == ".csv" else False
-        self.pd_args = dict(dtype=object, header=None)
+        self.pd_args = dict(dtype=str, header=None)
 
     def post_process_data(self, data):
         data = data.fillna("")

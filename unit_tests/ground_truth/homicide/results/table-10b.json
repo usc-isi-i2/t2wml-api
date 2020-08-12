@@ -1,16 +1,16 @@
 {
     "D5": {
-        "item": "Q967",
         "property": "P100024",
-        "value": 1,
+        "value": "1",
+        "item": "Q967",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2000-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2000-01-01T00:00:00",
                 "cell": "A4"
             },
             {
@@ -27,17 +27,17 @@
         "cell": "A5"
     },
     "D6": {
-        "item": "Q967",
         "property": "P100024",
-        "value": 3,
+        "value": "3",
+        "item": "Q967",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2000-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2000-01-01T00:00:00",
                 "cell": "A4"
             },
             {
@@ -54,17 +54,17 @@
         "cell": "A5"
     },
     "D7": {
-        "item": "Q970",
         "property": "P100024",
-        "value": 2,
+        "value": "2",
+        "item": "Q970",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2000-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2000-01-01T00:00:00",
                 "cell": "A4"
             },
             {
@@ -81,17 +81,17 @@
         "cell": "A7"
     },
     "D8": {
-        "item": "Q970",
         "property": "P100024",
-        "value": 4,
+        "value": "4",
+        "item": "Q970",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2000-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2000-01-01T00:00:00",
                 "cell": "A4"
             },
             {
@@ -108,17 +108,17 @@
         "cell": "A7"
     },
     "D9": {
-        "item": "Q977",
         "property": "P100024",
-        "value": 2,
+        "value": "2",
+        "item": "Q977",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2000-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2000-01-01T00:00:00",
                 "cell": "A4"
             },
             {
@@ -135,17 +135,17 @@
         "cell": "A9"
     },
     "D10": {
-        "item": "Q977",
         "property": "P100024",
-        "value": 1,
+        "value": "1",
+        "item": "Q977",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2000-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2000-01-01T00:00:00",
                 "cell": "A4"
             },
             {
@@ -162,17 +162,17 @@
         "cell": "A9"
     },
     "D12": {
-        "item": "Q967",
         "property": "P100024",
-        "value": 2,
+        "value": "2",
+        "item": "Q967",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2001-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2001-01-01T00:00:00",
                 "cell": "A11"
             },
             {
@@ -189,17 +189,17 @@
         "cell": "A12"
     },
     "D13": {
-        "item": "Q967",
         "property": "P100024",
-        "value": 3,
+        "value": "3",
+        "item": "Q967",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2001-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2001-01-01T00:00:00",
                 "cell": "A11"
             },
             {
@@ -216,17 +216,17 @@
         "cell": "A12"
     },
     "D14": {
-        "item": "Q970",
         "property": "P100024",
-        "value": 1,
+        "value": "1",
+        "item": "Q970",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2001-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2001-01-01T00:00:00",
                 "cell": "A11"
             },
             {
@@ -243,17 +243,17 @@
         "cell": "A14"
     },
     "D16": {
-        "item": "Q977",
         "property": "P100024",
-        "value": 1,
+        "value": "1",
+        "item": "Q977",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2001-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2001-01-01T00:00:00",
                 "cell": "A11"
             },
             {
@@ -270,17 +270,17 @@
         "cell": "A16"
     },
     "D17": {
-        "item": "Q977",
         "property": "P100024",
-        "value": 1,
+        "value": "1",
+        "item": "Q977",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2001-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2001-01-01T00:00:00",
                 "cell": "A11"
             },
             {
@@ -297,17 +297,17 @@
         "cell": "A16"
     },
     "D19": {
-        "item": "Q967",
         "property": "P100024",
-        "value": 2,
+        "value": "2",
+        "item": "Q967",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2002-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2002-01-01T00:00:00",
                 "cell": "A18"
             },
             {
@@ -324,17 +324,17 @@
         "cell": "A19"
     },
     "D20": {
-        "item": "Q967",
         "property": "P100024",
-        "value": 6,
+        "value": "6",
+        "item": "Q967",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2002-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2002-01-01T00:00:00",
                 "cell": "A18"
             },
             {
@@ -351,17 +351,17 @@
         "cell": "A19"
     },
     "D22": {
-        "item": "Q970",
         "property": "P100024",
-        "value": 8,
+        "value": "8",
+        "item": "Q970",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2002-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2002-01-01T00:00:00",
                 "cell": "A18"
             },
             {
@@ -378,17 +378,17 @@
         "cell": "A21"
     },
     "D23": {
-        "item": "Q977",
         "property": "P100024",
-        "value": 3,
+        "value": "3",
+        "item": "Q977",
         "qualifier": [
             {
                 "property": "P585",
+                "value": "2002-01-01T00:00:00",
                 "calendar": "Q1985727",
                 "precision": 9,
                 "time_zone": 0,
                 "format": "%Y",
-                "value": "2002-01-01T00:00:00",
                 "cell": "A18"
             },
             {
