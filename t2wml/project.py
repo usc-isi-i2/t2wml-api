@@ -64,25 +64,36 @@ class Project:
     
     def add_data_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
-        self.data_files.append(file_path)
+        if file_path in self.data_files:
+            print("This file is already present in the project's data files")
+        else:
+            self.data_files.append(file_path)
         return file_path
     
     def add_yaml_file(self, file_path, data_file=None, sheet_name=None, 
                         copy_from_elsewhere=False, overwrite=False, rename=False):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
-        self.yaml_files.append(file_path)
+        if file_path in self.yaml_files:
+            print("This file is already present in the project's yaml files")
+        else:
+            self.yaml_files.append(file_path)
         if data_file and sheet_name:
             self.associate_yaml_with_sheet(file_path, data_file, sheet_name)
         return file_path
 
     def associate_yaml_with_sheet(self, yaml_path, data_path, sheet_name):
+        data_path=Path(data_path).as_posix()
+        yaml_path=Path(yaml_path).as_posix()
         if data_path not in self.data_files:
             raise ValueError("That data file has not been added to project yet")
         if yaml_path not in self.yaml_files:
             raise ValueError("That yaml file has not been added to project yet")
         if data_path in self.yaml_sheet_associations:
             try:
-                self.yaml_sheet_associations[data_path][sheet_name].append(yaml_path)
+                if yaml_path in self.yaml_sheet_associations[data_path][sheet_name]:
+                    print("that yaml association has already been added")
+                else:
+                    self.yaml_sheet_associations[data_path][sheet_name].append(yaml_path)
             except KeyError:
                 self.yaml_sheet_associations[data_path][sheet_name]=[yaml_path]
         else:
@@ -90,7 +101,10 @@ class Project:
     
     def add_wikifier_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
-        self.wikifier_files.append(file_path)
+        if file_path in self.wikifier_files:
+            print("This file is already present in the project's wikifier files")
+        else:
+            self.wikifier_files.append(file_path)
         return file_path
     
     def add_specific_wikifier_file(self, wiki_path, data_path, sheet_name="NO_SHEET", 
@@ -108,12 +122,18 @@ class Project:
     
     def add_property_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
-        self.property_files.append(file_path)
+        if file_path in self.property_files:
+            print("This file is already present in the project's property files")
+        else:
+            self.property_files.append(file_path)
         return file_path
 
     def add_item_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
-        self.item_files.append(file_path)
+        if file_path in self.item_files:
+            print("This file is already present in the project's item files")
+        else:
+            self.item_files.append(file_path)
         return file_path
     
     def save(self):
