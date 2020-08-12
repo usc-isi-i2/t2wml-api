@@ -1,10 +1,18 @@
 T2WML API History
 ===================================
 
+Changes in version 0.0.7:
+------------------------
+* bug fixes:
+    - empty cells were not being skipped
+    - fixed bug reading value definitions in wikifier where value is numeric
+    - added globe field column to kgtk output 
+    - bug fix for spacey import errors
+    - read pandas dataframes as strings
+
 Changes in version 0.0.6:
 -------------------------
 * complete overhaul of region definition, added support for 'columns'/'rows'/'cells'
-* added Project class
 * backwards incompatible: 
      * changed 'skip_column/row/cell' to 'skip_columns/rows/cells'
      * renamed BaseStatementMapper to StatementMapper
