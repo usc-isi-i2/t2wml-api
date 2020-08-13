@@ -1,9 +1,23 @@
 import json
-from t2wml.mapping.download import get_file_output_from_statements
+import t2wml.utils.t2wml_exceptions as T2WMLExceptions
+from t2wml.mapping.download import create_kgtk
 
 from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet
 from t2wml.mapping.statement_mapper import YamlMapper, StatementMapper
+
+try:
+    from t2wml.mapping.triple_generator import generate_triples
+except (ImportError, OSError):
+    def generate_triplets(*args, **kwargs):
+        raise ImportError(
+            "Missing optional dependency 'etk' or its requirement, spacey. Install etk to enable triplet generation")
+
+
+
+
+
+
 
 class KnowledgeGraph:
     """A knowledge graph (collection of statements) created from inputs. Also included errors and metadata.
@@ -85,8 +99,23 @@ class KnowledgeGraph:
         Returns:
             data (str): json, kgtk, or ttl output from statements
         """
-        data = get_file_output_from_statements(self, filetype)
-        return data
+        data = self.statements
+        file_path = self.metadata.get("data_file", "")
+        sheet_name = self.metadata.get("sheet_name", "")
+        created_by = self.metadata.get("created_by", "")
+
+        if filetype == 'json':
+            # insertion-ordered
+            output = json.dumps(data, indent=3, sort_keys=False)
+        elif filetype == 'ttl':
+            output = generate_triples("n/a", data, created_by=created_by)
+        elif filetype in ["kgtk", "tsv"]:
+            output = create_kgtk(data, file_path, sheet_name)
+        else:
+            raise T2WMLExceptions.FileTypeNotSupportedException(
+                "No support for "+filetype+" format")
+        return output
+
 
     def save_file(self, output_filename: str, filetype: str):
         """save json, kgtk, or ttl output to a file
