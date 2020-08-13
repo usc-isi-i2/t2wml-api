@@ -54,12 +54,12 @@ def add_properties_from_file(file_path: str):
         dict: a dictionary of "added", "present" (already present, updated), and "failed" properties from the file
     """
     if Path(file_path).suffix == ".json":
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding="utf-8") as f:
             input_dict = json.load(f)
     elif Path(file_path).suffix == ".tsv":
         property_dict = {}
         input_dict = {}
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding="utf-8") as f:
             reader = csv.DictReader(f, delimiter="\t")
             for row_dict in reader:
                 node1 = row_dict["node1"]

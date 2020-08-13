@@ -47,7 +47,7 @@ class KnowledgeGraph:
         Returns:
             KnowledgeGraph: an initialized KnowledgeGraph instance
         """
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding="utf-8") as f:
             loaded = json.load(f)
         statements = loaded["statements"]
         errors = loaded.get("errors", [])
@@ -125,7 +125,7 @@ class KnowledgeGraph:
             filetype (str): accepts "json", "tsv" (or "kgtk"), "ttl"
         """
         download_data = self.get_output(filetype)
-        with open(output_filename, 'w') as f:
+        with open(output_filename, 'w', encoding="utf-8") as f:
             f.write(download_data)
 
     def save_json(self, output_filename: str):
@@ -173,6 +173,6 @@ def create_output_from_files(data_file_path:str, sheet_name:str, yaml_file_path:
         data_file_path, sheet_name, yaml_file_path, wikifier_filepath)
     output = kg.get_output(output_format)
     if output_filepath:
-        with open(output_filepath, 'w') as f:
+        with open(output_filepath, 'w', encoding="utf-8") as f:
             f.write(output)
     return output

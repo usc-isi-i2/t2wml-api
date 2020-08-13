@@ -180,7 +180,7 @@ class Wikifier:
             "lookup_table": self.item_table.lookup_table,
             "dataframes": [df.to_json() for df in self._data_frames]
         })
-        with open(filename, 'w') as f:
+        with open(filename, 'w', encoding="utf-8") as f:
             f.write(output)
 
     @classmethod
@@ -193,7 +193,7 @@ class Wikifier:
         Returns:
             Wikifier: initialized wikifier
         """
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding="utf-8") as f:
             wiki_args = json.load(f)
         wikifier = Wikifier()
         wikifier.wiki_files = wiki_args["wiki_files"]

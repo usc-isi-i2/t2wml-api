@@ -121,7 +121,7 @@ def model_data(properties_file_path, output_file_path) -> None:
         doc.kg.add_subject(p)
 
     # with open(Path.cwd().parent / "new_properties/result.ttl", "w") as f:
-    with open(output_file_path, "w") as f:
+    with open(output_file_path, "w", encoding="utf-8") as f:
         data = doc.kg.serialize('ttl')
         f.write(data)
 
