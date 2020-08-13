@@ -1,6 +1,6 @@
 import json
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
-from t2wml.mapping.download import create_kgtk
+from t2wml.mapping.kgtk import create_kgtk
 
 from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet

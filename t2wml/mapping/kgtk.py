@@ -1,6 +1,5 @@
 
 import csv
-import json
 from io import StringIO
 from pathlib import Path
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
