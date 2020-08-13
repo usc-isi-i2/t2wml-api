@@ -159,6 +159,9 @@ class NodeForEval(Node):
                         self._errors[key] += "Failed to resolve"
                         self.__dict__.pop(key)
                         # self.__dict__[key]=self.__dict__[key].unmodified_str
+                    elif value=="":
+                        self._errors[key] += "Empty cell"
+                        self.__dict__.pop(key)
                     else:
                         self.__dict__[key] = value
 

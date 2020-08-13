@@ -1,17 +1,9 @@
 
 import csv
-import json
 from io import StringIO
 from pathlib import Path
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
-try:
-    from t2wml.mapping.triple_generator import generate_triples
-except (ImportError, OSError):
-    def generate_triplets(*args, **kwargs):
-        raise ImportError(
-            "Missing optional dependency 'etk' or its requirement, spacey. Install etk to enable triplet generation")
-
 from t2wml.wikification.utility_functions import get_property_type
 
 
@@ -150,20 +142,3 @@ def create_kgtk(data, file_path, sheet_name):
     return data
 
 
-def get_file_output_from_statements(knowledge_graph, filetype):
-    data = knowledge_graph.statements
-    file_path = knowledge_graph.metadata.get("data_file", "")
-    sheet_name = knowledge_graph.metadata.get("sheet_name", "")
-    created_by = knowledge_graph.metadata.get("created_by", "")
-
-    if filetype == 'json':
-        # insertion-ordered
-        output = json.dumps(data, indent=3, sort_keys=False)
-    elif filetype == 'ttl':
-        output = generate_triples("n/a", data, created_by=created_by)
-    elif filetype in ["kgtk", "tsv"]:
-        output = create_kgtk(data, file_path, sheet_name)
-    else:
-        raise T2WMLExceptions.FileTypeNotSupportedException(
-            "No support for "+filetype+" format")
-    return output
