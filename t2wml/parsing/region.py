@@ -206,8 +206,10 @@ class YamlRegion(CodeParser, Region):
                     self.rows=[row for row in range(self.range_args["t_var_top"], self.range_args["t_var_bottom"]+1)]
                 except Exception as e:
                     raise T2WMLExceptions.InvalidYAMLFileException("You have not specified a valid set of arguments (top+bottom, range, or rows) for rows")
-        
-
+                    
+            #get rid of any duplicates before removal
+            self.skip_cols=set(self.skip_cols)
+            self.skip_rows=set(self.skip_rows)
             for col in self.skip_cols:
                 self.columns.remove(col)
             for row in self.skip_rows:
