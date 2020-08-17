@@ -154,12 +154,11 @@ class Project:
                 input=yaml.safe_load(f.read())
         except Exception as e:
             raise ValueError("Failed to read the project yaml file: "+str(e))
-
+        input["directory"]=str(Path(filepath).parent)
         try:
             proj= cls(**input)
-        except:
-            raise ValueError("Was not able to initialize project from the yaml file")
-        proj.directory=str(Path(filepath).parent)
+        except Exception as e:
+            raise ValueError("Was not able to initialize project from the yaml file: "+str(e))
         return proj
 
 
