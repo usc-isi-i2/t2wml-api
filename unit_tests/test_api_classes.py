@@ -97,30 +97,30 @@ class ClassesTest(unittest.TestCase):
 
 class ProjectTest(unittest.TestCase):
     def test_project_single(self):
-        from t2wml.api import ProjectRunner
+        from t2wml.api import Project, ProjectRunner
         project_folder=os.path.join(unit_test_folder, "homicide")
         property_file=(os.path.join(
             unit_test_folder, "property_type_map.json"))
-        sp=ProjectRunner(project_folder)
+        sp=Project(project_folder)
         sp.add_data_file("homicide_report_total_and_sex.xlsx")
         sp.add_property_file(property_file, copy_from_elsewhere=True, overwrite=True)
         sp.add_wikifier_file("wikifier_general.csv")
         yaml_file=sp.add_yaml_file(os.path.join("t2mwl","table-1a.yaml"))
         sp.associate_yaml_with_sheet(yaml_file, "homicide_report_total_and_sex.xlsx", "table-1a")
         save_file=sp.save()
-        sp2=ProjectRunner.load(save_file)
-        kg=sp2.generate_old_style_single_file_knowledge_graph("table-1a")
+        pr=ProjectRunner.load(save_file)
+        kg=pr.generate_old_style_single_file_knowledge_graph("table-1a")
     
     def test_project_multi(self):
         import os
-        from t2wml.api import ProjectRunner, SpreadsheetFile
+        from t2wml.api import Project, ProjectRunner, SpreadsheetFile
 
         #part one:
         project_folder=os.path.join(unit_test_folder, "homicide")
         yaml_folder = os.path.join(project_folder, "t2mwl")
         property_file=(os.path.join(
             unit_test_folder, "property_type_map.json"))
-        sp=ProjectRunner(project_folder)
+        sp=Project(project_folder)
         data_file1=sp.add_data_file("homicide_report_total_and_sex.xlsx")
         sp.add_property_file(property_file, copy_from_elsewhere=True, overwrite=True)
         sp.add_wikifier_file("wikifier_general.csv")
@@ -142,8 +142,8 @@ class ProjectTest(unittest.TestCase):
             sp.associate_yaml_with_sheet(yaml_filepath, data_file2, sheet_name)
 
         save_file=sp.save()
-        sp2=ProjectRunner.load(save_file)
-        kgs=sp2.generate_all_knowledge_graphs()
+        pr=ProjectRunner.load(save_file)
+        kgs=pr.generate_all_knowledge_graphs()
 
         
         
