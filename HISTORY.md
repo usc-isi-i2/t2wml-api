@@ -1,6 +1,14 @@
 T2WML API History
 ===================================
 
+Changes in version 0.0.8:
+------------------------
+* added the Project class
+* change settings to be class-based instead of a dictionary
+* add setting `cache_data_files_folder`
+* when caching, use an underscored version of the full path to the original file to create the cache name
+
+
 Changes in version 0.0.7:
 -------------------------
 * support utf-8 encoding for yaml files

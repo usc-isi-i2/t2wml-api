@@ -2,6 +2,8 @@
 
 * [Examples of using the API](#examples)
 * [Convenience Functions](#convenience)
+* [The Project Class](#project)
+  + [The ProjectRunner class](#projectrunner)
 * [KnowledgeGraph](#kg)
 * [SpreadsheetFile and Sheet](#sheet)
 * [Wikifier](#wikifier)
@@ -69,6 +71,14 @@ for sheet_name, sheet in spreadsheet_file.items():
 
 * `add_properties_from_file(properties_file_path)` : add properties to the wikidata provider from the provided file path, which must be in json or kgtk format
 * `create_output_from_files(data_file_path, sheet_name, yaml_file_path, wikifier_filepath, output_filepath=None, output_format="json")` : 
+
+## The Project Class
+
+<span id="project"></span>
+
+### The ProjectRunner Class
+
+<span id="projectrunner"></span>
 
 ## KnowledgeGraph
 
