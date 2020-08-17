@@ -25,11 +25,12 @@ class PickleCacher:
     @property
     def pickle_folder(self):
         storage_folder=Path(t2wml_settings.cache_data_files_folder)
-        parts = Path(self.data_file_path).parts
-        parts=parts[1:-1]
-        underscored="-".join(parts)
-        folder_path = storage_folder/underscored
-        return folder_path
+        return storage_folder
+        #parts = Path(self.data_file_path).parts
+        #parts=parts[1:-1]
+        #underscored="-".join(parts)
+        #folder_path = storage_folder/underscored
+        #return folder_path
 
     @property
     def pickle_file(self):
