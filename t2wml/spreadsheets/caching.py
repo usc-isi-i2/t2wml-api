@@ -35,7 +35,7 @@ class PickleCacher:
     def pickle_file(self):
         path = Path(self.data_file_path)
         filename = path.stem+"_"+self.sheet_name+".pkl"
-        return str(self.pickle_folder/filename)
+        return os.path.join(str(self.pickle_folder), filename)
 
     def fresh_pickle(self):
         # checks if the pickle is "fresh"-- is more newly modified than the datafile
