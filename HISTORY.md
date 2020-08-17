@@ -2,13 +2,19 @@ T2WML API History
 ===================================
 
 Changes in version 0.0.7:
-------------------------
+-------------------------
+* support utf-8 encoding for yaml files
 * bug fixes:
-    - empty cells were not being skipped
-    - fixed bug reading value definitions in wikifier where value is numeric
-    - added globe field column to kgtk output 
-    - bug fix for spacey import errors
-    - read pandas dataframes as strings
+  - bug fix for spacey import errors
+  - fixed bug reading value definitions in wikifier where value is numeric
+  - read pandas dataframes as strings (fixes bug: Object of type Timestamp is not JSON serializable)
+  - do not re-apply same skips (fixes bug: Multiple skip_rows conditions that apply to the same row causes error)
+  - do not generate qualifier edges for empty values
+  - empty data cells were not being skipped
+  - skip cells were being saved in columns
+  - "node2;kgtk:data_type" for location changed from "coordinate" to "location_coordinate"
+  - added globe field to kgtk output
+
 
 Changes in version 0.0.6:
 -------------------------
@@ -20,10 +26,10 @@ Changes in version 0.0.6:
 * added case insensitivity to property typing (ie, url, Url, URL now all valid)
 * stop printing template errors
 * bug fixes:
-  * critical bug: did not recognise 0 column/0 row when wikifying
-  * x->y is now valid (previously only worked with spaces, x -> y)
-  * error when not sending any date formats
-  * item and cell falsiness now explicitly defined
+  - critical bug: did not recognise 0 column/0 row when wikifying
+  - x->y is now valid (previously only worked with spaces, x -> y)
+  - error when not sending any date formats
+  - item and cell falsiness now explicitly defined
 
 Changes in version 0.0.5:
 -------------------------

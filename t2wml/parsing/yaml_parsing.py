@@ -107,14 +107,14 @@ class Template:
 
 
 def validate_yaml(yaml_file_path):
-    with open(yaml_file_path, 'r') as stream:
+    with open(yaml_file_path, 'r', encoding="utf-8") as stream:
         try:
             yaml_file_data = yaml.safe_load(stream)
         except Exception as e:
             raise T2WMLExceptions.InvalidYAMLFileException(
                 "Could not load Yaml File: "+str(e))
 
-    with open(yaml_file_path, 'r') as f:
+    with open(yaml_file_path, 'r', encoding="utf-8") as f:
         # some real quick security validation, lazy style
         content = f.read()
         if "import" in content:  # includes __import__ which is the real evil here
