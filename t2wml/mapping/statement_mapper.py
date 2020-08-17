@@ -30,6 +30,7 @@ class StatementMapper(ABC):
             "data_file": sheet.data_file_name,
             "sheet_name": sheet.name,
         }
+        raise ValueError(sheet.data_file_name)
         try:
             metadata["created_by"] = self.created_by
         except:
