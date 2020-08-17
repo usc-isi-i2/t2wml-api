@@ -1,0 +1,69 @@
+id	node1	label	node2	node2;kgtk:data_type	node2;kgtk:number	node2;kgtk:low_tolerance	node2;kgtk:high_tolerance	node2;kgtk:units_node	node2;kgtk:date_and_time	node2;kgtk:precision	node2;kgtk:calendar	node2;kgtk:truth	node2;kgtk:symbol	node2;kgtk:latitude	node2;kgtk:longitude	node2;kgtk:globe	node2;kgtk:text	node2;kgtk:language
+homicide_report_total_and_sex.xlsx.table-1a;D4	Q967	P100024		quantity	1													
+	homicide_report_total_and_sex.xlsx.table-1a;D4	P585		date_and_times					"2000-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;D4	P6001		symbol									Q6581072					
+	homicide_report_total_and_sex.xlsx.table-1a;D4	P123		symbol									Q7649586					
+homicide_report_total_and_sex.xlsx.table-1a;D5	Q967	P100024		quantity	4													
+	homicide_report_total_and_sex.xlsx.table-1a;D5	P585		date_and_times					"2000-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;D5	P6001		symbol									Q6581097					
+	homicide_report_total_and_sex.xlsx.table-1a;D5	P123		symbol									Q7649586					
+homicide_report_total_and_sex.xlsx.table-1a;D6	Q970	P100024		quantity	2													
+	homicide_report_total_and_sex.xlsx.table-1a;D6	P585		date_and_times					"2000-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;D6	P6001		symbol									Q6581072					
+	homicide_report_total_and_sex.xlsx.table-1a;D6	P123		symbol									Q6039400					
+homicide_report_total_and_sex.xlsx.table-1a;D7	Q970	P100024		quantity	4													
+	homicide_report_total_and_sex.xlsx.table-1a;D7	P585		date_and_times					"2000-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;D7	P6001		symbol									Q6581097					
+	homicide_report_total_and_sex.xlsx.table-1a;D7	P123		symbol									Q6039400					
+homicide_report_total_and_sex.xlsx.table-1a;D8	Q977	P100024		quantity	2													
+	homicide_report_total_and_sex.xlsx.table-1a;D8	P585		date_and_times					"2000-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;D8	P6001		symbol									Q6581072					
+	homicide_report_total_and_sex.xlsx.table-1a;D8	P123		symbol									Q6039400					
+homicide_report_total_and_sex.xlsx.table-1a;D9	Q977	P100024		quantity	1													
+	homicide_report_total_and_sex.xlsx.table-1a;D9	P585		date_and_times					"2000-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;D9	P6001		symbol									Q6581097					
+	homicide_report_total_and_sex.xlsx.table-1a;D9	P123		symbol									Q6039400					
+homicide_report_total_and_sex.xlsx.table-1a;E4	Q967	P100024		quantity	2													
+	homicide_report_total_and_sex.xlsx.table-1a;E4	P585		date_and_times					"2001-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;E4	P6001		symbol									Q6581072					
+	homicide_report_total_and_sex.xlsx.table-1a;E4	P123		symbol									Q7649586					
+homicide_report_total_and_sex.xlsx.table-1a;E5	Q967	P100024		quantity	5													
+	homicide_report_total_and_sex.xlsx.table-1a;E5	P585		date_and_times					"2001-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;E5	P6001		symbol									Q6581097					
+	homicide_report_total_and_sex.xlsx.table-1a;E5	P123		symbol									Q7649586					
+homicide_report_total_and_sex.xlsx.table-1a;E6	Q970	P100024		quantity	1													
+	homicide_report_total_and_sex.xlsx.table-1a;E6	P585		date_and_times					"2001-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;E6	P6001		symbol									Q6581072					
+	homicide_report_total_and_sex.xlsx.table-1a;E6	P123		symbol									Q6039400					
+homicide_report_total_and_sex.xlsx.table-1a;E7	Q970	P100024		quantity	4													
+	homicide_report_total_and_sex.xlsx.table-1a;E7	P585		date_and_times					"2001-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;E7	P6001		symbol									Q6581097					
+	homicide_report_total_and_sex.xlsx.table-1a;E7	P123		symbol									Q6039400					
+homicide_report_total_and_sex.xlsx.table-1a;E8	Q977	P100024		quantity	1													
+	homicide_report_total_and_sex.xlsx.table-1a;E8	P585		date_and_times					"2001-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;E8	P6001		symbol									Q6581072					
+	homicide_report_total_and_sex.xlsx.table-1a;E8	P123		symbol									Q6039400					
+homicide_report_total_and_sex.xlsx.table-1a;E9	Q977	P100024		quantity	1													
+	homicide_report_total_and_sex.xlsx.table-1a;E9	P585		date_and_times					"2001-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;E9	P6001		symbol									Q6581097					
+	homicide_report_total_and_sex.xlsx.table-1a;E9	P123		symbol									Q6039400					
+homicide_report_total_and_sex.xlsx.table-1a;F4	Q967	P100024		quantity	2													
+	homicide_report_total_and_sex.xlsx.table-1a;F4	P585		date_and_times					"2002-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;F4	P6001		symbol									Q6581072					
+	homicide_report_total_and_sex.xlsx.table-1a;F4	P123		symbol									Q7649586					
+homicide_report_total_and_sex.xlsx.table-1a;F5	Q967	P100024		quantity	6													
+	homicide_report_total_and_sex.xlsx.table-1a;F5	P585		date_and_times					"2002-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;F5	P6001		symbol									Q6581097					
+	homicide_report_total_and_sex.xlsx.table-1a;F5	P123		symbol									Q7649586					
+homicide_report_total_and_sex.xlsx.table-1a;F6	Q970	P100024		quantity	3													
+	homicide_report_total_and_sex.xlsx.table-1a;F6	P585		date_and_times					"2002-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;F6	P6001		symbol									Q6581072					
+	homicide_report_total_and_sex.xlsx.table-1a;F6	P123		symbol									Q6039400					
+homicide_report_total_and_sex.xlsx.table-1a;F7	Q970	P100024		quantity	8													
+	homicide_report_total_and_sex.xlsx.table-1a;F7	P585		date_and_times					"2002-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;F7	P6001		symbol									Q6581097					
+	homicide_report_total_and_sex.xlsx.table-1a;F7	P123		symbol									Q6039400					
+homicide_report_total_and_sex.xlsx.table-1a;F8	Q977	P100024		quantity	3													
+	homicide_report_total_and_sex.xlsx.table-1a;F8	P585		date_and_times					"2002-01-01T00:00:00"	9	Q1985727							
+	homicide_report_total_and_sex.xlsx.table-1a;F8	P6001		symbol									Q6581072					
+	homicide_report_total_and_sex.xlsx.table-1a;F8	P123		symbol									Q6039400					

@@ -146,7 +146,25 @@ class ProjectTest(unittest.TestCase):
         kgs=sp2.generate_all_knowledge_graphs()
 
         
-        
+class SheetsWithCachingTest(unittest.TestCase):
+    def test_with_caching(self):
+        from t2wml.api import t2wml_settings, SpreadsheetFile, create_output_from_files
+        t2wml_settings.cache_data_files=True
+        cache_folder=os.path.join(unit_test_folder, "tmp")
+        if not os.path.exists(cache_folder):
+            os.mkdir(cache_folder)
+        t2wml_settings.cache_data_files_folder=cache_folder
+        data_file_path=os.path.join(unit_test_folder, "homicide", "homicide_report_total_and_sex.xlsx")
+        sheet_name="table-1a"
+        yaml_file_path=os.path.join(unit_test_folder, "homicide", "t2mwl", "table-1a.yaml")
+        wikifier_filepath=os.path.join(unit_test_folder, "homicide", "wikifier_general.csv")
+        output_filepath=os.path.join(unit_test_folder, "homicide", "results", "table-1a.tsv")
+        output=create_output_from_files(data_file_path, sheet_name, yaml_file_path, wikifier_filepath, output_format="tsv")
+        with open(output_filepath, 'r') as f:
+            expected=f.read()
+        assert output==expected
+            
+
 
         
 if __name__ == '__main__':

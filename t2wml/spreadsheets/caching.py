@@ -25,18 +25,17 @@ class PickleCacher:
     @property
     def pickle_folder(self):
         storage_folder=Path(t2wml_settings.cache_data_files_folder)
-        return storage_folder
-        #parts = Path(self.data_file_path).parts
-        #parts=parts[1:-1]
-        #underscored="-".join(parts)
-        #folder_path = storage_folder/underscored
-        #return folder_path
+        parts = Path(self.data_file_path).parts
+        parts=parts[1:-1]
+        underscored="_".join(parts)
+        folder_path = storage_folder/underscored
+        return folder_path
 
     @property
     def pickle_file(self):
         path = Path(self.data_file_path)
         filename = path.stem+"_"+self.sheet_name+".pkl"
-        return os.path.join(str(self.pickle_folder), filename)
+        return str(self.pickle_folder/filename)
 
     def fresh_pickle(self):
         # checks if the pickle is "fresh"-- is more newly modified than the datafile
