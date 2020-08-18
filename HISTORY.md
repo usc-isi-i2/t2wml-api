@@ -22,7 +22,9 @@ Changes in version 0.0.7:
   - skip cells were being saved in columns
   - "node2;kgtk:data_type" for location changed from "coordinate" to "location_coordinate"
   - added globe field to kgtk output
-
+* change settings to be class-based instead of a dictionary
+* add setting `cache_data_files_folder`
+* when caching, use an underscored version of the full path to the original file to create the cache name
 
 Changes in version 0.0.6:
 -------------------------
