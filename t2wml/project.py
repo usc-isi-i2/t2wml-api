@@ -187,14 +187,17 @@ class ProjectRunner():
         return YamlMapper(os.path.join(self.project.directory, yf))
 
     def generate_old_style_single_file_knowledge_graph(self, sheet_name):
-        return self.generate_single_knowledge_graph(self.project.data_files[-1], sheet_name, self.project.yaml_files[-1])
+        return self.generate_single_knowledge_graph(self.project.data_files[-1], sheet_name, self.project.yaml_files[-1], self.project.wikifier_files[-1])
             
-    def generate_single_knowledge_graph(self, data_file, sheet_name, yaml):
+    def generate_single_knowledge_graph(self, data_file, sheet_name, yaml, wikifier_file=None):
         for f in self.project.property_files:
             self._add_properties_from_file(f)
         wikifier=Wikifier()
-        for w in self.project.wikifier_files:
-            self._add_file_to_wikifier(wikifier, w)
+        if wikifier_file:
+            self._add_file_to_wikifier(wikifier, wikifier_file)
+        else:
+            for w in self.project.wikifier_files:
+                self._add_file_to_wikifier(wikifier, w)
         data_file=os.path.join(self.project.directory, data_file)
         self._handle_specific_wikifiers(wikifier, data_file, sheet_name)
         sheet=Sheet(data_file, sheet_name)
