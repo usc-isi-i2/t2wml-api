@@ -151,12 +151,12 @@ class Project:
             raise FileNotFoundError("Could not find t2wmlproj.yaml file")
         try:
             with open(filepath, 'r', encoding="utf-8") as f:
-                input=yaml.safe_load(f.read())
+                proj_input=yaml.safe_load(f.read())
         except Exception as e:
             raise ValueError("Failed to read the project yaml file: "+str(e))
-        input["directory"]=str(Path(filepath).parent)
+        proj_input["directory"]=str(Path(filepath).parent)
         try:
-            proj= cls(**input)
+            proj= cls(**proj_input)
         except Exception as e:
             raise ValueError("Was not able to initialize project from the yaml file: "+str(e))
         return proj
