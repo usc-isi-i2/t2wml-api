@@ -1,5 +1,6 @@
 import warnings
 import pandas
+from datetime import datetime
 try:
     from etk.wikidata.utils import parse_datetime_string
     has_etk = True
@@ -64,36 +65,38 @@ def parse_datetime(value, additional_formats=None, precisions=None):
         precision=translate_precision_to_integer(precisions)
     
     value = str(value)
-    for index, date_format in enumerate(additional_formats):
+    if additional_formats: #format/s have been specified. input MUST match a format
+        datetime_string=False
+        for index, date_format in enumerate(additional_formats):
+            try:
+                datetime_string = datetime.strptime(value, date_format)
+
+                if not precision:
+                    try:
+                        precision=translate_precision_to_integer(precisions[index])
+                    except IndexError: #no precision defined for that format
+                        precision=None
+                return datetime_string.isoformat(), precision
+            except ValueError as e:
+                pass
+        if not datetime_string:
+            raise ValueError("Failed to parse datetime string with the provided format/s")
+    else: #no format specified. attempt to guess date
+        if has_etk:
+            # use this line to make etk stop harassing us with "no lang features detected" warnings
+            with warnings.catch_warnings(record=True) as w:
+                datetime_string, precision = parse_datetime_string(
+                    value,
+                    additional_formats=additional_formats,
+                    prefer_language_date_order=False
+                )
+            if not precision: #only if user didn't hard-define a precision do we take from etk
+                precision=int(precision.value.__str__())
+            return datetime_string, precision
+        
         try:
-            datetime_string = pandas.to_datetime(value, format=date_format)
-
-            if not precision:
-                try:
-                    precision=translate_precision_to_integer(precisions[index])
-                except IndexError: #no precision defined for that format
-                    precision=None
+            datetime_string = pandas.to_datetime(value, infer_datetime_format=True)
             return datetime_string.isoformat(), precision
-        except ValueError as e:
-            pass
-        except Exception as e:
-            pass
-    try:
-        datetime_string = pandas.to_datetime(value, infer_datetime_format=True)
-        return datetime_string.isoformat(), precision
-    except Exception as e:
-        pass
-
-    if has_etk:
-        # use this line to make etk stop harassing us with "no lang features detected" warnings
-        with warnings.catch_warnings(record=True) as w:
-            datetime_string, precision = parse_datetime_string(
-                value,
-                additional_formats=additional_formats,
-                prefer_language_date_order=False
-            )
-        if not precision: #only if user didn't hard-define a precision do we take from etk
-            precision=int(precision.value.__str__())
-        return datetime_string, precision
-    raise ValueError('No date / datetime detected')
+        except:
+            raise ValueError('No date / datetime detected')
 
