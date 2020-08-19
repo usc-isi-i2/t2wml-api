@@ -414,6 +414,7 @@ The settings are:
 * `wikidata_provider`: As discussed above in the WikidataProvider section. When set to None, a default wikidata_provider instance will be created, using the SparqlProvider class with a sparql_endpoint set to the sparql_endpoint in settings
 * `cache_data_files`: enables caching pickled files for spreadsheets. If set to True, storage location must be specified
 * `cache_data_files_folder`: storage location for cached data files. Only used if cache_data_files is set to True
+* `warn_for_empty_cells`: empty cells in qualifiers are always skipped in output. This setting controls whether the presence of empty cells in qualifiers is treated as an error and added to the KnowledgeGraph errors, or such cells are simply skipped silently.
 
 example code:
 

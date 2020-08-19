@@ -4,7 +4,7 @@ from t2wml.parsing.t2wml_parsing import iter_on_n_for_code, T2WMLCode
 from t2wml.spreadsheets.conversions import to_excel
 from t2wml.wikification.utility_functions import get_property_type
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES, parse_datetime, translate_precision_to_integer
-
+from t2wml.settings import t2wml_settings
 
 class Node:
     def __init__(self, property=None, value=None, **kwargs):
@@ -160,7 +160,8 @@ class NodeForEval(Node):
                         self.__dict__.pop(key)
                         # self.__dict__[key]=self.__dict__[key].unmodified_str
                     elif value=="":
-                        self._errors[key] += "Empty cell"
+                        if t2wml_settings.warn_for_empty_cells:
+                            self._errors[key] += "Empty cell"
                         self.__dict__.pop(key)
                     else:
                         self.__dict__[key] = value
