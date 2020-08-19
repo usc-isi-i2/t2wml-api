@@ -129,7 +129,7 @@ def extract_date(input, date_format):
 
 
 @string_modifier
-def regex(input, pattern, i=0):
+def regex(input, pattern, i=1):
     # extract a substring using a regex. The string is the regex and the result is the value of the first group in
     # the regex. If the regex contains no group, it is the match of the regex.
     # regex(value[], "regex") returns the first string that matches the whole regex
