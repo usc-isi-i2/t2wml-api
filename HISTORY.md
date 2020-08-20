@@ -7,7 +7,9 @@ Changes in version 0.0.8:
 * change settings to be class-based instead of a dictionary
 * add setting `cache_data_files_folder`
 * when caching, use an underscored version of the full path to the original file to create the cache name
-
+* add setting `warn_for_empty_cells`, default False
+* change how date parsing is handled: if format is provided, must stricly match format, otherwise will fuzzy-guess
+* change default behavior for regex to return first group
 
 Changes in version 0.0.7:
 -------------------------
