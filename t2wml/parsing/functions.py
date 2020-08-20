@@ -138,7 +138,12 @@ def regex(input, pattern, i=1):
     # common use case "oil production in 2017 in cambodia"
     match = re.search(pattern, input)
     if match:
-        return match.group(i)
+        try:
+            return match.group(i)
+        except IndexError as e:
+            if i==1:
+                return match.group(0)
+            raise e
 
 
 def concat(*args):
