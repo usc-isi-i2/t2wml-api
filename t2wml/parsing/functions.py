@@ -123,7 +123,7 @@ def substring(input, start, end=None):
 
 @string_modifier
 def extract_date(input, date_format):
-    date_str, precision = parse_datetime(str(input),
+    date_str, precision, used_format = parse_datetime(str(input),
                                          additional_formats=date_format)
     return date_str
 

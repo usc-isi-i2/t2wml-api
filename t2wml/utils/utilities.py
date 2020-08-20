@@ -54,6 +54,7 @@ def translate_precision_to_integer(precision: str) -> int:
 
 
 def parse_datetime(value, additional_formats=None, precisions=None):
+    used_format=None
     additional_formats=additional_formats or []
     precisions= precisions or []
     # check if additional formats is a string and convert to single entry array:
@@ -70,13 +71,13 @@ def parse_datetime(value, additional_formats=None, precisions=None):
         for index, date_format in enumerate(additional_formats):
             try:
                 datetime_string = datetime.strptime(value, date_format)
-
+                used_format=date_format
                 if not precision:
                     try:
                         precision=translate_precision_to_integer(precisions[index])
                     except IndexError: #no precision defined for that format
                         precision=None
-                return datetime_string.isoformat(), precision
+                return datetime_string.isoformat(), precision, used_format
             except ValueError as e:
                 pass
         if not datetime_string:
@@ -92,11 +93,11 @@ def parse_datetime(value, additional_formats=None, precisions=None):
                 )
             if not precision: #only if user didn't hard-define a precision do we take from etk
                 precision=int(precision.value.__str__())
-            return datetime_string, precision
+            return datetime_string, precision, used_format
         
         try:
             datetime_string = pandas.to_datetime(value, infer_datetime_format=True)
-            return datetime_string.isoformat(), precision
+            return datetime_string.isoformat(), precision, used_format
         except:
             raise ValueError('No date / datetime detected')
 

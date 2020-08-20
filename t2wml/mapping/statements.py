@@ -60,7 +60,7 @@ class Node:
 
     def validate_datetime(self):
         try:
-            datetime_string, parsed_precision = parse_datetime(
+            datetime_string, parsed_precision, used_format = parse_datetime(
                 self.value,
                 additional_formats=self.__dict__.get("format", []),
                 precisions=self.__dict__.get("precision", [])
@@ -68,6 +68,8 @@ class Node:
             self.value = datetime_string
             if parsed_precision:
                 self.precision = parsed_precision
+            if used_format:
+                self.format=used_format
         except:
             self._errors["value"] += "Invalid datetime: "+str(self.value)
 
