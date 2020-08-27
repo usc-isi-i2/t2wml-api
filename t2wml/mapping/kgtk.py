@@ -6,10 +6,12 @@ from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.wikification.utility_functions import get_property_type
 
+class EmptyValueException(Exception):
+    pass
 
 def enclose_in_quotes(value):
     if value != "" and value is not None:
-        return "\""+str(value)+"\""
+        return "\""+str(value.replace('"','\\"'))+"\""
     return ""
 
 
@@ -35,7 +37,10 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
         result_dict["node2;kgtk:globe"] = property_dict.get("globe", "")
 
     else:
-        value = property_dict["value"]
+        try:
+            value = property_dict["value"]
+        except:
+            raise EmptyValueException(f'Cell {property_dict["cell"]} has no value')
 
         if property_type == "quantity":
             '''
@@ -111,9 +116,15 @@ def create_kgtk(data, file_path, sheet_name):
                 #q_id = file_name + "." + sheet_name + ";" + cell +";"+second_cell
                 qualifier_result_dict = dict(
                     node1=id, label=qualifier["property"])
-                kgtk_add_property_type_specific_fields(
-                    qualifier, qualifier_result_dict)
-                tsv_data.append(qualifier_result_dict)
+
+                try:
+                    kgtk_add_property_type_specific_fields(
+                        qualifier, qualifier_result_dict)
+                    tsv_data.append(qualifier_result_dict)
+                except EmptyValueException:
+                    # Allow missing qualifier values
+                    pass
+
 
             references = statement.get("reference", [])
             # todo: handle references
@@ -140,5 +151,3 @@ def create_kgtk(data, file_path, sheet_name):
     data = string_stream.getvalue()
     string_stream.close()
     return data
-
-
