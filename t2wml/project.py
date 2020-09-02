@@ -138,7 +138,7 @@ class Project:
     
     def save(self):
         proj_file_text=(yaml.dump(self.__dict__))
-        proj_file_path=os.path.join(self.directory, "t2wmlproj.yaml")
+        proj_file_path=os.path.join(self.directory, ".t2wmlproj")
         with open(proj_file_path, 'w', encoding="utf-8") as f:
             f.write(proj_file_text)
         return proj_file_path
@@ -146,9 +146,9 @@ class Project:
     @classmethod
     def load(cls, filepath):
         if os.path.isdir(filepath):
-            filepath=os.path.join(filepath, "t2wmlproj.yaml")
+            filepath=os.path.join(filepath, ".t2wmlproj")
         if not os.path.isfile(filepath):
-            raise FileNotFoundError("Could not find t2wmlproj.yaml file")
+            raise FileNotFoundError("Could not find .t2wmlproj file")
         try:
             with open(filepath, 'r', encoding="utf-8") as f:
                 proj_input=yaml.safe_load(f.read())
