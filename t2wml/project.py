@@ -7,6 +7,7 @@ from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet, SpreadsheetFile
 from t2wml.mapping.statement_mapper import YamlMapper
 from t2wml.knowledge_graph import KnowledgeGraph
+from t2wml.settings import DEFAULT_SPARQL_ENDPOINT
 
 
     
@@ -14,7 +15,8 @@ from t2wml.knowledge_graph import KnowledgeGraph
 class Project:
     def __init__(self, directory, title="Untitled", data_files=None, yaml_files=None, wikifier_files=None, 
                        property_files=None, item_files=None,
-                   yaml_sheet_associations=None, specific_wikifiers=None):
+                   yaml_sheet_associations=None, specific_wikifiers=None,
+                   sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False):
         if not os.path.isdir(directory):
             raise ValueError("Project must be created with a valid project directory")
         self.directory=directory
@@ -26,6 +28,8 @@ class Project:
         self.item_files=item_files or []
         self.yaml_sheet_associations=yaml_sheet_associations or {}
         self.specific_wikifiers=specific_wikifiers or {}
+        self.sparql_endpoint=sparql_endpoint
+        self.warn_for_empty_cells=warn_for_empty_cells
     
     def _add_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         if os.path.isabs(file_path): #absolute paths behave differently when joining

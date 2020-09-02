@@ -1,6 +1,11 @@
 T2WML API History
 ===================================
 
+Changes in version 0.0.9:
+------------------------
+* Changed project class filename to .t2wmlproj
+* added sparql endpoint and warn for empty cells settings to project
+
 Changes in version 0.0.8:
 ------------------------
 * added the Project class
