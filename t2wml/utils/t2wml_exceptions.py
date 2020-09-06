@@ -71,3 +71,7 @@ class ConstraintViolationErrorException(T2WMLException):
 
 class WikificationFailureException(T2WMLException):
     message = "Faield to wikify provided input"
+
+class FileWithThatNameInProject(T2WMLException):
+    code=409
+    message="A file with that name is already present in the project"

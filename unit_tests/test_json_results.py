@@ -9,7 +9,7 @@ repo_folder = Path(__file__).parents[2]
 unit_test_folder = os.path.join(
     repo_folder, "t2wml-api", "unit_tests", "ground_truth")
 add_properties_from_file(os.path.join(
-    unit_test_folder, "property_type_map.json"))
+    unit_test_folder, "homicide", "homicide_properties.tsv"))
 
 
 class JsonTest(unittest.TestCase):
@@ -41,7 +41,7 @@ class TestHomicideData(JsonTest):
         self.expected_result_dir = os.path.join(
             unit_test_folder, "homicide", "results")
         add_properties_from_file(os.path.join(
-            unit_test_folder, "property_type_map.json"))
+            unit_test_folder, "homicide", "homicide_properties.tsv"))
 
     def run_test_on_sheet(self, sheet_name):
         yaml_name = sheet_name+".yaml"

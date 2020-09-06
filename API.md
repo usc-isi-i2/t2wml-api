@@ -26,7 +26,7 @@ import os
 from pathlib import Path
 from t2wml.api import create_output_from_files, add_properties_from_file
 
-properties_file= "custom_properties.json"
+properties_file= "custom_properties.tsv"
 add_properties_from_file(properties_file)
 
 data_folder="my_drive\my_data"
@@ -86,8 +86,7 @@ The Project class has a variety of functions for adding files to the entire proj
 
 * `add_data_file(file_path, copy_from_elsewhere=False, overwrite=False, rename=False)`
 * `add_wikifier_file(file_path, copy_from_elsewhere=False, overwrite=False, rename=False)`
-* `add_property_file(file_path, copy_from_elsewhere=False, overwrite=False, rename=False)` (Note: this may shortly be deprecated in favor of a joint properties+item function)
-* `add_item_file(file_path, copy_from_elsewhere=False, overwrite=False, rename=False)` (Note: this may shortly be deprecated in favor of a joint properties+item function)
+* `add_wikidata_file(file_path, copy_from_elsewhere=False, overwrite=False, rename=False)` 
 
 There are also two functions for adding files associated to a specific data_file+sheet:
 
@@ -377,7 +376,7 @@ class JsonFileProvider(DictionaryProvider):
 ```
 
 ```python 
-# given a database with tables/classes WikidataProperty and WikidataItem:
+# given a database with table WikidataEntry
 # this provider will check the database first, and if it doesn't succeed there, it will fall back to a sparql query
 
 from t2wml.wikification.wikidata_provider import FallbackSparql
@@ -385,14 +384,14 @@ class DatabaseProvider(FallbackSparql):
     def __init__(self, sparql_endpoint):
         super().__init__(sparql_endpoint)
     
-    def save_property(self, wd_property, property_type):
-        return WikidataProperty.add_or_update(wd_property, property_type, do_session_commit=False)
+    def save_property(self, wikidata_property, property_type):
+        return WikidataEntry.add_or_update(wikidata_property, wd_type=property_type, do_session_commit=False)
     
     def try_get_property_type(self, wikidata_property, *args, **kwargs):
-        prop = WikidataProperty.query.filter_by(wd_id=wikidata_property).first()
+        prop = WikidataEntry.query.filter_by(wd_id=wikidata_property).first()
         if prop is None:
             raise ValueError("Not found")
-        return prop.property_type
+        return prop.wd_type
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
         try:

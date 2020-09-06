@@ -45,8 +45,7 @@ class SparqlProvider(WikidataProvider):
         sparql.setReturnFormat(JSON)
         results = sparql.query().convert()
         try:
-            property_type = results["results"]["bindings"][0]["type"]["value"].split("#")[
-                1]
+            property_type = results["results"]["bindings"][0]["type"]["value"].split("#")[1]
         except IndexError:
             property_type = "Property Not Found"
         return property_type

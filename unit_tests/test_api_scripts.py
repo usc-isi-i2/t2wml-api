@@ -16,7 +16,7 @@ class TestScripts(unittest.TestCase):
 
     def setUp(self):
         self.property_file = os.path.join(
-            unit_test_folder, "property_type_map.json")
+            unit_test_folder, "homicide", "homicide_properties.tsv")
         test_folder = os.path.join(unit_test_folder, "error-catching")
         self.test_folder = test_folder
         self.data_filepath = os.path.join(test_folder, "input_1.csv")
@@ -41,7 +41,7 @@ class TestScripts(unittest.TestCase):
         from pathlib import Path
 
         properties_file = os.path.join(
-            unit_test_folder, "property_type_map.json")
+            unit_test_folder, "homicide", "homicide_properties.tsv")
         add_properties_from_file(properties_file)
 
         test_folder = os.path.join(unit_test_folder, "loop")

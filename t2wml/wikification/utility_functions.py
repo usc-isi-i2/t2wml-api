@@ -38,7 +38,6 @@ def _get_property_type(wikidata_property):
 
 def add_properties_from_file(file_path: str):
     """load properties from a file and add them to the current WikidataProvider as defined in settings.
-    If a json file, format must be {"property id": "property type", "property id":"property type"}
     If a kgtk-format tsv file, the property information will be loaded as follows:
     If the "label" column of a row is "data_type", property id will be node1 of that row, and property type will be node2
     If node1 of a row with "data_type" label also appears in rows with "label" or "description" labels, 
@@ -53,31 +52,30 @@ def add_properties_from_file(file_path: str):
     Returns:
         dict: a dictionary of "added", "present" (already present, updated), and "failed" properties from the file
     """
-    if Path(file_path).suffix == ".json":
-        with open(file_path, 'r', encoding="utf-8") as f:
-            input_dict = json.load(f)
-    elif Path(file_path).suffix == ".tsv":
-        property_dict = {}
-        input_dict = {}
-        with open(file_path, 'r', encoding="utf-8") as f:
-            reader = csv.DictReader(f, delimiter="\t")
-            for row_dict in reader:
-                node1 = row_dict["node1"]
-                label = row_dict["label"]
-                value = row_dict["node2"]
-
-                if label == "data_type":
-                    input_dict[node1] = {"property_type": value}
-                if label in ["label", "description"]:
-                    property_dict[(node1, label)] = value
-        for node1 in input_dict:
-            label = property_dict.get((node1, "label"))
-            description = property_dict.get((node1, "description"))
-            input_dict[node1].update(
-                {"label": label, "description": description})
-    else:
+    if Path(file_path).suffix != ".tsv":
         raise ValueError(
-            "Only .json and .tsv property files are currently supported")
+            "Only .tsv property files are currently supported")
+
+    property_dict = {}
+    input_dict = {}
+    with open(file_path, 'r', encoding="utf-8") as f:
+        reader = csv.DictReader(f, delimiter="\t")
+        for row_dict in reader:
+            node1 = row_dict["node1"]
+            label = row_dict["label"]
+            value = row_dict["node2"]
+
+            if label == "data_type":
+                input_dict[node1] = {"property_type": value}
+            if label in ["label", "description"]:
+                property_dict[(node1, label)] = value
+    for node1 in input_dict:
+        label = property_dict.get((node1, "label"))
+        description = property_dict.get((node1, "description"))
+        input_dict[node1].update(
+            {"label": label, "description": description})
+
+        
 
     return_dict = {"added": [], "present": [], "failed": []}
 
