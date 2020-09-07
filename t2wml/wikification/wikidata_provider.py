@@ -8,7 +8,7 @@ class WikidataProvider(ABC):
     def get_property_type(self, wikidata_property, *args, **kwargs):
         raise NotImplementedError
 
-    def save_entry(self, property, property_type, *args, **kwargs):
+    def save_entry(self, property, data_type, *args, **kwargs):
         pass
 
     def __enter__(self):
@@ -45,24 +45,24 @@ class SparqlProvider(WikidataProvider):
         sparql.setReturnFormat(JSON)
         results = sparql.query().convert()
         try:
-            property_type = results["results"]["bindings"][0]["type"]["value"].split("#")[1]
+            data_type = results["results"]["bindings"][0]["type"]["value"].split("#")[1]
         except IndexError:
-            property_type = "Property Not Found"
-        return property_type
+            data_type = "Property Not Found"
+        return data_type
 
     def get_property_type(self, wikidata_property: str):
-        property_type = self.cache.get(wikidata_property, False)
-        if not property_type:
-            property_type = self.query_wikidata_for_property_type(
+        data_type = self.cache.get(wikidata_property, False)
+        if not data_type:
+            data_type = self.query_wikidata_for_property_type(
                 wikidata_property)
-            self.save_entry(wikidata_property, property_type)
-            if property_type == "Property Not Found":
+            self.save_entry(wikidata_property, data_type)
+            if data_type == "Property Not Found":
                 raise ValueError("Property "+wikidata_property+" not found")
 
-        return property_type
+        return data_type
 
-    def save_entry(self, property, property_type, *args, **kwargs):
-        self.cache[property] = property_type
+    def save_entry(self, property, data_type, *args, **kwargs):
+        self.cache[property] = data_type
 
 
 class FallbackSparql(SparqlProvider):
@@ -73,11 +73,11 @@ class FallbackSparql(SparqlProvider):
 
     def get_property_type(self, wikidata_property, *args, **kwargs):
         try:
-            property_type = self.try_get_property_type(
+            data_type = self.try_get_property_type(
                 wikidata_property, *args, **kwargs)
         except:
-            property_type = super().get_property_type(wikidata_property)
-        return property_type
+            data_type = super().get_property_type(wikidata_property)
+        return data_type
 
     def try_get_property_type(self, wikidata_property, *args, **kwargs):
         raise NotImplementedError

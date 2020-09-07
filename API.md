@@ -423,8 +423,8 @@ class DatabaseProvider(FallbackSparql):
     def __init__(self, sparql_endpoint):
         super().__init__(sparql_endpoint)
 
-    def save_entry(self, wd_id, property_type, label=None, description=None):
-        return WikidataEntry.add_or_update(wd_id, property_type, label, description, do_session_commit=False)
+    def save_entry(self, wd_id, data_type, label=None, description=None, **args):
+        return WikidataEntry.add_or_update(wd_id, data_type, label, description, do_session_commit=False)
 
     def try_get_property_type(self, wikidata_property, *args, **kwargs):
         prop = WikidataEntry.query.filter_by(

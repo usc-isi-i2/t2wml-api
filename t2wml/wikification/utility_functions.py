@@ -69,19 +69,19 @@ def add_nodes_from_file(file_path: str):
             value = row_dict["node2"]
             input_dict[node1][label]=value
 
-    return_dict = {"added": [], "present": [], "failed": []}
+    return_dict = {"added": [], "updated": [], "failed": []}
 
     provider = get_provider()
     with provider as p:
         for node_id in input_dict:
             prop_info = input_dict[node_id]
-            data_type = prop_info["data_type"]
+            data_type = prop_info.pop("data_type", None) #we pop it because it's passed as a required argument for historical reasons
 
             try:
                 if data_type: #validate data types
                     if str(data_type.lower()) not in VALID_PROPERTY_TYPES:
                         raise ValueError("Property type: " +data_type+" not supported")
-                added = p.save_entry(node_id, **prop_info)
+                added = p.save_entry(node_id, data_type, **prop_info)
                 if added:
                     return_dict["added"].append(node_id)
                 else:
