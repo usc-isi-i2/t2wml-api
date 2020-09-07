@@ -3,7 +3,7 @@ from io import StringIO
 import csv
 import unittest
 from pathlib import Path
-from t2wml.wikification.utility_functions import add_properties_from_file
+from t2wml.wikification.utility_functions import add_nodes_from_file
 from t2wml.api import KnowledgeGraph
 
 repo_folder = Path(__file__).parents[2]
@@ -62,7 +62,7 @@ class TestOECDWithCustomProperties(unittest.TestCase):
     def test_custom_properties(self):
         yaml_file = self.yaml_file
         sheet_name = "oecd.csv"
-        add_props = add_properties_from_file(self.custom_properties_file)
+        add_props = add_nodes_from_file(self.custom_properties_file)
         assert len(add_props["failed"]) == 0
         kg = KnowledgeGraph.generate_from_files(
             self.data_file, sheet_name, yaml_file, self.wikifier_file)

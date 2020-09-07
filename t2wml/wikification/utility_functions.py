@@ -1,3 +1,4 @@
+from collections import defaultdict
 import json
 import csv
 from pathlib import Path
@@ -36,18 +37,21 @@ def _get_property_type(wikidata_property):
     return property_type
 
 
-def add_properties_from_file(file_path: str):
-    """load properties from a file and add them to the current WikidataProvider as defined in settings.
+def add_nodes_from_file(file_path: str):
+    """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
     If a kgtk-format tsv file, the property information will be loaded as follows:
-    If the "label" column of a row is "data_type", property id will be node1 of that row, and property type will be node2
-    If node1 of a row with "data_type" label also appears in rows with "label" or "description" labels, 
-    that information will be added to the property entry
+    node1 is used as the wikidata_id. 
+    each wikidata ID has a dictionary, as follows:
+    label is used as keys, for "data_type", "label", "description", and "P31". 
+    (note: rows with a label not in those 4 are not added to provider by default 
+    (users could write custom provider with support))
+    node2 is used for the value for that row's key, eg "Quantity", "Area(HA)", etc
 
     Args:
         file_path (str): location of the properties file
 
     Raises:
-        ValueError: invalid filetype (only json and tsv files are supported)
+        ValueError: invalid filetype (only tsv files are supported)
 
     Returns:
         dict: a dictionary of "added", "present" (already present, updated), and "failed" properties from the file
@@ -56,26 +60,14 @@ def add_properties_from_file(file_path: str):
         raise ValueError(
             "Only .tsv property files are currently supported")
 
-    property_dict = {}
-    input_dict = {}
+    input_dict=defaultdict(dict)
     with open(file_path, 'r', encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter="\t")
         for row_dict in reader:
             node1 = row_dict["node1"]
             label = row_dict["label"]
             value = row_dict["node2"]
-
-            if label == "data_type":
-                input_dict[node1] = {"property_type": value}
-            if label in ["label", "description"]:
-                property_dict[(node1, label)] = value
-    for node1 in input_dict:
-        label = property_dict.get((node1, "label"))
-        description = property_dict.get((node1, "description"))
-        input_dict[node1].update(
-            {"label": label, "description": description})
-
-        
+            input_dict[node1][label]=value
 
     return_dict = {"added": [], "present": [], "failed": []}
 
@@ -83,21 +75,17 @@ def add_properties_from_file(file_path: str):
     with provider as p:
         for node_id in input_dict:
             prop_info = input_dict[node_id]
-            if isinstance(prop_info, dict):
-                property_type = prop_info["property_type"]
-            else:
-                property_type = prop_info
-                prop_info = {"property_type": property_type}
+            data_type = prop_info["data_type"]
 
             try:
-                if str(property_type.lower()) not in VALID_PROPERTY_TYPES:
-                    raise ValueError("Property type: " +
-                                     property_type+" not supported")
-                added = p.save_property(node_id, **prop_info)
+                if data_type: #validate data types
+                    if str(data_type.lower()) not in VALID_PROPERTY_TYPES:
+                        raise ValueError("Property type: " +data_type+" not supported")
+                added = p.save_entry(node_id, **prop_info)
                 if added:
                     return_dict["added"].append(node_id)
                 else:
-                    return_dict["present"].append(node_id)
+                    return_dict["updated"].append(node_id)
             except Exception as e:
                 print(e)
                 return_dict["failed"].append((node_id, str(e)))

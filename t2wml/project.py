@@ -2,7 +2,7 @@ import yaml
 import os
 from pathlib import Path
 from shutil import copyfile
-from t2wml.wikification.utility_functions import add_properties_from_file
+from t2wml.wikification.utility_functions import add_nodes_from_file
 from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet, SpreadsheetFile
 from t2wml.mapping.statement_mapper import YamlMapper
@@ -167,8 +167,8 @@ class ProjectRunner():
         p=Project.load(filepath)
         return cls(p)
 
-    def _add_properties_from_file(self, f):
-        add_properties_from_file(os.path.join(self.project.directory, f))
+    def _add_nodes_from_file(self, f):
+        add_nodes_from_file(os.path.join(self.project.directory, f))
     def _add_file_to_wikifier(self, wikifier, f):
         wikifier.add_file(os.path.join(self.project.directory, f))
     def _handle_specific_wikifiers(self, wikifier, data_file, sheet_name):
@@ -187,7 +187,7 @@ class ProjectRunner():
             
     def generate_single_knowledge_graph(self, data_file, sheet_name, yaml, wikifier_file=None):
         for f in self.project.wikidata_files:
-            self._add_properties_from_file(f)
+            self._add_nodes_from_file(f)
         wikifier=Wikifier()
         if wikifier_file:
             self._add_file_to_wikifier(wikifier, wikifier_file)
@@ -204,7 +204,7 @@ class ProjectRunner():
     def generate_all_knowledge_graphs(self):
         knowledge_graphs=[]
         for f in self.project.wikidata_files:
-            self._add_properties_from_file(f)
+            self._add_nodes_from_file(f)
 
         for data_file in self.project.data_files:
             data_file=os.path.join(self.project.directory, data_file)

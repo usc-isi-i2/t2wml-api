@@ -24,10 +24,10 @@
 # a script that iterates over a directory of csvs that can all be parsed using the same yaml file
 import os
 from pathlib import Path
-from t2wml.api import create_output_from_files, add_properties_from_file
+from t2wml.api import create_output_from_files, add_nodes_from_file
 
 properties_file= "custom_properties.tsv"
-add_properties_from_file(properties_file)
+add_nodes_from_file(properties_file)
 
 data_folder="my_drive\my_data"
 wikifier_filepath="my_drive\wikiers\wiki.csv"
@@ -69,7 +69,7 @@ for sheet_name, sheet in spreadsheet_file.items():
 
 <span id="convenience"></span>
 
-* `add_properties_from_file(properties_file_path)` : add properties to the wikidata provider from the provided file path, which must be in json or kgtk format
+* `add_nodes_from_file(properties_file_path)` : add properties to the wikidata provider from the provided file path, which must be in json or kgtk format
 * `create_output_from_files(data_file_path, sheet_name, yaml_file_path, wikifier_filepath, output_filepath=None, output_format="json")` : 
 
 ## The Project Class
@@ -339,21 +339,19 @@ All providers inherit from WikidataProvider, which is a template base class.
 
 It has one required function which *must* be implemented (or an error will be raised)
 
- `get_property_type(self, wikidata_property, *args, **kwargs):`
+ `get_property_type(self, property_id, *args, **kwargs):`
 receives a single wikidata property id and returns the property's type
 
-As well as 4 optional functions:
-`save_property(self, property, property_type)` : save property-type pair to whatever source is being used, if relevant. is called by add_properties_from_file, so an error will be raised there if it is not implemented. can also be used in `get_property_type` is the user so desires (for example, SparqlFallback will call this function whenever it had to make a sparql query). 
+As well as 3 optional functions:
+`save_entry(self, entry_id, data_type, **args)` : save property-type pair to whatever source is being used, if relevant. is called by add_nodes_from_file, so an error will be raised there if it is not implemented. can also be used in `get_property_type` is the user so desires (for example, SparqlFallback will call this function whenever it had to make a sparql query). Must include **args, user can store whatever additional fields they'd like there, or simply ignore.
 
-`def __enter__(self)` : used exclusively with the utility function add_properties_from_file, if there is some setup work that should be done before bulk-adding properties
+`def __enter__(self)` : used exclusively with the utility function add_nodes_from_file, if there is some setup work that should be done before bulk-adding properties
 
-     
-
-`def __exit__(self, exc_type, exc_value, exc_traceback)` : used exclusively with the utility function add_properties_from_file, if there is some post-processing work that should be done after bulk-adding properties
+`def __exit__(self, exc_type, exc_value, exc_traceback)` : used exclusively with the utility function add_nodes_from_file, if there is some post-processing work that should be done after bulk-adding properties
 
 In addition to WikidataProvider, an additional template class is provided, SparqlFallback, for the common use pattern of "check this data source, and if it's not there, try a sparql query".
 
-It provides its own definitions for `get_property_type` . Instead of defining that, the user should define `try_get_property_type` (which will be called by get_property_type, and any failures redirected to the sparql querier).
+It provides its own definitions for `get_property_type`. Instead of defining that, the user should define `try_get_property_type` (which will be called by get_property_type, and any failures redirected to the sparql querier).
 
 Examples of creating a custom WikiDataProvider:
 
@@ -379,26 +377,66 @@ class JsonFileProvider(DictionaryProvider):
 # given a database with table WikidataEntry
 # this provider will check the database first, and if it doesn't succeed there, it will fall back to a sparql query
 
+from app_config import db
 from t2wml.wikification.wikidata_provider import FallbackSparql
-class DatabaseProvider(FallbackSparql):
-    def __init__(self, sparql_endpoint):
-        super().__init__(sparql_endpoint)
-    
-    def save_property(self, wikidata_property, property_type):
-        return WikidataEntry.add_or_update(wikidata_property, wd_type=property_type, do_session_commit=False)
-    
-    def try_get_property_type(self, wikidata_property, *args, **kwargs):
-        prop = WikidataEntry.query.filter_by(wd_id=wikidata_property).first()
-        if prop is None:
-            raise ValueError("Not found")
-        return prop.wd_type
-    
-    def __exit__(self, exc_type, exc_value, exc_traceback):
+
+class WikidataEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    wd_id = db.Column(db.String(64), index=True)
+    data_type = db.Column(db.String(64))
+    label = db.Column(db.String(64))
+    description = db.Column(db.String(200))
+    P31 = db.Column(db.String(64))
+
+    @staticmethod
+    def add_or_update(wd_id, data_type=None, label=None, description=None, P31=None, do_session_commit=True):
+        wd = WikidataEntry.query.filter_by(wd_id=wd_id).first()
+        if wd:
+            added = False
+        else:
+            wd = WikidataEntry(wd_id=wd_id)
+            added = True
+        
+        if data_type is not None:
+            wd.data_type = data_type
+        if label is not None:
+            wd.label = label
+        if description is not None:
+            wd.description = description
+        if P31 is not None:
+            wd.P31 = P31
+
+        if do_session_commit:
+            db.session.commit()
+        return added
+        
+    @staticmethod
+    def do_commit():
         try:
             db.session.commit()
         except:
             db.session.rollback()
             raise ValueError("Failed to commit to database session")
+
+
+class DatabaseProvider(FallbackSparql):
+    def __init__(self, sparql_endpoint):
+        super().__init__(sparql_endpoint)
+
+    def save_entry(self, wd_id, property_type, label=None, description=None):
+        return WikidataEntry.add_or_update(wd_id, property_type, label, description, do_session_commit=False)
+
+    def try_get_property_type(self, wikidata_property, *args, **kwargs):
+        prop = WikidataEntry.query.filter_by(
+            wd_id=wikidata_property).first()
+        if prop is None:
+            raise ValueError("Not found")
+        if prop.data_type is None:
+            raise ValueError("No datatype defined for that ID")
+        return prop.data_type
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        WikidataEntry.do_commit()
 ```
 
 ## T2WML Settings

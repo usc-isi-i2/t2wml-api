@@ -8,7 +8,7 @@ class WikidataProvider(ABC):
     def get_property_type(self, wikidata_property, *args, **kwargs):
         raise NotImplementedError
 
-    def save_property(self, property, property_type, *args, **kwargs):
+    def save_entry(self, property, property_type, *args, **kwargs):
         pass
 
     def __enter__(self):
@@ -55,13 +55,13 @@ class SparqlProvider(WikidataProvider):
         if not property_type:
             property_type = self.query_wikidata_for_property_type(
                 wikidata_property)
-            self.save_property(wikidata_property, property_type)
+            self.save_entry(wikidata_property, property_type)
             if property_type == "Property Not Found":
                 raise ValueError("Property "+wikidata_property+" not found")
 
         return property_type
 
-    def save_property(self, property, property_type, *args, **kwargs):
+    def save_entry(self, property, property_type, *args, **kwargs):
         self.cache[property] = property_type
 
 
