@@ -3,8 +3,11 @@ T2WML API History
 
 Changes in version 0.0.9:
 ------------------------
-* Changed project class filename to .t2wmlproj
-* added sparql endpoint and warn for empty cells settings to project
+* All at least somewhat backwards incompatible:
+    * Changed project class filename to .t2wmlproj
+    * added sparql endpoint and warn for empty cells settings to project
+    * change add_properties_from_file to add_nodes_from_file, some changes to wikidata_provider interface (documented in api.md)
+    * change returned dict key (from adding properties to file) from "present" to "updated"
 
 Changes in version 0.0.8:
 ------------------------
