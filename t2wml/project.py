@@ -42,6 +42,8 @@ class Project:
             full_path=os.path.join(self.directory, file_path)
             in_proj_dir=os.path.isfile(full_path)
         if not in_proj_dir:
+            if not os.path.isfile(file_path):
+                raise ValueError("Could not find file:"+file_path)
             if not copy_from_elsewhere:
                 raise ValueError("project files must be located in the project directory. did you mean to copy from elsewhere?")
             file_name=Path(file_path).name
