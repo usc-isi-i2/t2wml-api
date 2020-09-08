@@ -1,3 +1,4 @@
+from build.lib.t2wml.parsing.classes import ReturnClass
 from collections import defaultdict
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.parsing.t2wml_parsing import iter_on_n_for_code, T2WMLCode
@@ -156,7 +157,13 @@ class NodeForEval(Node):
                 try:
                     entry_parsed = iter_on_n_for_code(
                         self.__dict__[key], self.context)
-                    value = entry_parsed.value
+                    try:
+                        value = entry_parsed.value
+                    except AttributeError:
+                        if not isinstance(entry_parsed, ReturnClass): #sometimes parses to a string or number, not a returnclass
+                            value=str(entry_parsed)
+                        else:
+                            value=None
                     if value is None:
                         self._errors[key] += "Failed to resolve"
                         self.__dict__.pop(key)

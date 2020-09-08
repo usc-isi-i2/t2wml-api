@@ -8,6 +8,8 @@ Changes in version 0.0.9:
     * added sparql endpoint and warn for empty cells settings to project
     * change add_properties_from_file to add_nodes_from_file, some changes to wikidata_provider interface (documented in api.md)
     * change returned dict key (from adding properties to file) from "present" to "updated"
+* Bug fix:
+    * when set to something like $sheet, which doesn't return ReturnClass, parsing would fail on attribute error
 
 Changes in version 0.0.8:
 ------------------------
