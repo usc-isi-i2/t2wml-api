@@ -15,7 +15,7 @@ from t2wml.settings import DEFAULT_SPARQL_ENDPOINT
 
 class Project:
     def __init__(self, directory, title="Untitled", data_files=None, yaml_files=None, wikifier_files=None, 
-                       wikidata_files=None,
+                       entity_files=None,
                    yaml_sheet_associations=None, specific_wikifiers=None,
                    sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False):
         if not os.path.isdir(directory):
@@ -25,7 +25,7 @@ class Project:
         self.data_files=data_files or []
         self.yaml_files=yaml_files or []
         self.wikifier_files=wikifier_files or []
-        self.wikidata_files=wikidata_files or []
+        self.entity_files=entity_files or []
         self.yaml_sheet_associations=yaml_sheet_associations or {}
         self.specific_wikifiers=specific_wikifiers or {}
         self.sparql_endpoint=sparql_endpoint
@@ -128,10 +128,10 @@ class Project:
     
     def add_wikidata_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
-        if file_path in self.wikidata_files:
+        if file_path in self.entity_files:
             print("This file is already present in the project's wikidata files")
         else:
-            self.wikidata_files.append(file_path)
+            self.entity_files.append(file_path)
         return file_path
     
     def save(self):
@@ -188,7 +188,7 @@ class ProjectRunner():
         return self.generate_single_knowledge_graph(self.project.data_files[-1], sheet_name, self.project.yaml_files[-1], self.project.wikifier_files[-1])
             
     def generate_single_knowledge_graph(self, data_file, sheet_name, yaml, wikifier_file=None):
-        for f in self.project.wikidata_files:
+        for f in self.project.entity_files:
             self._add_nodes_from_file(f)
         wikifier=Wikifier()
         if wikifier_file:
@@ -205,7 +205,7 @@ class ProjectRunner():
     
     def generate_all_knowledge_graphs(self):
         knowledge_graphs=[]
-        for f in self.project.wikidata_files:
+        for f in self.project.entity_files:
             self._add_nodes_from_file(f)
 
         for data_file in self.project.data_files:

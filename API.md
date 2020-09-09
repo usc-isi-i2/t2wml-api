@@ -86,7 +86,7 @@ The Project class has a variety of functions for adding files to the entire proj
 
 * `add_data_file(file_path, copy_from_elsewhere=False, overwrite=False, rename=False)`
 * `add_wikifier_file(file_path, copy_from_elsewhere=False, overwrite=False, rename=False)`
-* `add_wikidata_file(file_path, copy_from_elsewhere=False, overwrite=False, rename=False)` 
+* `add_entity_file(file_path, copy_from_elsewhere=False, overwrite=False, rename=False)` 
 
 There are also two functions for adding files associated to a specific data_file+sheet:
 
