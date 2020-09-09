@@ -101,7 +101,7 @@ class ProjectTest(unittest.TestCase):
         project_folder=os.path.join(unit_test_folder, "homicide")
         sp=Project(project_folder)
         sp.add_data_file("homicide_report_total_and_sex.xlsx")
-        sp.add_wikidata_file("homicide_properties.tsv")
+        sp.add_entity_file("homicide_properties.tsv")
         sp.add_wikifier_file("wikifier_general.csv")
         yaml_file=sp.add_yaml_file(os.path.join("t2mwl","table-1a.yaml"))
         sp.associate_yaml_with_sheet(yaml_file, "homicide_report_total_and_sex.xlsx", "table-1a")
@@ -119,7 +119,7 @@ class ProjectTest(unittest.TestCase):
 
         sp=Project(project_folder)
         data_file1=sp.add_data_file("homicide_report_total_and_sex.xlsx")
-        sp.add_wikidata_file("homicide_properties.tsv")
+        sp.add_entity_file("homicide_properties.tsv")
         sp.add_wikifier_file("wikifier_general.csv")
         for file_name in os.listdir(yaml_folder):
             yaml_file=os.path.join("t2mwl", file_name)
@@ -129,7 +129,7 @@ class ProjectTest(unittest.TestCase):
         #part 2:
         test_folder = os.path.join(unit_test_folder, "loop")
         properties_file = os.path.join(test_folder, "kgtk_properties.tsv")
-        sp.add_wikidata_file(properties_file, copy_from_elsewhere=True, overwrite=True)
+        sp.add_entity_file(properties_file, copy_from_elsewhere=True, overwrite=True)
         data_file2 = sp.add_data_file(os.path.join(test_folder, "oecd.xlsx"), copy_from_elsewhere=True, overwrite=True)
         wikifier_filepath1 = os.path.join(test_folder, "country-wikifier.csv")
         sp.add_specific_wikifier_file(wikifier_filepath1, data_file2, copy_from_elsewhere=True, overwrite=True)
