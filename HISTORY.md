@@ -1,6 +1,6 @@
 T2WML API History
 ===================================
-Changes in version 0.0.11 (wip):
+Changes in version 0.0.11:
 ------------------------
 * rename add_wikidata_file to more accurate add_entity_file
 
