@@ -1,7 +1,10 @@
 T2WML API History
 ===================================
+Changes in version 0.0.11 (wip):
+------------------------
+* rename add_wikidata_file to more accurate add_entity_file
 
-Changes in version 0.0.9:
+Changes in version 0.0.10:
 ------------------------
 * All at least somewhat backwards incompatible:
     * Changed project class filename to .t2wmlproj
