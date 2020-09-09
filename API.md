@@ -374,13 +374,13 @@ class JsonFileProvider(DictionaryProvider):
 ```
 
 ```python 
-# given a database with table WikidataEntry
+# given a database with table WikidataEntity
 # this provider will check the database first, and if it doesn't succeed there, it will fall back to a sparql query
 
 from app_config import db
 from t2wml.wikification.wikidata_provider import FallbackSparql
 
-class WikidataEntry(db.Model):
+class WikidataEntity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     wd_id = db.Column(db.String(64), index=True)
     data_type = db.Column(db.String(64))
@@ -390,11 +390,11 @@ class WikidataEntry(db.Model):
 
     @staticmethod
     def add_or_update(wd_id, data_type=None, label=None, description=None, P31=None, do_session_commit=True):
-        wd = WikidataEntry.query.filter_by(wd_id=wd_id).first()
+        wd = WikidataEntity.query.filter_by(wd_id=wd_id).first()
         if wd:
             added = False
         else:
-            wd = WikidataEntry(wd_id=wd_id)
+            wd = WikidataEntity(wd_id=wd_id)
             added = True
         
         if data_type is not None:
@@ -424,10 +424,10 @@ class DatabaseProvider(FallbackSparql):
         super().__init__(sparql_endpoint)
 
     def save_entry(self, wd_id, data_type, label=None, description=None, **kwargs):
-        return WikidataEntry.add_or_update(wd_id, data_type, label, description, do_session_commit=False)
+        return WikidataEntity.add_or_update(wd_id, data_type, label, description, do_session_commit=False)
 
     def try_get_property_type(self, wikidata_property, *args, **kwargs):
-        prop = WikidataEntry.query.filter_by(
+        prop = WikidataEntity.query.filter_by(
             wd_id=wikidata_property).first()
         if prop is None:
             raise ValueError("Not found")
@@ -436,7 +436,7 @@ class DatabaseProvider(FallbackSparql):
         return prop.data_type
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        WikidataEntry.do_commit()
+        WikidataEntity.do_commit()
 ```
 
 ## T2WML Settings

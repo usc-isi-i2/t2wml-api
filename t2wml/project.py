@@ -129,7 +129,7 @@ class Project:
     def add_wikidata_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
         if file_path in self.entity_files:
-            print("This file is already present in the project's wikidata files")
+            print("This file is already present in the project's entity files")
         else:
             self.entity_files.append(file_path)
         return file_path
