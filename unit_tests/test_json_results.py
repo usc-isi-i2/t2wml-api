@@ -3,12 +3,12 @@ import os
 import unittest
 from pathlib import Path
 from t2wml.api import KnowledgeGraph
-from t2wml.wikification.utility_functions import add_nodes_from_file
+from t2wml.wikification.utility_functions import add_entities_from_file
 
 repo_folder = Path(__file__).parents[2]
 unit_test_folder = os.path.join(
     repo_folder, "t2wml-api", "unit_tests", "ground_truth")
-add_nodes_from_file(os.path.join(
+add_entities_from_file(os.path.join(
     unit_test_folder, "homicide", "homicide_properties.tsv"))
 
 
@@ -40,7 +40,7 @@ class TestHomicideData(JsonTest):
         self.yaml_folder = os.path.join(unit_test_folder, "homicide", "t2mwl")
         self.expected_result_dir = os.path.join(
             unit_test_folder, "homicide", "results")
-        add_nodes_from_file(os.path.join(
+        add_entities_from_file(os.path.join(
             unit_test_folder, "homicide", "homicide_properties.tsv"))
 
     def run_test_on_sheet(self, sheet_name):

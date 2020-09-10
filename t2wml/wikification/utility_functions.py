@@ -37,7 +37,7 @@ def _get_property_type(wikidata_property):
     return property_type
 
 
-def add_nodes_from_file(file_path: str):
+def add_entities_from_file(file_path: str):
     """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
     If a kgtk-format tsv file, the property information will be loaded as follows:
     node1 is used as the wikidata_id. 

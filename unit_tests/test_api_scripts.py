@@ -37,12 +37,12 @@ class TestScripts(unittest.TestCase):
 
     def test_docs_folder_loop_script(self):
         import os
-        from t2wml.api import create_output_from_files, add_nodes_from_file
+        from t2wml.api import create_output_from_files, add_entities_from_file
         from pathlib import Path
 
         properties_file = os.path.join(
             unit_test_folder, "homicide", "homicide_properties.tsv")
-        add_nodes_from_file(properties_file)
+        add_entities_from_file(properties_file)
 
         test_folder = os.path.join(unit_test_folder, "loop")
         data_folder = os.path.join(test_folder, "data")
@@ -59,14 +59,14 @@ class TestScripts(unittest.TestCase):
 
     def test_docs_sheet_loop_script(self):
         import os
-        from t2wml.api import KnowledgeGraph, Wikifier, YamlMapper, SpreadsheetFile, add_nodes_from_file
+        from t2wml.api import KnowledgeGraph, Wikifier, YamlMapper, SpreadsheetFile, add_entities_from_file
 
 
 
         test_folder = os.path.join(unit_test_folder, "loop")
         properties_file = os.path.join(
             test_folder, "kgtk_properties.tsv")
-        add_nodes_from_file(properties_file)
+        add_entities_from_file(properties_file)
 
         data_file = os.path.join(test_folder, "oecd.xlsx")
         wikifier_filepath1 = os.path.join(test_folder, "country-wikifier.csv")

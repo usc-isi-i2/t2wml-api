@@ -24,10 +24,10 @@
 # a script that iterates over a directory of csvs that can all be parsed using the same yaml file
 import os
 from pathlib import Path
-from t2wml.api import create_output_from_files, add_nodes_from_file
+from t2wml.api import create_output_from_files, add_entities_from_file
 
 properties_file= "custom_properties.tsv"
-add_nodes_from_file(properties_file)
+add_entities_from_file(properties_file)
 
 data_folder="my_drive\my_data"
 wikifier_filepath="my_drive\wikiers\wiki.csv"
@@ -69,7 +69,7 @@ for sheet_name, sheet in spreadsheet_file.items():
 
 <span id="convenience"></span>
 
-* `add_nodes_from_file(properties_file_path)` : add properties to the wikidata provider from the provided file path, which must be in json or kgtk format
+* `add_entities_from_file(properties_file_path)` : add properties to the wikidata provider from the provided file path, which must be in json or kgtk format
 * `create_output_from_files(data_file_path, sheet_name, yaml_file_path, wikifier_filepath, output_filepath=None, output_format="json")` : 
 
 ## The Project Class
@@ -343,11 +343,11 @@ It has one required function which *must* be implemented (or an error will be ra
 receives a single wikidata property id and returns the property's type
 
 As well as 3 optional functions:
-`save_entry(self, entry_id, data_type, **kwargs)` : save property-type pair to whatever source is being used, if relevant. is called by add_nodes_from_file, so an error will be raised there if it is not implemented. can also be used in `get_property_type` is the user so desires (for example, SparqlFallback will call this function whenever it had to make a sparql query). Must include **kwargs, user can store whatever additional fields they'd like there, or simply ignore.
+`save_entry(self, entry_id, data_type, **kwargs)` : save property-type pair to whatever source is being used, if relevant. is called by add_entities_from_file, so an error will be raised there if it is not implemented. can also be used in `get_property_type` is the user so desires (for example, SparqlFallback will call this function whenever it had to make a sparql query). Must include **kwargs, user can store whatever additional fields they'd like there, or simply ignore.
 
-`def __enter__(self)` : used exclusively with the utility function add_nodes_from_file, if there is some setup work that should be done before bulk-adding properties
+`def __enter__(self)` : used exclusively with the utility function add_entities_from_file, if there is some setup work that should be done before bulk-adding properties
 
-`def __exit__(self, exc_type, exc_value, exc_traceback)` : used exclusively with the utility function add_nodes_from_file, if there is some post-processing work that should be done after bulk-adding properties
+`def __exit__(self, exc_type, exc_value, exc_traceback)` : used exclusively with the utility function add_entities_from_file, if there is some post-processing work that should be done after bulk-adding properties
 
 In addition to WikidataProvider, an additional template class is provided, SparqlFallback, for the common use pattern of "check this data source, and if it's not there, try a sparql query".
 

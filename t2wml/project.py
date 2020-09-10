@@ -2,7 +2,7 @@ import yaml
 import os
 from pathlib import Path
 from shutil import copyfile
-from t2wml.wikification.utility_functions import add_nodes_from_file
+from t2wml.wikification.utility_functions import add_entities_from_file
 from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet, SpreadsheetFile
 from t2wml.mapping.statement_mapper import YamlMapper
@@ -136,7 +136,7 @@ class Project:
     
     def save(self):
         proj_file_text=(yaml.dump(self.__dict__))
-        proj_file_path=os.path.join(self.directory, ".t2wmlproj")
+        proj_file_path=os.path.join(self.directory, "project.t2wml")
         with open(proj_file_path, 'w', encoding="utf-8") as f:
             f.write(proj_file_text)
         return proj_file_path
@@ -144,9 +144,9 @@ class Project:
     @classmethod
     def load(cls, filepath):
         if os.path.isdir(filepath):
-            filepath=os.path.join(filepath, ".t2wmlproj")
+            filepath=os.path.join(filepath, "project.t2wml")
         if not os.path.isfile(filepath):
-            raise FileNotFoundError("Could not find .t2wmlproj file")
+            raise FileNotFoundError("Could not find project.t2wml file")
         try:
             with open(filepath, 'r', encoding="utf-8") as f:
                 proj_input=yaml.safe_load(f.read())
@@ -169,8 +169,8 @@ class ProjectRunner():
         p=Project.load(filepath)
         return cls(p)
 
-    def _add_nodes_from_file(self, f):
-        add_nodes_from_file(os.path.join(self.project.directory, f))
+    def _add_entities_from_file(self, f):
+        add_entities_from_file(os.path.join(self.project.directory, f))
     def _add_file_to_wikifier(self, wikifier, f):
         wikifier.add_file(os.path.join(self.project.directory, f))
     def _handle_specific_wikifiers(self, wikifier, data_file, sheet_name):
@@ -189,7 +189,7 @@ class ProjectRunner():
             
     def generate_single_knowledge_graph(self, data_file, sheet_name, yaml, wikifier_file=None):
         for f in self.project.entity_files:
-            self._add_nodes_from_file(f)
+            self._add_entities_from_file(f)
         wikifier=Wikifier()
         if wikifier_file:
             self._add_file_to_wikifier(wikifier, wikifier_file)
@@ -206,7 +206,7 @@ class ProjectRunner():
     def generate_all_knowledge_graphs(self):
         knowledge_graphs=[]
         for f in self.project.entity_files:
-            self._add_nodes_from_file(f)
+            self._add_entities_from_file(f)
 
         for data_file in self.project.data_files:
             data_file=os.path.join(self.project.directory, data_file)

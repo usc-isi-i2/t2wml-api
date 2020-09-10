@@ -1,6 +1,6 @@
 
 from t2wml.settings import t2wml_settings
-from t2wml.wikification.utility_functions import add_nodes_from_file
+from t2wml.wikification.utility_functions import add_entities_from_file
 from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet, SpreadsheetFile
 from t2wml.mapping.statement_mapper import YamlMapper, StatementMapper

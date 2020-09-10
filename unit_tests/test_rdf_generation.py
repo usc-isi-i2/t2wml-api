@@ -3,7 +3,7 @@ import shutil
 import unittest
 from pathlib import Path
 import tempfile
-from t2wml.wikification.utility_functions import add_nodes_from_file
+from t2wml.wikification.utility_functions import add_entities_from_file
 from t2wml.spreadsheets.utilities import get_first_sheet_name
 from t2wml.api import KnowledgeGraph
 
