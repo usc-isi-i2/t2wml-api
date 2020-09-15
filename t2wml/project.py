@@ -14,13 +14,31 @@ from t2wml.settings import DEFAULT_SPARQL_ENDPOINT
     
 
 class Project:
-    def __init__(self, directory, title="Untitled", data_files=None, yaml_files=None, wikifier_files=None, 
+    def __init__(self, directory, title=None, data_files=None, yaml_files=None, wikifier_files=None, 
                        entity_files=None,
                    yaml_sheet_associations=None, specific_wikifiers=None,
                    sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False):
+        """
+        Args:
+            directory ([str, None]): Project directory. All project files must be contained in this directory or it's sub directories
+            title ([str], optional): Project title. When None, defaults to name of folder at end of directory path
+            data_files ([list], optional): Project's data files. When None, defaults to empty array. 
+            yaml_files ([list], optional): Project's yaml files. When None, defaults to empty array. 
+            wikifier_files ([list], optional): Project's wikifier files. When None, defaults to empty array. 
+            entity_files ([list], optional): Project's entity files. When None, defaults to empty array. 
+            yaml_sheet_associations ([dict], optional): [description]. When None, defaults to empty dictionary.
+            specific_wikifiers ([dict], optional): wikifiers to be applied only to specific data files/sheets.  When None, defaults to empty dictionary.
+            sparql_endpoint ([str], optional): sparql endpoint for attempting to fetch entities not in entity files. Defaults to DEFAULT_SPARQL_ENDPOINT.
+            warn_for_empty_cells (bool, optional): Project setting for whether empty cells in qualifier region are treated as an error. Defaults to False.
+
+        Raises:
+            ValueError: [description]
+        """        
         if not os.path.isdir(directory):
             raise ValueError("Project must be created with a valid project directory")
         self.directory=directory
+        if title is None:
+            title=Path(directory).stem
         self.title=title
         self.data_files=data_files or []
         self.yaml_files=yaml_files or []
