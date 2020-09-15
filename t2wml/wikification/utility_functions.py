@@ -37,6 +37,19 @@ def _get_property_type(wikidata_property):
     return property_type
 
 
+def validate_id(node_id):
+    first_letter=str(node_id).upper()[0]
+    if first_letter not in ["P", "Q"]:
+        raise T2WMLExceptions.InvalidEntityDefinition("Only entity IDs beginning with P or Q are supported: "+str(node_id))
+    try:
+        num=int(node_id[1:])
+        if first_letter=="P" and num<10000:
+            raise T2WMLExceptions.InvalidEntityDefinition("Custom entity ID Pnum where num<10000 is not allowed: "+str(node_id))
+        if first_letter=="Q" and num<1000000000:
+            raise T2WMLExceptions.InvalidEntityDefinition("Custom entity ID Qnum where num<1 billion is not allowed: "+str(node_id))
+    except ValueError: #conversion to int failed, is not Pnum or Qnum
+        pass
+
 def add_entities_from_file(file_path: str):
     """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
     If a kgtk-format tsv file, the property information will be loaded as follows:
@@ -79,25 +92,15 @@ def add_entities_from_file(file_path: str):
             data_type = prop_info.pop("data_type", None) #we pop it because it's passed as a required argument for historical reasons
 
             try:
-                #validate ID
-                first_letter=str(node_id).upper()[0]
-                if first_letter not in ["P", "Q"]:
-                    raise T2WMLExceptions.InvalidEntityDefinition("Only entity IDs beginning with P or Q are supported: "+str(node_id))
-                try:
-                    num=int(node_id[1:])
-                    if first_letter=="P" and num<10000:
-                        raise T2WMLExceptions.InvalidEntityDefinition("Custom entity ID Pnum where num<10000 is not allowed: "+str(node_id))
-                    if first_letter=="Q" and num<1000000000:
-                        raise T2WMLExceptions.InvalidEntityDefinition("Custom entity ID Qnum where num<1 billion is not allowed: "+str(node_id))
-                except ValueError: #conversion to int failed, is not Pnum or Qnum
-                    pass
+                #validate ID- currently disabled
+                #validate_id(node_id)
 
                 #validate data types
                 if data_type: 
                     if str(data_type.lower()) not in VALID_PROPERTY_TYPES:
                         raise T2WMLExceptions.InvalidEntityDefinition("Property type: " +data_type+" not supported")
                 
-                #attempt to sadd definition
+                #attempt to add definition
                 added = p.save_entry(node_id, data_type, **prop_info)
                 if added:
                     return_dict["added"].append(node_id)
