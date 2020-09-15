@@ -41,6 +41,7 @@ def add_entities_from_file(file_path: str):
     """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
     If a kgtk-format tsv file, the property information will be loaded as follows:
     node1 is used as the wikidata_id. 
+    wikidata_id must be valid: Must begin with P or Q, Pnum where num<10000 or Qnum where num<1 billion are not allowed. 
     each wikidata ID has a dictionary, as follows:
     label is used as keys, for "data_type", "label", "description", and "P31". 
     (note: rows with a label not in those 4 are not added to provider by default 
@@ -78,9 +79,25 @@ def add_entities_from_file(file_path: str):
             data_type = prop_info.pop("data_type", None) #we pop it because it's passed as a required argument for historical reasons
 
             try:
-                if data_type: #validate data types
+                #validate ID
+                first_letter=str(node_id).upper()[0]
+                if first_letter is not in ["P", "Q"]:
+                    raise T2WMLExceptions.InvalidEntityDefinition("Only entity IDs beginning with P or Q are supported")
+                try:
+                    num=int(node_id[1:])
+                    if first_letter=="P" and num<10000:
+                        raise T2WMLExceptions.InvalidEntityDefinition("Custom entity ID Pnum where num<10000 is not allowed")
+                    if first_letter=="Q" and num<1000000000:
+                        raise T2WMLExceptions.InvalidEntityDefinition("Custom entity ID Qnum where num<1 billion is not allowed")
+                except ValueError: #conversion to int failed, is not Pnum or Qnum
+                    pass
+
+                #validate data types
+                if data_type: 
                     if str(data_type.lower()) not in VALID_PROPERTY_TYPES:
-                        raise ValueError("Property type: " +data_type+" not supported")
+                        raise T2WMLExceptions.InvalidEntityDefinition("Property type: " +data_type+" not supported")
+                
+                #attempt to sadd definition
                 added = p.save_entry(node_id, data_type, **prop_info)
                 if added:
                     return_dict["added"].append(node_id)

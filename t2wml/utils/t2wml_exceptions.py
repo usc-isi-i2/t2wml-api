@@ -75,3 +75,6 @@ class WikificationFailureException(T2WMLException):
 class FileWithThatNameInProject(T2WMLException):
     code=409
     message="A file with that name is already present in the project"
+
+class InvalidEntityDefinition(T2WMLException):
+    message= "Illegal entity definition"
