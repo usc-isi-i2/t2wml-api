@@ -82,13 +82,13 @@ def add_entities_from_file(file_path: str):
                 #validate ID
                 first_letter=str(node_id).upper()[0]
                 if first_letter not in ["P", "Q"]:
-                    raise T2WMLExceptions.InvalidEntityDefinition("Only entity IDs beginning with P or Q are supported")
+                    raise T2WMLExceptions.InvalidEntityDefinition("Only entity IDs beginning with P or Q are supported: "+str(node_id))
                 try:
                     num=int(node_id[1:])
                     if first_letter=="P" and num<10000:
-                        raise T2WMLExceptions.InvalidEntityDefinition("Custom entity ID Pnum where num<10000 is not allowed")
+                        raise T2WMLExceptions.InvalidEntityDefinition("Custom entity ID Pnum where num<10000 is not allowed: "+str(node_id))
                     if first_letter=="Q" and num<1000000000:
-                        raise T2WMLExceptions.InvalidEntityDefinition("Custom entity ID Qnum where num<1 billion is not allowed")
+                        raise T2WMLExceptions.InvalidEntityDefinition("Custom entity ID Qnum where num<1 billion is not allowed: "+str(node_id))
                 except ValueError: #conversion to int failed, is not Pnum or Qnum
                     pass
 
