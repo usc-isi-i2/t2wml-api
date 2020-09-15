@@ -2,8 +2,8 @@ T2WML API History
 ===================================
 Changes in version 0.0.12(pre-release):
 ------------------------
-* rename add_nodes_from_file to add_entities_from_file
-* rename .t2wmlproj to project.t2wml, so that it can be viewed on mac and linux
+* deprecation: rename add_nodes_from_file to add_entities_from_file
+* backwards incompatible: rename .t2wmlproj to project.t2wml, so that it can be viewed on mac and linux
 * change default project title from "Untitled" to folder name
 * add validation for entity definitions
 
