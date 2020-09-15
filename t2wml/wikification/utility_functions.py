@@ -81,7 +81,7 @@ def add_entities_from_file(file_path: str):
             try:
                 #validate ID
                 first_letter=str(node_id).upper()[0]
-                if first_letter is not in ["P", "Q"]:
+                if first_letter not in ["P", "Q"]:
                     raise T2WMLExceptions.InvalidEntityDefinition("Only entity IDs beginning with P or Q are supported")
                 try:
                     num=int(node_id[1:])
