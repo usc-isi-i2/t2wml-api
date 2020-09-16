@@ -93,7 +93,7 @@ def add_entities_from_file(file_path: str):
 
             try:
                 #validate ID- currently disabled
-                #validate_id(node_id)
+                validate_id(node_id)
 
                 #validate data types
                 if data_type: 
