@@ -36,26 +36,35 @@ class SparqlProvider(WikidataProvider):
         self.cache = {}
 
     def query_wikidata_for_property_type(self, wikidata_property):
-        query = """SELECT ?type WHERE {
-                    wd:""" + wikidata_property + """ rdf:type wikibase:Property ;
-                    wikibase:propertyType ?type .
-                }"""
+        query = """SELECT ?type ?label ?desc WHERE {
+                    wd:"""+wikidata_property+""" rdf:type wikibase:Property;
+                        wikibase:propertyType ?type.
+                    OPTIONAL { wd:"""+wikidata_property+""" rdfs:label ?label. }
+                    OPTIONAL { wd:"""+wikidata_property+""" schema:description ?desc. }
+                    FILTER(LANGMATCHES(LANG(?label), "EN"))
+                    FILTER(LANGMATCHES(LANG(?desc), "EN"))
+                    }"""
         sparql = SPARQLWrapper(self.sparql_endpoint)
         sparql.setQuery(query)
         sparql.setReturnFormat(JSON)
         results = sparql.query().convert()
         try:
-            data_type = results["results"]["bindings"][0]["type"]["value"].split("#")[1]
+            results_0=results["results"]["bindings"][0]
+            data_type = results_0["type"]["value"].split("#")[1]
+            label=results_0["label"]["value"]
+            description=results_0["desc"]["value"]
         except IndexError:
             data_type = "Property Not Found"
-        return data_type
+            label=description=""
+        return dict(data_type=data_type, label=label, description=description)
 
     def get_property_type(self, wikidata_property: str):
         data_type = self.cache.get(wikidata_property, False)
         if not data_type:
-            data_type = self.query_wikidata_for_property_type(
+            data_type_args = self.query_wikidata_for_property_type(
                 wikidata_property)
-            self.save_entry(wikidata_property, data_type)
+            data_type=data_type_args["data_type"]
+            self.save_entry(wikidata_property, **data_type_args)
             if data_type == "Property Not Found":
                 raise ValueError("Property "+wikidata_property+" not found")
 
