@@ -153,7 +153,9 @@ class Project:
         return file_path
     
     def save(self):
-        proj_file_text=(yaml.dump(self.__dict__))
+        output_dict=dict(self.__dict__)
+        output_dict.pop('directory')
+        proj_file_text=(yaml.dump(output_dict))
         proj_file_path=os.path.join(self.directory, "project.t2wml")
         with open(proj_file_path, 'w', encoding="utf-8") as f:
             f.write(proj_file_text)
