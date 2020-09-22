@@ -92,7 +92,7 @@ def add_entities_from_file(file_path: str):
             data_type = prop_info.pop("data_type", None) #we pop it because it's passed as a required argument for historical reasons
 
             try:
-                #validate ID- currently disabled
+                #validate ID
                 validate_id(node_id)
 
                 #validate data types

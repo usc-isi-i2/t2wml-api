@@ -30,7 +30,7 @@ class SpreadsheetFile(Mapping):
 
     @property
     def sheet_names(self):
-        return self.dict.keys()
+        return list(self.dict.keys())
 
     def __iter__(self):
         return iter(self.dict)
