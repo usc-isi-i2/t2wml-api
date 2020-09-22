@@ -1,5 +1,13 @@
 T2WML API History
 ===================================
+Changes in version wip:
+------------------------
+* add state to project file
+* bug fix when adding absolute file paths to project
+* change format of project file to include sheet names
+* remove specific wikifier support
+* removed the ProjectRunner class
+
 Changes in version 0.0.13:
 ------------------------
 * validate P/Q node definitions (must begin with P/Q, Pnum where num<10000 or Qnum where num<1 billion not allowed)
