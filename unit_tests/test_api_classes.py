@@ -103,7 +103,7 @@ class ProjectTest(unittest.TestCase):
         sp.add_data_file("homicide_report_total_and_sex.xlsx")
         sp.add_entity_file("homicide_properties.tsv")
         sp.add_wikifier_file("wikifier_general.csv")
-        yaml_file=sp.add_yaml_file(os.path.join("t2mwl","table-1a.yaml"))
+        yaml_file=sp.add_yaml_file(os.path.join("t2wml","table-1a.yaml"))
         sp.associate_yaml_with_sheet(yaml_file, "homicide_report_total_and_sex.xlsx", "table-1a")
         save_file=sp.save()
         pr=ProjectRunner.load(save_file)
@@ -115,14 +115,14 @@ class ProjectTest(unittest.TestCase):
 
         #part one:
         project_folder=os.path.join(unit_test_folder, "homicide")
-        yaml_folder = os.path.join(project_folder, "t2mwl")
+        yaml_folder = os.path.join(project_folder, "t2wml")
 
         sp=Project(project_folder)
         data_file1=sp.add_data_file("homicide_report_total_and_sex.xlsx")
         sp.add_entity_file("homicide_properties.tsv")
         sp.add_wikifier_file("wikifier_general.csv")
         for file_name in os.listdir(yaml_folder):
-            yaml_file=os.path.join("t2mwl", file_name)
+            yaml_file=os.path.join("t2wml", file_name)
             sheet_name=file_name.split(".")[0]
             sp.add_yaml_file(yaml_file, data_file1, sheet_name)
         
@@ -153,7 +153,7 @@ class SheetsWithCachingTest(unittest.TestCase):
         t2wml_settings.cache_data_files_folder=cache_folder
         data_file_path=os.path.join(unit_test_folder, "homicide", "homicide_report_total_and_sex.xlsx")
         sheet_name="table-1a"
-        yaml_file_path=os.path.join(unit_test_folder, "homicide", "t2mwl", "table-1a.yaml")
+        yaml_file_path=os.path.join(unit_test_folder, "homicide", "t2wml", "table-1a.yaml")
         wikifier_filepath=os.path.join(unit_test_folder, "homicide", "wikifier_general.csv")
         output_filepath=os.path.join(unit_test_folder, "homicide", "results", "table-1a.tsv")
         output=create_output_from_files(data_file_path, sheet_name, yaml_file_path, wikifier_filepath, output_format="tsv")

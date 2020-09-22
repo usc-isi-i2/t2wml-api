@@ -37,7 +37,7 @@ class TestHomicideData(JsonTest):
             unit_test_folder, "homicide", "homicide_report_total_and_sex.xlsx")
         self.wikifier_file = os.path.join(
             unit_test_folder, "homicide", "wikifier_general.csv")
-        self.yaml_folder = os.path.join(unit_test_folder, "homicide", "t2mwl")
+        self.yaml_folder = os.path.join(unit_test_folder, "homicide", "t2wml")
         self.expected_result_dir = os.path.join(
             unit_test_folder, "homicide", "results")
         add_entities_from_file(os.path.join(
