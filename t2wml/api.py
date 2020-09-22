@@ -7,7 +7,7 @@ from t2wml.mapping.statement_mapper import YamlMapper, StatementMapper
 from t2wml.wikification.wikifier_service import WikifierService
 from t2wml.wikification.wikidata_provider import SparqlProvider, DictionaryProvider, WikidataProvider
 from t2wml.knowledge_graph import KnowledgeGraph, create_output_from_files
-from t2wml.project import Project, ProjectRunner
+from t2wml.project import Project
 
 def add_nodes_from_file(file_path: str):
     warnings.warn("add_nodes_from_file is deprecated, use add_entities_from_file instead", DeprecationWarning)

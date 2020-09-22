@@ -3,7 +3,6 @@
 * [Examples of using the API](#examples)
 * [Convenience Functions](#convenience)
 * [The Project Class](#project)
-  + [The ProjectRunner class](#projectrunner)
 * [KnowledgeGraph](#kg)
 * [SpreadsheetFile and Sheet](#sheet)
 * [Wikifier](#wikifier)
@@ -78,7 +77,7 @@ for sheet_name, sheet in spreadsheet_file.items():
 
 The Project class is essentially a container, for a single mapping calculation's various files. A central use case for the project is creating an association of files and then being able to upload the project to the T2WML UI.
 
-The project class properties' consist of a series of containers (arrays, dictionaries) for tracking the various files of the project, and `directory` (required) and `title` (optional, default "Untitled")
+The project class properties' consist of a series of containers (arrays, dictionaries) for tracking the various files of the project, the current state of the project if relevant, and `directory` (required) and `title` (optional, default name of directory folder)
 
 All the project's files MUST be located in the project's `directory` (sub-directories of this directory are also fine). For adding files not located in the directory, see the explanation of the arguments in the adding file functions, below.
 
@@ -90,7 +89,6 @@ The Project class has a variety of functions for adding files to the entire proj
 
 There are also two functions for adding files associated to a specific data_file+sheet:
 
-* `add_specific_wikifier_file(self, wiki_path, data_path, sheet_name="NO_SHEET", copy_from_elsewhere=False, overwrite=False, rename=False)`: if you want a wikifier file to apply only to a specific sheet
 * `add_yaml_file(self, file_path, data_file=None, sheet_name=None, copy_from_elsewhere=False, overwrite=False, rename=False)` : If data_file and sheet_name aren't specified, the yaml_file is added to the project's yaml_files without being associated with anything. This means it is not included in the calculation at all, unless you later associate it with the additional function associate_yaml_with_sheet (which only accepts yaml files already added to the project)
 * `associate_yaml_with_sheet(self, yaml_path, data_path, sheet_name)`
 
@@ -112,31 +110,6 @@ It is possible to `save` a Project. This creates a file t2wmlproj.yaml in the pr
 It is also possible to `load` a project by providing the path to either the directory of a project in which a t2wmlproj.yaml file has been saved, or directly to the t2wmlproj.yaml file.
 
 When loading a file, the project directory is overwritten to wherever the t2wmlproj.yaml file was saved. In other words, if you create a project in C:\username\myprojects on one computer, and then copy it to /usr/projects on another computer, loading the project from there will adjust the directory to the new directory.
-
-
-### The ProjectRunner Class
-
-<span id="projectrunner"></span>
-
-This is a convenience class for generating KnowledgeGraphs from Projects.
-
-It can be initialized with a project:
-
-`pr= ProjectRunner(project)`
-
-but it can also be loaded with a path to a project directory or project t2wmlproj.yaml file (this will call Project.load internally):
-
-`pr=ProjectRunner.load("my/path")`
-
-It has three functions:
-
-`generate_old_style_single_file_knowledge_graph(sheet_name)`: given a project with arbitrary number of files within, it will replicate the current UI's behavior: the last-added data_file, last-added wikifier_file, and last-added yaml_file to the sheet in question will be used, all other files ignored. 
-
-`generate_single_knowledge_graph(self, data_file, sheet_name, yaml, wikifier_fle=None)`: generates a single knowledge graph for a single sheet of a single data_file with a single yaml_file. If wikifier_file is specified, only the specified file will be used, otherwise, all of the project's wikifier's will be applied, in order.
-
-`generate_all_knowledge_graphs()`: BETA support for multiple files. api should not be assumed to be stable. generates a collection of knowledge graphs, for every date file in the project, for every sheet in that ata file, for every yaml file associated with that specific sheet (ymal files not associated with any sheets are not applied at all). general wikifier files are applied to all the calculations, specific ones are applied only to their specific sheets.
-
-
 
 ## KnowledgeGraph
 

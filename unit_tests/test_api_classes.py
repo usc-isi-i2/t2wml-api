@@ -97,7 +97,7 @@ class ClassesTest(unittest.TestCase):
 
 class ProjectTest(unittest.TestCase):
     def test_project_single(self):
-        from t2wml.api import Project, ProjectRunner
+        from t2wml.api import Project
         project_folder=os.path.join(unit_test_folder, "homicide")
         sp=Project(project_folder)
         sp.add_data_file("homicide_report_total_and_sex.xlsx")
@@ -106,12 +106,11 @@ class ProjectTest(unittest.TestCase):
         yaml_file=sp.add_yaml_file(os.path.join("t2wml","table-1a.yaml"))
         sp.associate_yaml_with_sheet(yaml_file, "homicide_report_total_and_sex.xlsx", "table-1a")
         save_file=sp.save()
-        pr=ProjectRunner.load(save_file)
-        kg=pr.generate_old_style_single_file_knowledge_graph("table-1a")
+
     
     def test_project_multi(self):
         import os
-        from t2wml.api import Project, ProjectRunner, SpreadsheetFile
+        from t2wml.api import Project, SpreadsheetFile
 
         #part one:
         project_folder=os.path.join(unit_test_folder, "homicide")
@@ -132,15 +131,13 @@ class ProjectTest(unittest.TestCase):
         sp.add_entity_file(properties_file, copy_from_elsewhere=True, overwrite=True)
         data_file2 = sp.add_data_file(os.path.join(test_folder, "oecd.xlsx"), copy_from_elsewhere=True, overwrite=True)
         wikifier_filepath1 = os.path.join(test_folder, "country-wikifier.csv")
-        sp.add_specific_wikifier_file(wikifier_filepath1, data_file2, copy_from_elsewhere=True, overwrite=True)
         yaml_filepath = sp.add_yaml_file(os.path.join(test_folder, "oecd.yaml"), copy_from_elsewhere=True, overwrite=True)
         spreadsheet_file=SpreadsheetFile(os.path.join(project_folder, "oecd.xlsx"))
         for sheet_name in spreadsheet_file:
             sp.associate_yaml_with_sheet(yaml_filepath, data_file2, sheet_name)
 
         save_file=sp.save()
-        pr=ProjectRunner.load(save_file)
-        kgs=pr.generate_all_knowledge_graphs()
+
 
         
 class SheetsWithCachingTest(unittest.TestCase):
