@@ -23,11 +23,12 @@ jobs:
       - name: Run coverage
         run: |
           coverage run --source t2wml -m unittest discover
-      - name: Update Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.github_token }}
-          path-to-lcov: .coverage
+      - name: Upload coverall results
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        run: |
+          pip install coveralls
+          coveralls
 
 
 
