@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/usc-isi-i2/t2wml-api/badge.svg?branch=master)]
+
 # The T2WML API: A programmatic way of using T2WML
 
 * [Installing the API and using within code](#install)
