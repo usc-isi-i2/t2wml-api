@@ -177,15 +177,15 @@ def fix_url(input ):
 
 cleaning_functions_dict=dict(
     strip_whitespace=strip_whitespace, #v
-    remove_numbers=remove_numbers,
-    remove_letters=remove_letters,
-    remove_regex=remove_regex,
+    remove_numbers=remove_numbers, #v
+    #remove_letters=remove_letters,
+    #remove_regex=remove_regex,
     truncate=truncate, #v
     normalize_whitespace=normalize_whitespace, #v
     change_case=change_case, #v
-    pad=pad, #xv
-    make_numeric=make_numeric,
-    fix_url=fix_url
+    #pad=pad, #xv
+    #make_numeric=make_numeric,
+    #fix_url=fix_url
 )
 
 

@@ -3,10 +3,12 @@ from t2wml.parsing.classes import (CellExpression, ItemExpression,
                                    ReturnClass)
 from t2wml.parsing.constants import char_dict
 from t2wml.parsing.functions import functions_dict
+from t2wml.parsing.cleaning_functions import cleaning_functions_dict
 
 eval_globals = dict()
 eval_globals.update(char_dict)
 eval_globals.update(functions_dict)
+eval_globals.update(cleaning_functions_dict)
 
 
 class T2WMLCode:
