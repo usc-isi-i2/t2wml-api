@@ -25,4 +25,4 @@ jobs:
           COVERALLS_REPO_TOKEN: ${{ secrets.github_token }}        
         run: |
           coverage run --source t2wml -m unittest discover
-          converalls
+          coveralls
