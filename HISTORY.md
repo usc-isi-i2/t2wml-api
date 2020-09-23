@@ -7,6 +7,7 @@ Changes in version wip:
 * change format of project file to include sheet names
 * remove specific wikifier support
 * removed the ProjectRunner class
+* add cache_id and and handle_calendar properties to Project class
 
 Changes in version 0.0.13:
 ------------------------

@@ -1,5 +1,6 @@
 import yaml
 import os
+import warnings
 from pathlib import Path
 from shutil import copyfile
 from t2wml.wikification.utility_functions import add_entities_from_file
@@ -16,25 +17,13 @@ from t2wml.settings import DEFAULT_SPARQL_ENDPOINT
 class Project:
     def __init__(self, directory, title=None, 
                     data_files=None, yaml_files=None, wikifier_files=None, entity_files=None,
-                    yaml_sheet_associations=None, specific_wikifiers=None,
-                    sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False,
-                    _saved_state=None    
+                    yaml_sheet_associations=None,
+                    sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False, handle_calendar="leave",
+                    _saved_state=None, cache_id=None,
+                    **kwargs    
                 ):
-        """
-        Args:
-            directory ([str, None]): Project directory. All project files must be contained in this directory or it's sub directories
-            title ([str], optional): Project title. When None, defaults to name of folder at end of directory path
-            data_files ([list], optional): Project's data files. When None, defaults to empty array. 
-            yaml_files ([list], optional): Project's yaml files. When None, defaults to empty array. 
-            wikifier_files ([list], optional): Project's wikifier files. When None, defaults to empty array. 
-            entity_files ([list], optional): Project's entity files. When None, defaults to empty array. 
-            yaml_sheet_associations ([dict], optional): [description]. When None, defaults to empty dictionary.
-            sparql_endpoint ([str], optional): sparql endpoint for attempting to fetch entities not in entity files. Defaults to DEFAULT_SPARQL_ENDPOINT.
-            warn_for_empty_cells (bool, optional): Project setting for whether empty cells in qualifier region are treated as an error. Defaults to False.
-
-        Raises:
-            ValueError: [description]
-        """        
+        if kwargs:
+            warnings.warn("Passed unsupported arguments to Project, may be deprecated:"+str(kwargs.keys()), DeprecationWarning)
         if not os.path.isdir(directory):
             raise ValueError("Project must be created with a valid project directory")
         self.directory=directory
@@ -53,10 +42,11 @@ class Project:
         self.wikifier_files=wikifier_files or []
         self.entity_files=entity_files or []
         self.yaml_sheet_associations=yaml_sheet_associations or {}
-        if specific_wikifiers:
-            raise NotImplementedError("Specific wikifiers are not currently supported")
         self.sparql_endpoint=sparql_endpoint
         self.warn_for_empty_cells=warn_for_empty_cells
+        self.handle_calendar=handle_calendar
+
+        self.cache_id=cache_id
         if _saved_state is None or _saved_state["current_data_file"] is None:
             self.get_default_saved_state()
         else:
