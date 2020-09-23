@@ -238,7 +238,7 @@ error can also be returned as simply an empty dictionary, or the user can choose
 
 `errors` , like `statements` , is simply a dictionary of `error` s with cells as keys. 
 
-`metadata` is a dictionary. It ideally should define "data_file" (the name of the file we are processing) and "sheet_name" (the name of the sheet in that file we are processing). These keys are used when generating IDs for the kgtk format, and without them, the IDs may not be unique. It can also define "created_by" (used when generating ttl files). Any other information the user feels interested in preserving can also be stuck here. However, the code will continue to work even if an empty dictionary is returned.
+`metadata` is a dictionary. It ideally should define "data_file" (the name of the file we are processing) and "sheet_name" (the name of the sheet in that file we are processing). These keys are used when generating IDs for the kgtk format, and without them, the IDs may not be unique. Any other information the user feels interested in preserving can also be stuck here. However, the code will continue to work even if an empty dictionary is returned.
 
 ### The YamlMapper
 

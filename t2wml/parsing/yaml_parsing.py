@@ -134,10 +134,6 @@ def validate_yaml(yaml_file_path):
                 errors += "Unrecognized key '" + key + \
                     "' (statementMapping -> " + key + ") found\n"
 
-        if 'created_by' in yaml_file_data['statementMapping']:
-            if not yaml_file_data['statementMapping']['created_by']:
-                errors += "Value of key 'created_by' (statementMapping -> created_by) cannot be empty\n"
-
         if 'region' not in yaml_file_data['statementMapping']:
             errors += "Key 'region' (statementMapping -> X) not found\n"
         else:

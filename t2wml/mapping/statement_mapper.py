@@ -30,10 +30,7 @@ class StatementMapper(ABC):
             "data_file": sheet.data_file_name,
             "sheet_name": sheet.name,
         }
-        try:
-            metadata["created_by"] = self.created_by
-        except:
-            pass
+
         for col, row in self.iterator():
             cell = to_excel(col-1, row-1)
             try:
@@ -56,8 +53,6 @@ class YamlMapper(StatementMapper):
     def __init__(self, file_path):
         self.file_path = file_path
         self.yaml_data = validate_yaml(file_path)
-        self.created_by = self.yaml_data['statementMapping'].get(
-            'created_by', 't2wml')
 
     def do_init(self, sheet, wikifier):
         update_bindings(item_table=wikifier.item_table, sheet=sheet)

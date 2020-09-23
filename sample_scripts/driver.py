@@ -5,7 +5,7 @@ from t2wml.api import create_output_from_files
 from t2wml.spreadsheets.utilities import get_first_sheet_name
 
 def run_t2wml(data_file_path: str, wikified_output_path: str, t2wml_spec: str, output_directory: str,
-              sheet_name: str = None, filetype: str="ttl",
+              sheet_name: str = None, filetype: str="tsv",
               debug=False):
     
 

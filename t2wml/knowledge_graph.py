@@ -6,16 +6,6 @@ from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet
 from t2wml.mapping.statement_mapper import YamlMapper, StatementMapper
 
-try:
-    from t2wml.mapping.triple_generator import generate_triples
-except (ImportError, OSError):
-    def generate_triplets(*args, **kwargs):
-        raise ImportError(
-            "Missing optional dependency 'etk' or its requirement, spacey. Install etk to enable triplet generation")
-
-
-
-
 
 
 
@@ -91,24 +81,21 @@ class KnowledgeGraph:
         return cls.generate(cell_mapper, sheet, wikifier)
 
     def get_output(self, filetype: str):
-        """returns json, kgtk, or ttl output of the KnowledgeGraph statements, in a string
+        """returns json or kgtk output of the KnowledgeGraph statements, in a string
 
         Args:
-            filetype (str): accepts "json", "tsv" (or "kgtk"), "ttl"
+            filetype (str): accepts "json", "tsv" (or "kgtk")
 
         Returns:
-            data (str): json, kgtk, or ttl output from statements
+            data (str): json or kgtk output from statements
         """
         data = self.statements
         file_path = self.metadata.get("data_file", "")
         sheet_name = self.metadata.get("sheet_name", "")
-        created_by = self.metadata.get("created_by", "")
 
         if filetype == 'json':
             # insertion-ordered
             output = json.dumps(data, indent=3, sort_keys=False)
-        elif filetype == 'ttl':
-            output = generate_triples("n/a", data, created_by=created_by)
         elif filetype in ["kgtk", "tsv"]:
             output = create_kgtk(data, file_path, sheet_name)
         else:
@@ -118,11 +105,11 @@ class KnowledgeGraph:
 
 
     def save_file(self, output_filename: str, filetype: str):
-        """save json, kgtk, or ttl output to a file
+        """save json or kgtk output to a file
 
         Args:
             output_filename (str): location to save output
-            filetype (str): accepts "json", "tsv" (or "kgtk"), "ttl"
+            filetype (str): accepts "json", "tsv" (or "kgtk")
         """
         download_data = self.get_output(filetype)
         with open(output_filename, 'w', encoding="utf-8") as f:
@@ -144,13 +131,6 @@ class KnowledgeGraph:
         """
         self.save_file(output_filename, "tsv")
 
-    def save_ttl(self, output_filename: str):
-        """save ttl-format output to file
-
-        Args:
-            output_filename (str): location to save output
-        """
-        self.save_file(output_filename, "ttl")
 
 
 def create_output_from_files(data_file_path:str, sheet_name:str, yaml_file_path:str, wikifier_filepath:str, output_filepath:str =None, output_format:str ="json"):
@@ -164,7 +144,7 @@ def create_output_from_files(data_file_path:str, sheet_name:str, yaml_file_path:
         yaml_file_path (str): location of the yaml file describing the region and template
         wikifier_filepath (str): location of the wikifier file used to create the item table
         output_filename (str, optional): location to save output. Defaults to None.
-        filetype (str, optional): accepts "json", "tsv" (or "kgtk"), "ttl". Defaults to "json".
+        filetype (str, optional): accepts "json", "tsv" (or "kgtk"). Defaults to "json".
 
     Returns:
         str: string of the output data in the [filetype] format
