@@ -1,6 +1,6 @@
 T2WML API History
 ===================================
-Changes in version wip:
+Changes in version 0.0.14:
 ------------------------
 * add state to project file
 * bug fix when adding absolute file paths to project
@@ -8,6 +8,7 @@ Changes in version wip:
 * remove specific wikifier support
 * removed the ProjectRunner class
 * add cache_id and and handle_calendar properties to Project class
+* pre-release: some of the cleaning functions (strip_whitespace, remove_numbers, truncate, normalize_whitespace, change_case)
 
 Changes in version 0.0.13:
 ------------------------
