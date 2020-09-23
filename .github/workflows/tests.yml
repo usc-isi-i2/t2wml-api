@@ -22,7 +22,7 @@ jobs:
           python -m unittest discover
       - name: Run coverage
         run: |
-          coverage --source t2wml -m unittest discover
+          coverage run --source t2wml -m unittest discover
       - name: Update Coveralls
         uses: coverallsapp/github-action@master
         with:
