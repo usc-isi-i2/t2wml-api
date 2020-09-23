@@ -57,7 +57,7 @@ class Project:
             raise NotImplementedError("Specific wikifiers are not currently supported")
         self.sparql_endpoint=sparql_endpoint
         self.warn_for_empty_cells=warn_for_empty_cells
-        if _saved_state is None:
+        if _saved_state["current_data_file"] is None:
             self.get_default_saved_state()
         else:
             self._saved_state=_saved_state
