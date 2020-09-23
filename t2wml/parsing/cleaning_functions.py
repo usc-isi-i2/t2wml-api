@@ -2,130 +2,68 @@ import re
 import string
 
 '''
-left: apply the operator starting at the beginning of the value and stop when it can no longer be applied, e.g., remove numbers and stop when a non-number is found
-right: apply the operator from the right end of the value
-left-and-right: apply if both on the left and the right
-everywhere: start on the left and keep applying the operator after skipping the characters where it does not apply, e.g., remove all numbers in a value regardless of where they appear
+start: apply the operator starting at the beginning of the value and stop when it can no longer be applied, e.g., remove numbers and stop when a non-number is found
+end: apply the operator from the end end of the value
+start-and-end: apply if both on the start and the end
+everywhere: start on the start and keep applying the operator after skipping the characters where it does not apply, e.g., remove all numbers in a value regardless of where they appear
 '''
 
-left="left"
-right="right"
-left_and_right="left-and-right"
+start="start"
+end="end"
+start_and_end="start-and-end"
 everywhere="everywhere"
 
 '''
 Example:
 cleaning:
   - strip-whitespace: auto 
-    where: left-and-right
-  - remove-symbols: auto 
-    where: left
-  - remove-unicodes: auto
-    where: everywhere
+    where: start-and-end
+  #- remove-symbols: auto 
+  #  where: start
+  #- remove-unicodes: auto
+  #  where: everywhere
+  - make_alphanumeric
+  - make_ascii
   - remove-numbers: auto
-    where: right
+    where: end
   - remove-letters: auto
     where: everywhere
   - remove-regex: <regex>
-    where: left
-  - remove-long: 50
+    where: start
+  #- remove-long: 50
+  - truncate
   - normalize-whitespace: auto
   - replace-whitespace: _
   - change-case: sentence
   - pad: 10
     text: 0
-    where: left
+    where: start
   - make-numeric: auto
   - fix-url: auto
 
 '''
 
-def strip_whitespace(input, char=None, where=left_and_right):
+def strip_whitespace(input, char=None, where=start_and_end):
     """
     Args:
         input ([type]): [description]
         char ([type], optional): [description]. Defaults to None- remove all whitespace. Can also accept " " space or "\t" tab
-        where (["left", "right", "left_and_right", "everywhere"], optional): [description]. Defaults to left_and_right.
+        where (["start", "end", "start_and_end", "everywhere"], optional): [description]. Defaults to start_and_end.
 
     Returns:
         [type]: [description]
     """
     if where == everywhere:
         return "".join(str(input).split(sep=char))
-    if where == left:
+    if where == start:
         return str(input).lstrip(char)
-    if where == right:
+    if where == end:
         return str(input).rstrip(char)
-    if where == left_and_right:
+    if where == start_and_end:
         return str(input).strip(char)
 
-def remove_symbols(input, to_remove="all", where=left):
-    """[summary]
 
-    Args:
-        input ([type]): [description]
-        to_remove (["all", "parenthesis", "punctuation"], optional): [description]. Defaults to "all".
-        where (["left", "right", "left_and_right", "everywhere"], optional): [description]. Defaults to left.
-
-    Returns:
-        str: modified string
-    """
-    input=str(input)
-
-    if to_remove=="parentheses":
-        forbidden="()[]{}"
-    elif to_remove=="punctuation":
-        forbidden=string.punctuation
-    elif to_remove=="all":
-        forbidden=None #use a different mechanism
-    else:
-        raise ValueError("to_remove must be all, parentheses, or punctuation")
-    
-    if where==everywhere: #bunch of really efficient options for this one:
-        if to_remove=="all":
-            raise NotImplementedError
-        else:
-            return input.translate(str.maketrans('', '', forbidden))
-    
-
-    if where==left or where == left_and_right:
-        if to_remove=="all":
-            while not input[0].isalnum():
-                input=input[1:]
-        else:
-            while input[0] in forbidden:
-                input=input[1:]
-
-    if where==right or where == left_and_right:
-        if to_remove=="all":
-            while not input[-1].isalnum():
-                input=input[:-2]
-        else:
-            while input[-1] in forbidden:
-                input=input[:-2]
-    
-    return input
-
-
-
-
-
-def remove_unicode(input, to_remove="all", where=everywhere):
-    """[summary]
-
-    Args:
-        input ([type]): [description]
-        to_remove (str, optional): [description]. Defaults to "all"- all non-ascii characters
-        where ([type], optional): [description]. Defaults to everywhere.
-
-    Returns:
-        [type]: [description]
-    """
-    if where==everywhere:
-        if to_remove=="all":
-            return ''.join(e for e in input if e.isalnum())
-
-def remove_numbers(input, numbers=None,  where=right):
+def remove_numbers(input, numbers=None,  where=end):
     ''' remove-numbers:
     auto: all digits
     list of specific numbers, e.g., "1, 2, 3, 5, 7, 11, 13, 17"
@@ -137,10 +75,10 @@ def remove_numbers(input, numbers=None,  where=right):
     for num in numbers: #if it was limited to single digits, easier, but since it needs to be specific numbers...
         if where==everywhere:
             input= re.sub(str(num), "", input)
-        if where==right or where ==left_and_right:
+        if where==end or where ==start_and_end:
             sub_string="^"+str(num)
             input= re.sub(sub_string, "", input)
-        if where==left or where==left_and_right:
+        if where==start or where==start_and_end:
             sub_string=str(num)+"$"
             input= re.sub(sub_string, "", input)
     return input
@@ -153,19 +91,19 @@ def remove_letters(input, letters=None, where=everywhere):
     ''' 
     pass
 
-def remove_regex(input, regex, where=left):
+def remove_regex(input, regex, where=start):
     '''remove-regex:
     if the regex has no group, it removes the part that matches; if there are groups, it removes all the groups.
     where specifies the direction and the number of times it is matched
     ''' 
     pass
 
-def remove_long(input, length):
+def truncate(input, length):
     ''' remove-long:
     delete cell values where the string length is >= the specified number of characters
     ''' 
     if len(str(input))>length:
-        return ""
+        return str(input)[:length]
     return input
 
 def normalize_whitespace(input, tab=False):
@@ -176,11 +114,8 @@ def normalize_whitespace(input, tab=False):
     replacement=" "
     if tab:
         replacement="\t"
-    return re.sub("\s{2,}", replacement, input)
+    return re.sub("\s{1,}", replacement, input)
 
-def replace_whitespace(input ):
-    ''' ''' 
-    pass
 
 def change_case(input, case="sentence"):
     ''' change-case:
@@ -199,12 +134,30 @@ def change_case(input, case="sentence"):
     if case=="title":
         return str(input).title()
 
-def pad(input,  where=left):
+def pad(input, length, text, where=start):
     ''' pad:
     the main argument is a length in number of characters
-    text: what text to add, if the text is longer than one character and the number of characters does not divide exactly then smartly choose depending on whether it is on the left or the right (other values or where are errors)
+    text: what text to add, if the text is longer than one character 
+    and the number of characters does not divide exactly then smartly choose 
+    depending on whether it is on the start or the end 
+    (other values or where are errors)
     ''' 
-    pass
+    if where not in [start, end]:
+        raise ValueError("Only start and end are valid where values for pad")
+
+    pad_length=length-len(str(input))
+    if pad_length<1:
+        return str(input)
+    if len(text)>1 and pad_length%len(text):
+        raise NotImplementedError("Still need to add support for not evenly divisible padding")
+    pad_times=int(pad_length/len(text))
+    padding=text*pad_times
+    if where==start:
+        return padding + str(input)
+    if where==end:
+        return str(input)+ padding
+
+
 
 def make_numeric(input):
     '''make-numeric:
@@ -223,16 +176,14 @@ def fix_url(input ):
     pass
 
 cleaning_functions_dict=dict(
-    strip_whitespace=strip_whitespace,
-    remove_symbols=remove_symbols,
-    remove_unicode=remove_unicode,
+    strip_whitespace=strip_whitespace, #v
     remove_numbers=remove_numbers,
     remove_letters=remove_letters,
     remove_regex=remove_regex,
-    remove_long=remove_long,
-    normalize_whitespace=normalize_whitespace,
-    change_case=change_case,
-    pad=pad,
+    truncate=truncate, #v
+    normalize_whitespace=normalize_whitespace, #v
+    change_case=change_case, #v
+    pad=pad, #xv
     make_numeric=make_numeric,
     fix_url=fix_url
 )
