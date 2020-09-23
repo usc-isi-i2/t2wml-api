@@ -101,7 +101,7 @@ def add_entities_from_file(file_path: str):
                         raise T2WMLExceptions.InvalidEntityDefinition("Property type: " +data_type+" not supported")
                 
                 #attempt to add definition
-                added = p.save_entry(node_id, data_type, **prop_info)
+                added = p.save_entry(node_id, data_type, from_file=True, **prop_info)
                 if added:
                     return_dict["added"].append(node_id)
                 else:
