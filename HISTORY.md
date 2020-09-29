@@ -1,5 +1,10 @@
 T2WML API History
 ===================================
+Changes in version wip:
+------------------------
+* backwards incompatible: completely remove remaining ttl/rdf support
+* 
+
 Changes in version 0.0.14:
 ------------------------
 * add state to project file
