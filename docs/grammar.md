@@ -312,21 +312,40 @@ Several of the functions have a "where" argument. The valid values for where are
 
 ### The functions
 
-`ftfy(input)`:  Uses the [ftfy package](https://ftfy.readthedocs.io/en/latest/) to clean the input, eg schÃ¶n becomes schön
-
 `strip_whitespace(input, char=None, where="start_and_end")`: Remove whitespace. By default will remove all whitespace, but if char argument (" " or "\t") is provided, will only remove that.
+
+example: `strip_whitespace("\t  \w Hel l o?\tworld \t  ", where="everywhere")` becomes "Hello?world"
+
+`normalize_whitespace(input, tab=False)`: replaces multiple consecutive whitespace characters with one space (also replaces other whitespace characters with one space). if Tab is True, replaces with one tab, instead.
+
+example: `normalize_whitespace("Hello  you   hi\t this")` becomes "Hello you hi this"
 
 `replace_regex(input, regex, replacement="", count=0)`: replace_regex uses underlying python [re.sub](https://docs.python.org/2/library/re.html#re.sub) functionality, `re.sub(regex, replacement, input, count)`. You can test that your regex performs as expected on websites like [regex101.com](https://regex101.com/) (make sure to select Python flavor and substitution). The default behavior for replacement is to replace with the empty string, ie remove. When count=0, it replaces everywhere. No `where` argument is provided, if you'd like to remove from the end, etc, you can arrange to do so with regex tokens like $ for end of string.
 
 `remove_numbers(input, where=everywhere)`: remove the digits 0-9
 
+example: `remove_numbers("123 hello1234hi 123")` returns " hellohi "
+example: `remove_numbers("123 hello1234hi 123", where=start)` returns " hello1234hi 123"
+
 `remove_letters(input, where=everywhere)`: WIP (not yet fully defined)
 
-`normalize_whitespace(input, tab=False)`: replaces multiple consecutive whitespace characters with one space (also replaces other whitespace characters with one space). if Tab is True, replaces with one tab, instead.
+
 
 `change_case(input, case="sentence")`: Changes the case to one of "sentence", "lower", "upper", "title".
 
+example: case="tHe QUiCK brown fox"
+        `change_case(case)` returns "The quick brown fox"
+        `change_case(case, "lower")`returns "the quick brown fox"
+        `change_case(case, "upper")` returns "THE QUICK BROWN FOX"
+        `change_case(case, "title")` returns "The Quick Brown Fox"
+
+`truncate(input, length)`: if input is longer than length, return only first length number of characters from the string
+
+example: `truncate("QWERTYUIOPASDFGHJKL", 10)` returns "QWERTYUIOP"
+
 `pad(input, length, text, where=start)`: WIP (not yet fully defined). where can only be start or end. the main argument is a length in number of characters, which strings shorter than that length will be padded to. text is the string to be used in the padding, eg "\t". if the number of characters does not divide exactly then WIP
+
+`ftfy(input)`:  Uses the [ftfy package](https://ftfy.readthedocs.io/en/latest/) to clean the input, eg schÃ¶n becomes schön
 
 `make_numeric(input, decimal=".")`: makes the value of a cell numeric by removing non-numeric characters (except for `-`, `e`, and `.`). The decimal argument allows numeric formats which use a different decimal characer than `.`. Support for LaTeX style numbers is not yet supported but may be added.
 
