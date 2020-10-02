@@ -2,6 +2,9 @@ import unittest
 from t2wml.parsing.cleaning_functions import *
 
 class TestScripts(unittest.TestCase):
+    def test_ftfy(self):
+        assert ftfy("schÃ¶n")=="schön"
+
     def test_strip_whitespace(self):
         whitespace="\t  \w Hel l o?\tworld \t  "
         #TODO: add asserts
@@ -13,20 +16,11 @@ class TestScripts(unittest.TestCase):
         space="Helo  you hi\t this"
         assert normalize_whitespace(space)=="Helo you hi this"
         assert normalize_whitespace(space, tab=True)=="Helo\tyou\thi\tthis"
-
-    def test_remove_symbols(self):
-        uni="Thanks 😊! (<hello>) חחחחⒶ"
-
-
-    def test_remove_unicode(self):
-        uni="Thanks 😊! (<hello>) חחחחⒶ"
-
     
     def test_remove_numbers(self):
         nums="123 hello1234hi 123"
-        assert remove_numbers(nums) == " hello1234hi 123"
-        assert remove_numbers(nums, numbers=[123], where=start_and_end) == " hello1234hi "
-        assert remove_numbers(nums, numbers=[3, 34], where=everywhere) =="12 hello12hi 12"
+        assert remove_numbers(nums) == " hellohi "
+        assert remove_numbers(nums, where=start) == " hello1234hi 123"
     
     
     def test_change_case(self):
@@ -43,7 +37,14 @@ class TestScripts(unittest.TestCase):
     
     def test_padding(self):
         assert pad("שלום", 10, "ח") == "חחחחחחשלום"
+        assert pad("My input", 12, "xx", where=end) == "My inputxxxx"
+        #TODO: uneven padding
+        
+    def test_remove_symbols(self):
+        uni="Thanks 😊! (<hello>) חחחחⒶ"
 
 
+    def test_remove_unicode(self):
+        uni="Thanks 😊! (<hello>) חחחחⒶ"
 if __name__ == '__main__':
     unittest.main()

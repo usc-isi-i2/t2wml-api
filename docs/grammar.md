@@ -16,6 +16,7 @@
         * [String modifiers](#string)
         * [Other](#other)
     * [Miscellaneous](#misc)
+* [Cleaning Functions](#cleaning)
 
 ## Structure
 <span id="overallstructure"></span>
@@ -224,22 +225,12 @@ It does not make sense to run string modifiers on items or item ranges, and atte
 
 For simplicity, the examples all use a string for the input, but they would apply equally to a value for a cell whose contents are the string in the example, or a value range.
 
-`strip(input)`: Removes leading and trailing whitespace from the input
-
-`title(input)`: Changes the case of the input to titlecase.
-
-`upper(input)`: Changes the case of the input to uppercase
-
-`lower(input)`: Changes the case of the input to lowercase
-
-`clean(input)`:  Uses the ftfy package to clean the input, eg schÃ¶n becomes schön
+All of the [cleaning functions](#cleaning) can be used within the template yaml as string modifiers.
 
 `replace(input, to_replace, replace_with)`: replaces instance of to_replace with replace_with. to_replace can be a regex. (therefore you will need to escape regex characters you want treated literally)
 
 * `replace("cats and dogs and cats", "cats", "turtles")` returns "turtles and dogs and turtles"
 * `replace(" 30 456 e", "[^\d.-]", "")` returns "30456"
-
-
 
 `split_index(input, split_char, i)`: Splits the input on the split_char, and returns the ith item from the split, where i is 1-indexed. For example, `split_index(“yes,no,maybe”, “,”, 2)` returns “no”
 
@@ -306,3 +297,39 @@ Concat does not preserve row/column source information. This means that concat d
 If for some reason you need a string value to start with "=" (and not have it be interepreted as T2WML code), you can escape it with a forward slash `/=`. If for some reason you need a string value to start with a forward slash followed by an equal sign, you can escape the initial forward slash with an additional forward slash `//=`. And so on. So `value: /=)` would return the string "=)"
 
 This is only necessary at the beginning of a statement, forward slashes and equal signs in the middle of a string require no special treatment, eg: `value: The smiley /= is = to =/`
+
+## Cleaning Functions
+<span id="cleaning"></span>
+
+Cleaning functions can be used to munge messy data.
+
+They can be used as string modifiers in the template yaml, and act like any string modifier. But they can also be used in a separate cleaning section of the yaml, to create a cleaned copy of the data (the template section does not touch the underlying data, only the output result)
+
+
+### Where
+
+Several of the functions have a "where" argument. The valid values for where are "start", "end", "start_and_end", and "everywhere". Different functions have different defaults for where, indicated in the function signature.
+
+### The functions
+
+`ftfy(input)`:  Uses the [ftfy package](https://ftfy.readthedocs.io/en/latest/) to clean the input, eg schÃ¶n becomes schön
+
+`strip_whitespace(input, char=None, where="start_and_end")`: Remove whitespace. By default will remove all whitespace, but if char argument (" " or "\t") is provided, will only remove that.
+
+`replace_regex(input, regex, replacement="", count=0)`: replace_regex uses underlying python [re.sub](https://docs.python.org/2/library/re.html#re.sub) functionality, `re.sub(regex, replacement, input, count)`. You can test that your regex performs as expected on websites like [regex101.com](https://regex101.com/) (make sure to select Python flavor and substitution). The default behavior for replacement is to replace with the empty string, ie remove. When count=0, it replaces everywhere. No `where` argument is provided, if you'd like to remove from the end, etc, you can arrange to do so with regex tokens like $ for end of string.
+
+`remove_numbers(input, where=everywhere)`: remove the digits 0-9
+
+`remove_letters(input, where=everywhere)`: WIP (not yet fully defined)
+
+`normalize_whitespace(input, tab=False)`: replaces multiple consecutive whitespace characters with one space (also replaces other whitespace characters with one space). if Tab is True, replaces with one tab, instead.
+
+`change_case(input, case="sentence")`: Changes the case to one of "sentence", "lower", "upper", "title".
+
+`pad(input, length, text, where=start)`: WIP (not yet fully defined). where can only be start or end. the main argument is a length in number of characters, which strings shorter than that length will be padded to. text is the string to be used in the padding, eg "\t". if the number of characters does not divide exactly then WIP
+
+`make_numeric(input, decimal=".")`: makes the value of a cell numeric by removing non-numeric characters (except for `-`, `e`, and `.`). The decimal argument allows numeric formats which use a different decimal characer than `.`. Support for LaTeX style numbers is not yet supported but may be added.
+
+`make_alphanumeric`: WIP, being defined. removes all non-alphanumeric characters 
+
+`make_ascii`: WIP, checking license. either removes all non-ascii characters or uses [Unidecode](https://pypi.org/project/Unidecode/) to translate to closest equivalent, decision pending

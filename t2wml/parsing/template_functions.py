@@ -1,11 +1,10 @@
-import ftfy
 import re
 from t2wml.utils.utilities import parse_datetime
 from SPARQLWrapper import SPARQLWrapper, JSON
 from t2wml.utils.bindings import bindings
 from t2wml.settings import t2wml_settings
 from t2wml.parsing.classes import ReturnClass, RangeClass
-
+from t2wml.parsing.cleaning_functions import string_modifier
 
 def boolean_modifer(func):
     def wrapper(input, *args, **kwargs):
@@ -47,53 +46,10 @@ def instance_of(input, qnode):
     return results['boolean']
 
 
-def string_modifier(func):
-    def wrapper(input, *args, **kwargs):
-        if input:  # if value is None, don't modify
-            if isinstance(input, RangeClass):  # handle ranges separately:
-                for i, val in enumerate(input):
-                    if val:
-                        input[i] = func(str(input[i]), *args, **kwargs)
-            res_string = func(str(input), *args, **kwargs)
-            try:
-                input.value = res_string
-                return input
-            except:
-                return res_string
-        return input
-    return wrapper
 
 
-@string_modifier
-def strip(input):
-    return input.strip()
 
 
-@string_modifier
-def lower(input):
-    return input.lower()
-
-
-@string_modifier
-def upper(input):
-    return input.upper()
-
-
-@string_modifier
-def title(input):
-    return input.title()
-
-
-@string_modifier
-def clean(input):
-    return ftfy.fix_text(input)
-
-
-@string_modifier
-def replace(input, to_replace, replacer):
-    val = re.sub(to_replace, replacer, input)
-    return val
-    # return input.replace(to_replace, replacer)
 
 
 @string_modifier
@@ -197,12 +153,6 @@ functions_dict = dict(
     starts_with=starts_with,
     ends_with=ends_with,
     instance_of=instance_of,
-    strip=strip,
-    lower=lower,
-    upper=upper,
-    title=title,
-    clean=clean,
-    replace=replace,
     split_index=split_index,
     substring=substring,
     extract_date=extract_date,
