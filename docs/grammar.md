@@ -333,11 +333,13 @@ example: `remove_numbers("123 hello1234hi 123", where=start)` returns " hello123
 
 `change_case(input, case="sentence")`: Changes the case to one of "sentence", "lower", "upper", "title".
 
-example: case="tHe QUiCK brown fox"
-        `change_case(case)` returns "The quick brown fox"
-        `change_case(case, "lower")`returns "the quick brown fox"
-        `change_case(case, "upper")` returns "THE QUICK BROWN FOX"
-        `change_case(case, "title")` returns "The Quick Brown Fox"
+example: 
+       case="tHe QUiCK brown fox"
+       
+       * `change_case(case)` returns "The quick brown fox"
+       * `change_case(case, "lower")* `returns "the quick brown fox"
+       * `change_case(case, "upper")` returns "THE QUICK BROWN FOX"
+       * `change_case(case, "title")` returns "The Quick Brown Fox"
 
 `truncate(input, length)`: if input is longer than length, return only first length number of characters from the string
 
