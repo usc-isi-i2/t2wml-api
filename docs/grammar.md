@@ -323,6 +323,9 @@ example: `normalize_whitespace("Hello  you   hi\t this")` becomes "Hello you hi 
 `replace_regex(input, regex, replacement="", count=0)`: replace_regex uses underlying python [re.sub](https://docs.python.org/2/library/re.html#re.sub) functionality, `re.sub(regex, replacement, input, count)`. You can test that your regex performs as expected on websites like [regex101.com](https://regex101.com/) (make sure to select Python flavor and substitution). The default behavior for replacement is to replace with the empty string, ie remove. When count=0, it replaces everywhere. No `where` argument is provided, if you'd like to remove from the end, etc, you can arrange to do so with regex tokens like $ for end of string.
 
 examples:
+* `replace_regex("123456790 ABC#%? .(朱惠英)", r'[^\x00-\x7f]', "")` returns "123456790 ABC#%? .()"
+* `replace_regex("dan dan dan", "dan", "bob", 1)` returns "bob dan dan"
+
 
 `remove_numbers(input, where=everywhere)`: remove the digits 0-9
 

@@ -62,7 +62,8 @@ class TestScripts(unittest.TestCase):
         assert make_numeric("1.577E20") == "1.577e+20"
     
     def test_replace_regex(self):
-        pass
+        assert replace_regex("123456790 ABC#%? .(朱惠英)", r'[^\x00-\x7f]', "") == "123456790 ABC#%? .()"
+        assert replace_regex("dan dan dan", "dan", "bob", 1) == "bob dan dan"
 
 
 def create_lambda(function, *args, **kwargs):
