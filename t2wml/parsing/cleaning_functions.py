@@ -1,7 +1,9 @@
+import math
 import re
+import string
 import ftfy as FTFY
 from t2wml.parsing.classes import ReturnClass, RangeClass
-
+from text_unidecode import unidecode
 
 '''
 start: apply the operator starting at the beginning of the value and stop when it can no longer be applied, e.g., remove numbers and stop when a non-number is found
@@ -21,12 +23,14 @@ def string_modifier(func):
         if where:
             if where not in [start, end, start_and_end, everywhere]:
                 raise ValueError("Invalid argument for where: "+where)
+
         if input:  # if value is None, don't modify
             if isinstance(input, RangeClass):  # handle ranges separately:
                 for i, val in enumerate(input):
                     if val:
                         input[i] = func(str(input[i]), *args, **kwargs)
             res_string = func(str(input), *args, **kwargs)
+            
             try:
                 input.value = res_string
                 return input
@@ -81,13 +85,13 @@ def strip_whitespace(input, char=None, where=start_and_end):
         [type]: [description]
     """
     if where == everywhere:
-        return "".join(str(input).split(sep=char))
+        return "".join(input.split(sep=char))
     if where == start:
-        return str(input).lstrip(char)
+        return input.lstrip(char)
     if where == end:
-        return str(input).rstrip(char)
+        return input.rstrip(char)
     if where == start_and_end:
-        return str(input).strip(char)
+        return input.strip(char)
 
 @string_modifier
 def replace_regex(input, regex, replacement="", count=0):
@@ -108,8 +112,8 @@ def remove_numbers(input, where=everywhere):
     return input
 
 @string_modifier
-def wip_remove_letters(input, where=everywhere):
-    regex= "[a-zA-Z]"
+def remove_letters(input, where=everywhere):
+    regex="\D*"
     if where==everywhere:
         input= re.sub(str(regex), "", input)
     if where==start or where==start_and_end:
@@ -125,8 +129,8 @@ def truncate(input, length):
     ''' remove-long:
     delete cell values where the string length is >= the specified number of characters
     ''' 
-    if len(str(input))>length:
-        return str(input)[:length]
+    if len(input)>length:
+        return input[:length]
     return input
 
 @string_modifier
@@ -150,16 +154,16 @@ def change_case(input, case="sentence"):
     title
     ''' 
     if case=="sentence":
-        return str(input).capitalize()
+        return input.capitalize()
     if case=="lower":
-        return str(input).lower()
+        return input.lower()
     if case=="upper":
-        return str(input).upper()
+        return input.upper()
     if case=="title":
-        return str(input).title()
+        return input.title()
 
 @string_modifier
-def pad(input, length, text, where=start):
+def pad(input, length, pad_text, where=start):
     ''' pad:
     the main argument is a length in number of characters
     text: what text to add, if the text is longer than one character 
@@ -172,17 +176,24 @@ def pad(input, length, text, where=start):
     if not len(input): #don't pad empty strings
         return input
 
-    pad_length=length-len(str(input))
-    if pad_length<1:
-        return str(input)
-    if len(text)>1 and pad_length%len(text):
-        raise NotImplementedError("Still need to add support for not evenly divisible padding")
-    pad_times=int(pad_length/len(text))
-    padding=text*pad_times
-    if where==start:
-        return padding + str(input)
-    if where==end:
-        return str(input)+ padding
+    pad_length=length-len(input)
+    
+
+    if pad_length<1: #input longer than/equal to pad length, don't pad
+        return input
+    
+    pad_times=math.ceil(pad_length/len(pad_text))
+    pad_rem=pad_length%len(pad_text)
+    padding=pad_text*pad_times
+    if len(pad_text)>1 and pad_rem:
+        if where == end:
+            padding = padding[pad_rem:]
+        if where == start:
+            padding=padding[:-pad_rem]
+    if where == start:
+        return padding + input
+    if where == end:
+        return input+ padding
 
 @string_modifier
 def make_numeric(input, decimal=".", latex=False):
@@ -194,10 +205,11 @@ def make_numeric(input, decimal=".", latex=False):
     interprets exponential notation
     ''' 
     
-    original_input=str(input)
+    original_input=input
     if decimal!=".":
+        input=input.replace(".", "")
         input=input.replace(decimal, ".")
-    re.sub("[^\d.|^\de\d|-]", "", input)
+    input= re.sub("[^\d.|^\deE\d|-]", "", input)
     try:
         input=float(input)
     except:
@@ -210,26 +222,26 @@ def make_alphanumeric(input):
     return ''.join(e for e in input if e.isalnum())
 
 @string_modifier
-def make_ascii(input, convert=False):
-    if convert:
-        pass
+def make_ascii(input, translate=False):
+    if translate:
+        return unidecode(input)
     else:
-        pass
+        #remove non-printable ascii as well
+        return ''.join(filter(lambda x: x in string.printable, input))
 
 cleaning_functions_dict=dict(
-    ftfy=ftfy,
+    ftfy=ftfy, #v
     strip_whitespace=strip_whitespace, #v
-    remove_numbers=remove_numbers,
-    #remove_letters=remove_letters,
+    remove_numbers=remove_numbers, #v
+    remove_letters=remove_letters, #v confirm definition
     replace_regex=replace_regex,
     truncate=truncate, #v
     normalize_whitespace=normalize_whitespace, #v
     change_case=change_case, #v
-    pad=pad, #TODO: uneven padding
-    make_numeric=make_numeric,
-    #make_alphanumeric=make_alphanumeric,
-    #make_ascii=make_ascii,
+    pad=pad, #v
+    make_numeric=make_numeric, #v may want to add additional support
+    make_alphanumeric=make_alphanumeric, #v confirm definition
+    make_ascii=make_ascii, #v confirm definition
 
 )
-
 

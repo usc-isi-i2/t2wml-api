@@ -322,14 +322,14 @@ example: `normalize_whitespace("Hello  you   hi\t this")` becomes "Hello you hi 
 
 `replace_regex(input, regex, replacement="", count=0)`: replace_regex uses underlying python [re.sub](https://docs.python.org/2/library/re.html#re.sub) functionality, `re.sub(regex, replacement, input, count)`. You can test that your regex performs as expected on websites like [regex101.com](https://regex101.com/) (make sure to select Python flavor and substitution). The default behavior for replacement is to replace with the empty string, ie remove. When count=0, it replaces everywhere. No `where` argument is provided, if you'd like to remove from the end, etc, you can arrange to do so with regex tokens like $ for end of string.
 
+examples:
+
 `remove_numbers(input, where=everywhere)`: remove the digits 0-9
 
 example: `remove_numbers("123 hello1234hi 123")` returns " hellohi "
 example: `remove_numbers("123 hello1234hi 123", where=start)` returns " hello1234hi 123"
 
-`remove_letters(input, where=everywhere)`: WIP (not yet fully defined)
-
-
+`remove_letters(input, where=everywhere)`: inverse of remove_numbers, leaves only digits and removes everything else (alpha version, may be redefined)
 
 `change_case(input, case="sentence")`: Changes the case to one of "sentence", "lower", "upper", "title".
 
@@ -346,12 +346,23 @@ case="tHe QUiCK brown fox"
 
 example: `truncate("QWERTYUIOPASDFGHJKL", 10)` returns "QWERTYUIOP"
 
-`pad(input, length, text, where=start)`: WIP (not yet fully defined). where can only be start or end. the main argument is a length in number of characters, which strings shorter than that length will be padded to. text is the string to be used in the padding, eg "\t". if the number of characters does not divide exactly then WIP
+`pad(input, length, text, where=start)`: where can only be start or end. the main argument is a length in number of characters, which strings shorter than that length will be padded to. text is the string to be used in the padding, eg "\t". if the number of characters does not divide exactly then the cut-off depends on where. if where is start, the end of the pad string will be cut off, if where is end, the start of the pad string will be cut off. 
+
+examples: 
+* `pad("12345678", 11, "xo", where=start)` returns "xox12345678"
+* `pad("12345678", 11, "xo", where=end)` returns "12345678oxo"
 
 `ftfy(input)`:  Uses the [ftfy package](https://ftfy.readthedocs.io/en/latest/) to clean the input, eg schÃ¶n becomes schön
 
 `make_numeric(input, decimal=".")`: makes the value of a cell numeric by removing non-numeric characters (except for `-`, `e`, and `.`). The decimal argument allows numeric formats which use a different decimal characer than `.`. Support for LaTeX style numbers is not yet supported but may be added.
 
-`make_alphanumeric`: WIP, being defined. removes all non-alphanumeric characters 
+examples:
+*  `make_numeric("1.977$")` returns "1.977"
+* `make_numeric("1.554.677,88€", decimal=",")` returns "1554677.88"
+* `make_numeric("1.577E20")` returns "1.577e+20" (python scientific notation)
 
-`make_ascii`: WIP, checking license. either removes all non-ascii characters or uses [Unidecode](https://pypi.org/project/Unidecode/) to translate to closest equivalent, decision pending
+`make_alphanumeric`: for now, removes all characters that are not true for isalnum(). May be redefined (eg to not remove spaces and punctuation...?)
+
+`make_ascii`: either removes all non-ascii non-printable characters or, if translate=true,  uses [text-unidecode](https://pypi.org/project/text-unidecode/) to translate to closest equivalent
+
+example: `make_ascii("какой-то текст", translate=True)` returns "kakoi-to tekst"
