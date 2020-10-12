@@ -336,7 +336,7 @@ example: `remove_numbers("123 hello1234hi 123", where=start)` returns " hello123
 
 `change_case(input, case="sentence")`: Changes the case to one of "sentence", "lower", "upper", "title".
 
-example: 
+examples: 
 
 case="tHe QUiCK brown fox"
        
@@ -355,7 +355,9 @@ examples:
 * `pad("12345678", 11, "xo", where=start)` returns "xox12345678"
 * `pad("12345678", 11, "xo", where=end)` returns "12345678oxo"
 
-`ftfy(input)`:  Uses the [ftfy package](https://ftfy.readthedocs.io/en/latest/) to clean the input, eg schÃ¶n becomes schön
+`ftfy(input)`:  Uses the [ftfy package](https://ftfy.readthedocs.io/en/latest/) to clean the input
+
+example: `ftfy(schÃ¶n)` returns "schön"
 
 `make_numeric(input, decimal=".")`: makes the value of a cell numeric by removing non-numeric characters (except for `-`, `e`, and `.`). The decimal argument allows numeric formats which use a different decimal characer than `.`. Support for LaTeX style numbers is not yet supported but may be added.
 
@@ -366,6 +368,11 @@ examples:
 
 `make_alphanumeric`: for now, removes all characters that are not true for isalnum(). May be redefined (eg to not remove spaces and punctuation...?)
 
+example: `make_alphanumeric("Thanks 😊! (<hello>) חחחחⒶ -1.2e10")` would return "Thankshelloחחחח12e10"
+
 `make_ascii`: either removes all non-ascii non-printable characters or, if translate=true,  uses [text-unidecode](https://pypi.org/project/text-unidecode/) to translate to closest equivalent
 
-example: `make_ascii("какой-то текст", translate=True)` returns "kakoi-to tekst"
+example: 
+
+* `make_ascii("какой-то текст", translate=True)` returns "kakoi-to tekst", without translate the only ascii character there is the "-" so that's what would be returned
+* `make_ascii("Thanks 😊! (<hello>) חחחחⒶ")` would return "Thanks ! (<hello>) "
