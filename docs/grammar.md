@@ -375,4 +375,4 @@ example: `make_alphanumeric("Thanks 😊! (<hello>) חחחחⒶ -1.2e10")` would
 example: 
 
 * `make_ascii("какой-то текст", translate=True)` returns "kakoi-to tekst", without translate the only ascii character there is the "-" so that's what would be returned
-* `make_ascii("Thanks 😊! (<hello>) חחחחⒶ")` would return "Thanks ! (<hello>) "
+* `make_ascii("Thanks 😊! (<hello>) חחחחⒶ")` would return `"Thanks ! (<hello>) "`
