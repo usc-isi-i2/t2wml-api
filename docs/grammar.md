@@ -329,8 +329,9 @@ examples:
 
 `remove_numbers(input, where=everywhere)`: remove the digits 0-9
 
-example: `remove_numbers("123 hello1234hi 123")` returns " hellohi "
-example: `remove_numbers("123 hello1234hi 123", where=start)` returns " hello1234hi 123"
+examples: 
+* `remove_numbers("123 hello1234hi 123")` returns " hellohi "
+* `remove_numbers("123 hello1234hi 123", where=start)` returns " hello1234hi 123"
 
 `remove_letters(input, where=everywhere)`: inverse of remove_numbers, leaves only digits and removes everything else (alpha version, may be redefined)
 

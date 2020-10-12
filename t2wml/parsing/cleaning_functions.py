@@ -39,36 +39,6 @@ def string_modifier(func):
         return input
     return wrapper
 
-'''
-Example:
-cleaning:
-  - strip-whitespace: auto 
-    where: start-and-end
-  #- remove-symbols: auto 
-  #  where: start
-  #- remove-unicodes: auto
-  #  where: everywhere
-  - make_alphanumeric
-  - make_ascii
-  - remove-numbers: auto
-    where: end
-  - remove-letters: auto
-    where: everywhere
-  - remove-regex: <regex>
-    where: start
-  #- remove-long: 50
-  - truncate
-  - normalize-whitespace: auto
-  - replace-whitespace: _
-  - change-case: sentence
-  - pad: 10
-    text: 0
-    where: start
-  - make-numeric: auto
-  - fix-url: auto
-
-'''
-
 @string_modifier
 def ftfy(input):
     return FTFY.fix_text(input)
@@ -242,6 +212,5 @@ cleaning_functions_dict=dict(
     make_numeric=make_numeric, #v may want to add additional support
     make_alphanumeric=make_alphanumeric, #v confirm definition
     make_ascii=make_ascii, #v confirm definition
-
 )
 
