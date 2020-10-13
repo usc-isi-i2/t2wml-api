@@ -5,35 +5,14 @@ from pathlib import Path
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 from SPARQLWrapper.SPARQLExceptions import QueryBadFormed
 from t2wml.utils import t2wml_exceptions as T2WMLExceptions
-from t2wml.wikification.wikidata_provider import SparqlProvider, DictionaryProvider
+from t2wml.wikification.wikidata_provider import SparqlProvider
 from t2wml.settings import t2wml_settings
 
-
-def load_property_type_mapping() -> dict:
-    csv_path = Path(__file__).parent / 'property-type-mapping.csv'
-    if not csv_path.exists():
-        return {}
-
-    mapping = {}
-    with open(csv_path, 'r') as f:
-        reader = csv.reader(f)
-
-        # skip header
-        next(reader)
-
-        for row in reader:
-            mapping[row[0]] = row[1]
-    return mapping
 
 def get_provider():
     wikidata_provider = t2wml_settings.wikidata_provider
     if wikidata_provider is None:
         wikidata_provider = SparqlProvider(t2wml_settings.sparql_endpoint)
-        t2wml_settings.wikidata_provider = wikidata_provider
-    elif wikidata_provider == 'DictionaryProvider':
-        ref_dict = load_property_type_mapping()
-        print('property type dict len = ', len(ref_dict))
-        wikidata_provider = DictionaryProvider(ref_dict)
         t2wml_settings.wikidata_provider = wikidata_provider
     return wikidata_provider
 
@@ -74,11 +53,11 @@ def validate_id(node_id):
 def add_entities_from_file(file_path: str):
     """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
     If a kgtk-format tsv file, the property information will be loaded as follows:
-    node1 is used as the wikidata_id.
-    wikidata_id must be valid: Must begin with P or Q, Pnum where num<10000 or Qnum where num<1 billion are not allowed.
+    node1 is used as the wikidata_id. 
+    wikidata_id must be valid: Must begin with P or Q, Pnum where num<10000 or Qnum where num<1 billion are not allowed. 
     each wikidata ID has a dictionary, as follows:
-    label is used as keys, for "data_type", "label", "description", and "P31".
-    (note: rows with a label not in those 4 are not added to provider by default
+    label is used as keys, for "data_type", "label", "description", and "P31". 
+    (note: rows with a label not in those 4 are not added to provider by default 
     (users could write custom provider with support))
     node2 is used for the value for that row's key, eg "Quantity", "Area(HA)", etc
 
@@ -117,10 +96,10 @@ def add_entities_from_file(file_path: str):
                 validate_id(node_id)
 
                 #validate data types
-                if data_type:
+                if data_type: 
                     if str(data_type.lower()) not in VALID_PROPERTY_TYPES:
                         raise T2WMLExceptions.InvalidEntityDefinition("Property type: " +data_type+" not supported")
-
+                
                 #attempt to add definition
                 added = p.save_entry(node_id, data_type, from_file=True, **prop_info)
                 if added:
