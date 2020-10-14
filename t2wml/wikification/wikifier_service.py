@@ -68,7 +68,7 @@ class WikifierService:
                 'header': (None, 'False')
             }
             response = requests.post(
-                self.wikifier_endpoint, data=payload, files=files, verify=False)
+                self.wikifier_endpoint, data=payload, files=files)
         if response.status_code == 200:
             data = response.content.decode("utf-8")
             data = json.loads(data)['data']
