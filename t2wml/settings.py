@@ -6,8 +6,7 @@ class T2WMLSettings:
         self.cache_data_files=False
         self.cache_data_files_folder=None
         self.sparql_endpoint=DEFAULT_SPARQL_ENDPOINT
-        # self.wikidata_provider=None #default is SparqlProvider
-        self.wikidata_provider='DictionaryProvider'
+        self.wikidata_provider=None #default is DictionaryProvider with preloaded properties
         self.warn_for_empty_cells=False
 
 

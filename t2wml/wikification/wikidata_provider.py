@@ -63,13 +63,12 @@ class SparqlProvider(WikidataProvider):
     def get_property_type(self, wikidata_property: str):
         data_type = self.cache.get(wikidata_property, False)
         if not data_type:
-            data_type_args = self.query_wikidata_for_property_type(
+            property_args = self.query_wikidata_for_property_type(
                 wikidata_property)
-            data_type=data_type_args["data_type"]
-            self.save_entry(wikidata_property, **data_type_args)
+            data_type=property_args["data_type"]
+            self.save_entry(wikidata_property, **property_args)
             if data_type == "Property Not Found":
                 raise ValueError("Property "+wikidata_property+" not found")
-
         return data_type
 
     def save_entry(self, property, data_type, *args, **kwargs):
