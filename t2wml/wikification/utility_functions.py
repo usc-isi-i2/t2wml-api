@@ -5,14 +5,16 @@ from pathlib import Path
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 from SPARQLWrapper.SPARQLExceptions import QueryBadFormed
 from t2wml.utils import t2wml_exceptions as T2WMLExceptions
-from t2wml.wikification.wikidata_provider import SparqlProvider
+from t2wml.wikification.wikidata_provider import DictionaryProvider
+from t2wml.wikification.preloaded_properties import preloaded_properties
 from t2wml.settings import t2wml_settings
+
 
 
 def get_provider():
     wikidata_provider = t2wml_settings.wikidata_provider
     if wikidata_provider is None:
-        wikidata_provider = SparqlProvider(t2wml_settings.sparql_endpoint)
+        wikidata_provider = DictionaryProvider(preloaded_properties)
         t2wml_settings.wikidata_provider = wikidata_provider
     return wikidata_provider
 
@@ -53,11 +55,11 @@ def validate_id(node_id):
 def add_entities_from_file(file_path: str):
     """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
     If a kgtk-format tsv file, the property information will be loaded as follows:
-    node1 is used as the wikidata_id. 
-    wikidata_id must be valid: Must begin with P or Q, Pnum where num<10000 or Qnum where num<1 billion are not allowed. 
+    node1 is used as the wikidata_id.
+    wikidata_id must be valid: Must begin with P or Q, Pnum where num<10000 or Qnum where num<1 billion are not allowed.
     each wikidata ID has a dictionary, as follows:
-    label is used as keys, for "data_type", "label", "description", and "P31". 
-    (note: rows with a label not in those 4 are not added to provider by default 
+    label is used as keys, for "data_type", "label", "description", and "P31".
+    (note: rows with a label not in those 4 are not added to provider by default
     (users could write custom provider with support))
     node2 is used for the value for that row's key, eg "Quantity", "Area(HA)", etc
 
@@ -96,10 +98,10 @@ def add_entities_from_file(file_path: str):
                 validate_id(node_id)
 
                 #validate data types
-                if data_type: 
+                if data_type:
                     if str(data_type.lower()) not in VALID_PROPERTY_TYPES:
                         raise T2WMLExceptions.InvalidEntityDefinition("Property type: " +data_type+" not supported")
-                
+
                 #attempt to add definition
                 added = p.save_entry(node_id, data_type, from_file=True, **prop_info)
                 if added:
