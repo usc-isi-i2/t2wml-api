@@ -7,7 +7,8 @@ REQUIREMENTS = [
     'SPARQLWrapper>=1.8.5',
     'ftfy>=5.8',
     'requests>=2.24.0',
-    'xlrd>=1.0.0'
+    'xlrd>=1.0.0',
+    'text-unidecode==1.3'
 ]
 
 setuptools.setup(
