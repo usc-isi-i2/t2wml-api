@@ -227,11 +227,6 @@ For simplicity, the examples all use a string for the input, but they would appl
 
 All of the [cleaning functions](#cleaning) can be used within the template yaml as string modifiers.
 
-`replace(input, to_replace, replace_with)`: replaces instance of to_replace with replace_with. to_replace can be a regex. (therefore you will need to escape regex characters you want treated literally)
-
-* `replace("cats and dogs and cats", "cats", "turtles")` returns "turtles and dogs and turtles"
-* `replace(" 30 456 e", "[^\d.-]", "")` returns "30456"
-
 `split_index(input, split_char, i)`: Splits the input on the split_char, and returns the ith item from the split, where i is 1-indexed. For example, `split_index(“yes,no,maybe”, “,”, 2)` returns “no”
 
 `substring(input, start (,end))`: Returns a substring of the input, from start to end, inclusive. (end is optional, if not provided the end will be the end of the string). Negatives indices are counted from the end of the string.
@@ -323,6 +318,8 @@ example: `normalize_whitespace("Hello  you   hi\t this")` becomes "Hello you hi 
 `replace_regex(input, regex, replacement="", count=0)`: replace_regex uses underlying python [re.sub](https://docs.python.org/2/library/re.html#re.sub) functionality, `re.sub(regex, replacement, input, count)`. You can test that your regex performs as expected on websites like [regex101.com](https://regex101.com/) (make sure to select Python flavor and substitution). The default behavior for replacement is to replace with the empty string, ie remove. When count=0, it replaces everywhere. No `where` argument is provided, if you'd like to remove from the end, etc, you can arrange to do so with regex tokens like $ for end of string.
 
 examples:
+* `replace_regex("cats and dogs and cats", "cats", "turtles")` returns "turtles and dogs and turtles"
+* `replace_regex(" 30 456 e", "[^\d.-]", "")` returns "30456"
 * `replace_regex("123456790 ABC#%? .(朱惠英)", r'[^\x00-\x7f]', "")` returns "123456790 ABC#%? .()"
 * `replace_regex("dan dan dan", "dan", "bob", 1)` returns "bob dan dan"
 

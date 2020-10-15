@@ -62,6 +62,8 @@ class TestScripts(unittest.TestCase):
         assert make_numeric("1.577E20") == "1.577e+20"
     
     def test_replace_regex(self):
+        assert replace_regex("cats and dogs and cats", "cats", "turtles") == "turtles and dogs and turtles"
+        assert replace_regex(" 30 456 e", "[^\d.-]", "") == "30456"
         assert replace_regex("123456790 ABC#%? .(朱惠英)", r'[^\x00-\x7f]', "") == "123456790 ABC#%? .()"
         assert replace_regex("dan dan dan", "dan", "bob", 1) == "bob dan dan"
 

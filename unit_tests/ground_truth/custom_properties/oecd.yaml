@@ -13,7 +13,7 @@ statementMapping:
     # The country is extracted from B2
     item: '=get_item(regex(value[B, 2], "profile: (.*) \d{4}", 1))' 
     property: P1082 #=item[B, $row]
-    value: =replace(value[$col, $row], "[^\d.-]", "")
+    value: =replace_regex(value[$col, $row], "[^\d.-]", "")
     unit: =item[C, $row, 'unit']
     qualifier:
       - property: P585 #point in time
