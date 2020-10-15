@@ -36,14 +36,16 @@ class SparqlProvider(WikidataProvider):
         self.cache = {}
 
     def query_wikidata_for_property_type(self, wikidata_property):
-        query = """SELECT ?type ?label ?desc WHERE {
-                    wd:"""+wikidata_property+""" rdf:type wikibase:Property;
-                        wikibase:propertyType ?type.
-                    OPTIONAL { wd:"""+wikidata_property+""" rdfs:label ?label. }
-                    OPTIONAL { wd:"""+wikidata_property+""" schema:description ?desc. }
-                    FILTER(LANGMATCHES(LANG(?label), "EN"))
-                    FILTER(LANGMATCHES(LANG(?desc), "EN"))
-                    }"""
+        query = """SELECT ?label ?desc ?type
+                WHERE 
+                {{
+                wd:{wpid} wikibase:propertyType ?type;
+                SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en".
+                        wd:{wpid} rdfs:label         ?label.
+                        wd:{wpid} schema:description   ?desc.
+                    }}
+                }}
+                """.format(wpid=wikidata_property)
         sparql = SPARQLWrapper(self.sparql_endpoint)
         sparql.setQuery(query)
         sparql.setReturnFormat(JSON)
