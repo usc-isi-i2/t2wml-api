@@ -1,9 +1,18 @@
 T2WML API History
 ===================================
-Changes in version wip:
+
+Changes in version 0.0.15:
 ------------------------
 * backwards incompatible: completely remove remaining ttl/rdf support
-* 
+* new feature: as documented in grammar.md, a lot of cleaning functions added
+    * this includes an added requirement, text-unidecode
+    * backwards incompatible: some functions were renamed or replaced:
+        - `replace` is gone, there's `replace_regex` now
+        - `clean` has been renamed to `ftfy`
+        - `title`, `upper`, `lower` are gone, there's a function `change_case` instead
+        - `strip` is gone, use `strip_whitespace` instead
+* default WikidataProvider is now a DictionaryProvider with preloaded properties
+
 
 Changes in version 0.0.14:
 ------------------------

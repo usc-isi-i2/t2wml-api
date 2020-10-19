@@ -64,8 +64,8 @@ def strip_whitespace(input, char=None, where=start_and_end):
         return input.strip(char)
 
 @string_modifier
-def replace_regex(input, regex, replacement="", count=0):
-    input=re.sub(regex, replacement, input, count)
+def replace_regex(input, to_replace, replacement="", count=0):
+    input=re.sub(to_replace, replacement, input, count)
     return input
 
 @string_modifier
