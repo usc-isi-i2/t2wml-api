@@ -141,6 +141,7 @@ def pad(input, length, pad_text, where=start):
     depending on whether it is on the start or the end 
     (other values or where are errors)
     ''' 
+    pad_text=str(pad_text)
     if where not in [start, end]:
         raise ValueError("Only start and end are valid where values for pad")
     if not len(input): #don't pad empty strings
