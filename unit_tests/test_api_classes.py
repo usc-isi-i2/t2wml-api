@@ -143,7 +143,6 @@ class ProjectTest(unittest.TestCase):
 class SheetsWithCachingTest(unittest.TestCase):
     def test_with_caching(self):
         from t2wml.api import t2wml_settings, SpreadsheetFile, create_output_from_files
-        t2wml_settings.cache_data_files=True
         cache_folder=os.path.join(unit_test_folder, "tmp")
         if not os.path.exists(cache_folder):
             os.mkdir(cache_folder)
