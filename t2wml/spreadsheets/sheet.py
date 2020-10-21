@@ -86,13 +86,3 @@ class Sheet:
     @property
     def col_len(self):
         return self.data.shape[1]
-    
-    def get_raw_data(self):
-        #used by t2wml_web
-        return self.raw_data.copy()
-    
-    def get_cleaned_data(self):
-        #used by t2wml_web
-        if self.cleaned_data:
-            return self.cleaned_data.copy()
-        return None
