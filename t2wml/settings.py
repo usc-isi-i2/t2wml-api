@@ -10,11 +10,11 @@ class T2WMLSettings:
         self.warn_for_empty_cells=False
     @property
     def cache_data_files(self):
-        if self.cache_data_files_folder:
+        if self.cache_data_files_folder is not None:
             if os.path.isdir(self.cache_data_files_folder):
                 return True
             else:
-                raise ValueError("Cachhe folder in settings does not exist")
+                raise ValueError("Cache folder in settings does not exist: "+self.cache_data_files_folder)
         return False
 
 

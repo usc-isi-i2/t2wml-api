@@ -13,7 +13,8 @@ Changes in version wip:
         - `title`, `upper`, `lower` are gone, there's a function `change_case` instead
         - `strip` is gone, use `strip_whitespace` instead
 * included in the added cleaning functionality is the ability to add a `cleaningMapping` section to the yaml file to apply cleaning functions to specific sections of the calculated sheet
-* default WikidataProvider is now a DictionaryProvider with preloaded properties (we may change how preloaidng works in future version)
+* the default sparql endpoint is now the public wikidata endpoint
+* default WikidataProvider is now a DictionaryProvider with preloaded properties (we may change how preloading works in future version)
 
 
 Changes in version 0.0.14:
