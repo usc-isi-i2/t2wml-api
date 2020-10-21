@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import pandas as pd
-from t2wml.spreadsheets.utilities import PandasLoader
+from t2wml.spreadsheets.utilities import PandasLoader, load_pickle
 from t2wml.settings import t2wml_settings
 
 class FakeCacher:
@@ -14,6 +14,14 @@ class FakeCacher:
         return self.pandas_wrapper.load_sheet(self.sheet_name)
 
 
+def pickle_folder(data_file_path):
+    storage_folder=Path(t2wml_settings.cache_data_files_folder)
+    parts = Path(data_file_path).parts
+    parts=parts[1:-1]
+    underscored="_".join(parts)
+    folder_path = storage_folder/underscored
+    return folder_path
+
 class PickleCacher:
     def __init__(self, data_file_path, sheet_name):
         self.data_file_path = data_file_path
@@ -24,12 +32,7 @@ class PickleCacher:
 
     @property
     def pickle_folder(self):
-        storage_folder=Path(t2wml_settings.cache_data_files_folder)
-        parts = Path(self.data_file_path).parts
-        parts=parts[1:-1]
-        underscored="_".join(parts)
-        folder_path = storage_folder/underscored
-        return folder_path
+        return pickle_folder(self.data_file_path)
 
     @property
     def pickle_file(self):
@@ -46,7 +49,7 @@ class PickleCacher:
 
     def get_sheet(self):
         if self.fresh_pickle():
-            data = self.pandas_wrapper.load_pickle(self.pickle_file)
+            data = load_pickle(self.pickle_file)
         else:
             # if not, load the sheet, save the pickle file for future use
             data = self.pandas_wrapper.load_sheet(self.sheet_name)
