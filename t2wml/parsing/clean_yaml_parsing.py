@@ -50,7 +50,7 @@ class DFCleaner:
                 parsed_funcs.append(parsed_func)
             final_func=compose(*parsed_funcs) 
             parsing_instructions.append({"region":region, "parsed_func":final_func})
-            return parsing_instructions
+        return parsing_instructions
 
 
     def clean_sheet(self, parsing_instructions, sheet):

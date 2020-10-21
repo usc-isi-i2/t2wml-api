@@ -4,7 +4,10 @@ import yaml
 from pathlib import Path
 from t2wml.spreadsheets.sheet import SpreadsheetFile
 from t2wml.parsing.cleaning_functions import *
-from t2wml.parsing.clean_yaml_parsing import clean_sheet
+from t2wml.parsing.clean_yaml_parsing import get_cleaned_dataframe
+from t2wml.settings import t2wml_settings
+
+t2wml_settings.cache_data_files_folder=None
 
 class TestScripts(unittest.TestCase):
     def test_ftfy(self):
@@ -75,6 +78,7 @@ class TestScripts(unittest.TestCase):
 
 class TestDataFrame(unittest.TestCase):
     def test_yaml(self):
+        t2wml_settings.cache_data_files_folder=None
         repo_folder = Path(__file__).parents[2]
         test_folder = os.path.join(
             repo_folder, "t2wml-api", "unit_tests", "ground_truth", "cleaning")
@@ -86,10 +90,10 @@ class TestDataFrame(unittest.TestCase):
         sf = SpreadsheetFile(filepath)
         first_sheet_name=sf.sheet_names[0]
         first_sheet=sf[first_sheet_name]
-        cleaned = clean_sheet(test["cleaningMapping"], first_sheet)
-        assert cleaned[0, 0]=="schön"
-        assert cleaned[2, 8]=="QWERTYUIOP"
-        assert cleaned[3,4]=="00forpadding"
+        cleaned = get_cleaned_dataframe(first_sheet, test["cleaningMapping"])
+        assert cleaned.iloc[0, 0]=="schön"
+        assert cleaned.iloc[2, 8]=="QWERTYUIOP"
+        assert cleaned.iloc[3, 4]=="00forpadding"
 
 
 

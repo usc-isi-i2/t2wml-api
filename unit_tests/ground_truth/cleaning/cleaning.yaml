@@ -1,0 +1,29 @@
+statementMapping:
+    region: 
+        - range: A1:B20 #fake region, whatever
+    template:
+        item: Q123
+        value: 2
+        property: P123
+cleaningMapping:
+    - region:
+        range: A1:D2
+      functions:
+        - ftfy
+        - strip_whitespace:
+            where: everywhere
+    - region:
+        columns: 
+        - E
+        - F
+        - G
+      functions:
+        - remove_numbers
+        - pad:
+            length: 12
+            pad_text: 0
+    - region: 
+        cells: ['I3', 'A8', 'G13']
+      functions:
+         - truncate: 
+                length: 10

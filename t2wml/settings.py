@@ -1,3 +1,4 @@
+import os
 # DEFAULT_SPARQL_ENDPOINT ='https://dsbox02.isi.edu:8888/bigdata/namespace/wdq/sparql'
 DEFAULT_SPARQL_ENDPOINT= 'https://query.wikidata.org/bigdata/namespace/wdq/sparql'
 
@@ -10,7 +11,10 @@ class T2WMLSettings:
     @property
     def cache_data_files(self):
         if self.cache_data_files_folder:
-            return True
+            if os.path.isdir(self.cache_data_files_folder):
+                return True
+            else:
+                raise ValueError("Cachhe folder in settings does not exist")
         return False
 
 
