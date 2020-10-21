@@ -1,10 +1,10 @@
-import sys
 from abc import ABC, abstractmethod
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.mapping.statements import EvaluatedStatement
 from t2wml.utils.bindings import update_bindings
 from t2wml.parsing.yaml_parsing import validate_yaml, Template
 from t2wml.parsing.region import YamlRegion
+from t2wml.parsing.clean_yaml_parsing import get_cleaned_dataframe
 from t2wml.spreadsheets.conversions import to_excel
 
 
@@ -55,6 +55,9 @@ class YamlMapper(StatementMapper):
         self.yaml_data = validate_yaml(file_path)
 
     def do_init(self, sheet, wikifier):
+        if self.yaml_data.get("cleaningMapping"):
+            new_df=get_cleaned_dataframe(sheet, self.yaml_data["cleaningMapping"])
+            sheet.cleaned_data=new_df
         update_bindings(item_table=wikifier.item_table, sheet=sheet)
         
 
