@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from t2wml.parsing.region import YamlRegion
 from t2wml.spreadsheets.sheet import Sheet
-from t2wml.utils.t2wml_exceptions import InvalidYAMLFileException
+from t2wml.utils.t2wml_exceptions import ErrorInYAMLFileException
 from t2wml.parsing.cleaning_functions import cleaning_functions_dict
 from t2wml.utils.bindings import update_bindings
 
@@ -18,7 +18,6 @@ def compose(*fs):
             x = f(x)
         return x
     return composition
-
 
 def clean_sheet(cleaning_mappings, sheet):
     update_bindings(sheet=sheet)
@@ -52,14 +51,8 @@ def clean_sheet(cleaning_mappings, sheet):
             new_val=parsed_func(df.iloc[row, col])
             df.iat[row, col]=new_val
             #output=df.apply(np.vectorize(my_func))
-    
-    cleaned_file_name=Path(sheet.data_file_name).stem +"_"+sheet.name + "_cleaned.csv"
-    cleaned_file_folder=Path(sheet.data_file_path).parent / "cleaned"
-    cleaned_file_folder.mkdir(exist_ok=True)
-    cleaned_file_path=str(cleaned_file_folder / cleaned_file_name)
-    df.to_csv(cleaned_file_path, header=False, index=False)
-    cleaned_sheet=Sheet(data_file_path=cleaned_file_path, sheet_name=cleaned_file_name, data=df)
-    return cleaned_sheet
+    sheet.cleaned_data=df
+    return sheet
 
 
 base_yaml_string="""
@@ -99,27 +92,13 @@ cleaningMapping:
 
 def validate_cleaning_yaml(input):
     if not isinstance(input, list):
-        raise InvalidYAMLFileException("cleaningMapping must contain a list")
+        raise ErrorInYAMLFileException("cleaningMapping must contain a list")
     for entry in input:
         if not isinstance(entry, dict):
-            raise InvalidYAMLFileException("each entry in cleaningMapping must be a dictionary")
+            raise ErrorInYAMLFileException("each entry in cleaningMapping must be a dictionary")
         if set(entry.keys())!=set(["region", "functions"]):
-            raise InvalidYAMLFileException("each entry must contain 2 keys, 'region' and 'functions'")
+            raise ErrorInYAMLFileException("each entry must contain 2 keys, 'region' and 'functions'")
         if not isinstance(entry["functions"], list):
-            raise InvalidYAMLFileException("functions entry must contain a list")
+            raise ErrorInYAMLFileException("functions entry must contain a list")
 
-
-
-
-if False:
-    df=pd.DataFrame([])
-    with pd.ExcelWriter(filepath, engine='openpyxl', mode='a') as writer:
-                workBook = writer.book
-                try:
-                    workBook.remove(workBook[first_sheet_name])
-                except:
-                    print("Worksheet does not exist")
-                finally:
-                    df.to_excel(writer, sheet_name=first_sheet_name, index=False, header=None)
-                    writer.save()
 

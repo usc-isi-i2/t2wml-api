@@ -68,7 +68,7 @@ class Sheet:
     
     @property
     def data(self):
-        if self.cleaned_data:
+        if self.cleaned_data is not None:
             return self.cleaned_data
         return self.raw_data
 

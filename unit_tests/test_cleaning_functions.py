@@ -1,7 +1,10 @@
+import os
 import unittest
+import yaml
+from pathlib import Path
+from t2wml.spreadsheets.sheet import SpreadsheetFile
 from t2wml.parsing.cleaning_functions import *
-import pandas as pd
-import numpy as np
+from t2wml.parsing.clean_yaml_parsing import clean_sheet
 
 class TestScripts(unittest.TestCase):
     def test_ftfy(self):
@@ -68,57 +71,26 @@ class TestScripts(unittest.TestCase):
         assert replace_regex("dan dan dan", "dan", "bob", 1) == "bob dan dan"
 
 
-def create_lambda(function, *args, **kwargs):
-    new_func= lambda input: function(input, *args, **kwargs)
-    return new_func
 
-def compose(*fs):
-    def composition(x):
-        for f in fs:
-            x = f(x)
-        return x
-    return composition
 
 class TestDataFrame(unittest.TestCase):
-    def test_ftfy_and_strip_whitespace(self):
-        df=pd.DataFrame([["s\tc  hÃ¶n", "yogurt"],
-                        ["loop", "loop"]])
-        func_1=create_lambda(ftfy)
-        func_2=create_lambda(strip_whitespace, where=everywhere)
-        my_func=compose(func_1, func_2)
-        output=df.apply(np.vectorize(my_func))
-        assert output.iloc[0,0]=="schön"
+    def test_yaml(self):
+        repo_folder = Path(__file__).parents[2]
+        test_folder = os.path.join(
+            repo_folder, "t2wml-api", "unit_tests", "ground_truth", "cleaning")
+        yaml_file=os.path.join(test_folder, "cleaning.yaml")
+        with open(yaml_file, 'r') as f:
+            test= yaml.safe_load(f.read())
 
+        filepath=os.path.join(test_folder, "cleaning.xlsx")
+        sf = SpreadsheetFile(filepath)
+        first_sheet_name=sf.sheet_names[0]
+        first_sheet=sf[first_sheet_name]
+        cleaned = clean_sheet(test["cleaningMapping"], first_sheet)
+        assert cleaned[0, 0]=="schön"
+        assert cleaned[2, 8]=="QWERTYUIOP"
+        assert cleaned[3,4]=="00forpadding"
 
-    def test_normalize_whitespace(self):
-        df= pd.DataFrame([["Helo  you hi\t this", "goruty"], ["Helo  you hi\t this", ""]])
-        my_func=create_lambda(normalize_whitespace, tab=True)
-        output=df.apply(np.vectorize(my_func))
-        assert output.iloc[0,0]=="Helo\tyou\thi\tthis"
-    
-    def test_remove_numbers(self):
-        df=pd.DataFrame([["123 hello1234hi 123", "yogurt"],
-                        ["loop", "loop"]])
-        my_func=create_lambda(remove_numbers, where=start)
-        output=df.apply(np.vectorize(my_func))
-        assert output.iloc[0,0]== " hello1234hi 123"
-    
-    
-    def test_change_case(self):
-        df=pd.DataFrame([
-            ["Hello", "Yogurt"],
-            ["Parsley", "Meep"]
-        ])
-        my_func=create_lambda(change_case, case='upper')
-        output=df.apply(np.vectorize(my_func))
-        assert output.iloc[0,0]=="HELLO"
-    
-    def test_truncate(self):
-        df=pd.DataFrame([["QWERTYUIOPASDFGHJKLZXCVBNMQWERTYUIOPASDFGHJKLZXCVBNM", "yogurt"],
-                        ["loop", "loop"]])
-        my_func=create_lambda(truncate, 10)
-        output=df.apply(np.vectorize(my_func))
-        assert output.iloc[0,0]=="QWERTYUIOP"
 
 
     
