@@ -15,7 +15,7 @@ Changes in version wip:
 * included in the added cleaning functionality is the ability to add a `cleaningMapping` section to the yaml file to apply cleaning functions to specific sections of the calculated sheet
 * the default sparql endpoint is now the public wikidata endpoint
 * default WikidataProvider is now a DictionaryProvider with preloaded properties (we may change how preloading works in future version)
-
+* allow uploading entities with wikidata IDs if user specifies `allow_wikidata_ids=True` in add_entities_from_file
 
 Changes in version 0.0.14:
 ------------------------
