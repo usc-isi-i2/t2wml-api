@@ -27,30 +27,14 @@ class InvalidYAMLFileException(T2WMLException):
     message = "YAML file is either empty or not valid"
 
 
-class BadDateFormatException(InvalidYAMLFileException):
-    pass
-
-
-class MissingWikidataEntryException(InvalidYAMLFileException):
-    pass
-
-
 class ErrorInYAMLFileException(InvalidYAMLFileException):
     message = "Key not found in the YAML specification or value of a key in the YAML specification is not appropriate"
-
-
-class ValueErrorInYAMLFileException(InvalidYAMLFileException):
-    message = "Value of a key in the YAML specification is not appropriate"
 
 
 class TemplateDidNotApplyToInput(InvalidYAMLFileException):
     def __init__(self, message="Could not apply", errors={}):
         super().__init__(message)
         self.errors = errors
-
-
-class InvalidOperatorException(T2WMLException):
-    message = "Invalid operator in found in YAML specification"
 
 
 class ValueOutOfBoundException(T2WMLException):
@@ -68,9 +52,6 @@ class InvalidT2WMLExpressionException(T2WMLException):
 class ConstraintViolationErrorException(T2WMLException):
     message = "Constraint on a given set of values have been violated"
 
-
-class WikificationFailureException(T2WMLException):
-    message = "Faield to wikify provided input"
 
 class FileWithThatNameInProject(T2WMLException):
     code=409
