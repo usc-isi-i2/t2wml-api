@@ -1,17 +1,19 @@
 T2WML API History
 ===================================
 
-Changes in version 0.0.15:
+Changes in version wip:
 ------------------------
 * backwards incompatible: completely remove remaining ttl/rdf support
+* backwards incompatible: the setting cache_data_files is now a property and cannot be directly set (instead, it is true when cache_data_files_folder is provided)
 * new feature: as documented in grammar.md, a lot of cleaning functions added
-    * this includes an added requirement, text-unidecode
+    * IMPORTANT: this includes an added requirement, text-unidecode
     * backwards incompatible: some functions were renamed or replaced:
         - `replace` is gone, there's `replace_regex` now
         - `clean` has been renamed to `ftfy`
         - `title`, `upper`, `lower` are gone, there's a function `change_case` instead
         - `strip` is gone, use `strip_whitespace` instead
-* default WikidataProvider is now a DictionaryProvider with preloaded properties
+* included in the added cleaning functionality is the ability to add a `cleaningMapping` section to the yaml file to apply cleaning functions to specific sections of the calculated sheet
+* default WikidataProvider is now a DictionaryProvider with preloaded properties (we may change how preloaidng works in future version)
 
 
 Changes in version 0.0.14:
