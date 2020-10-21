@@ -57,12 +57,20 @@ class Sheet:
         self.data_file_name = Path(data_file_path).name
         self.name = sheet_name
 
+        self.cleaned_data=None #this is set from outside the class, if cleaning is run
+
         if data is not None:
-            self.data = data
+            self.raw_data = data
         else:
             cache_class = get_cache_class()
             sc = cache_class(data_file_path, sheet_name)
-            self.data = sc.get_sheet()
+            self.raw_data = sc.get_sheet()
+    
+    @property
+    def data(self):
+        if self.cleaned_data:
+            return self.cleaned_data
+        return self.raw_data
 
     def __getitem__(self, params):
         try:
@@ -78,3 +86,13 @@ class Sheet:
     @property
     def col_len(self):
         return self.data.shape[1]
+    
+    def get_raw_data(self):
+        #used by t2wml_web
+        return self.raw_data.copy()
+    
+    def get_cleaned_data(self):
+        #used by t2wml_web
+        if self.cleaned_data:
+            return self.cleaned_data.copy()
+        return None
