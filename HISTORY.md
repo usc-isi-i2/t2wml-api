@@ -1,7 +1,7 @@
 T2WML API History
 ===================================
 
-Changes in version wip:
+Changes in version 0.0.15:
 ------------------------
 * backwards incompatible: completely remove remaining ttl/rdf support
 * backwards incompatible: the setting cache_data_files is now a property and cannot be directly set (instead, it is true when cache_data_files_folder is provided)
