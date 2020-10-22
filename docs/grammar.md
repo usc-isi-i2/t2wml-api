@@ -5,6 +5,7 @@
     * [Overall structure](#overallstructure)
     * [The region](#regionstructure)
     * [The template](#templatestructure)
+    * [cleaningMapping](#cleaningmapping)
     * [Conformance to Yaml Standards](#yamlstandards)
 * [The T2WML Language](#language)
     * [Reserved keywords](#reserved)
@@ -31,16 +32,22 @@ statementMapping:
          - keys...
     template:
          - keys...
-    created_by: demo
+cleaningMapping:
+    - region:
+        - keys...
+      functions:
+        - func:
+            args1:...
 ````
 
 
+It must contain the key `statementMapping`, opening a dictionary.
 
-It must begin with the key `statementMapping`, opening a dictionary.
-
-The `statementMapping` must contain the keys `region` and `template`. It can also optionally contain the key `created_by`.
+The `statementMapping` must contain the keys `region` and `template`.
 
 The `region` and the `template` must each be a list of dictionaries (although we currently only support one entry in the list)
+
+It may optionally contain the key `cleaningMapping`, opening a list, discussed further in its section below.
 
 
 ### The region
@@ -48,13 +55,30 @@ The `region` and the `template` must each be a list of dictionaries (although we
 
 The region is used to specify which cells of the data sheet are the data area.
 
-The `region` can be written in one of two formats.
+The `region` can be written in a variety of formats. 
 
-The first option is to use the key `range` and specify a cell range, eg: `C4:E10`. This is a simple, easy option for straightforward data ranges.
+**Step one**: calculate the base rectangle.
 
-The second option is to use all four of the keys `left`, `right`, `top`, and `bottom`, to specify the left, right, top, and bottom edges of the area (inclusive). These arguments can be specified dynamically using the t2wml language.
+1. The first option is to use the key `range` and specify a cell range, eg: `C4:E10`. 
 
-Regardless of which option is chosen, a further three optional keys can be supplied: `skip_row`, `skip_column`, and `skip_cell`. These must be lists, and their contents must be boolean expressions in the t2wml language.
+2. The second option is to use the keys `left`, `right`, `top`, and `bottom`, to specify the left, right, top, and bottom edges of the area (inclusive). These arguments can be specified dynamically using the t2wml language. If left unspecified, left/right/top/bottom will default to the edges of the spreadsheet (ie the leftmost/rightmost columns and top/bottom rows)
+
+The two options are mutually exclusive, if `range` is provided `top/bottom/left/right` will be ignored. If neither option is provided, the rectangle will default to the entire sheet.
+
+**Step two**: Select/remove columns/rows/cells
+
+There are six further, optional arguments the user can provide.
+
+The arguments `columns`, `rows`, `cells` select specific columns, rows, and cells. These are not purely additive arguments-- another way of putting this is that selection arguments take priority over the base rectangle.
+
+So, if someone provides a base rectangle of A1:E7 and then provides columns [A, B, E, G], the code will *select* columns A, B, E and ignore columns C and D, and the rows will be 1-7. If someone provides columns and rows, then the range argument will end up being ignored entirely. 
+
+The arguments `skip_columns`, `skip_rows`, and `skip_cells` subtract from the selected rectangle (or selected rows+columns). 
+
+All 6 arguments can be dynamically defined. When dynamically defined, the search for matches takes place exclusively within the base rectangle. So, going back to the example of A1:E7, if the columns argument was a dynamic definition that matched G, G would nonetheless not be included because the definition would not be searched for outside the rectangle. 
+
+(A side effect of this is that dynamically defining the cells argument is pointless. There is ONE exception-- if none of the other arguments are provided, ONLY cells, then only the cells specified will be used, searching across the entire sheet.)
+
 
 #### Region example one
 `````
@@ -108,7 +132,48 @@ template:
 
 `````
 
+### cleaningMapping
+<span id="cleaningmapping"></span>
 
+Providing a cleaningMapping section is optional, but if it is provided, it must conform to the following format:
+
+It must contain a list.
+
+Each entry of the list must be a dictionary, containing two keys, `region` and `functions`. The region is the same as the region in templateMapping and must follow the same format. `functions` is specific to cleaningMapping. It consists of a list of functions to be applied to the specified region (functions are describe in greater detail in the [cleaning Functions](#cleaning) section).
+
+Some of the functions receive no arguments, some receive optional arguments, and some have required arguments. These are summarized below.
+
+```yaml
+cleaningMapping:
+       - region: range: D6:K20
+         functions:
+            - ftfy
+            - strip_whitespace:
+                char: null # default all whitespace, can also be " " or  "\t"
+                where: start_and_end
+            - replace_regex:
+                to_replace: #required, no default
+                replacement: #required, no default
+            - remove_numbers:
+                where: everywhere
+            - remove_letters:
+                where: everywhere
+            - truncate:
+                length: #required, no default
+            - normalize_whitespace:
+                tab: False
+            - change_case:
+                case: sentence #can also be "lower", "upper", and "title"
+            - pad:
+                length: #required, no default
+                pad_text: #required, no default
+                where: start # or "end". does not allow "everywhere" or "start_and_end"
+            - make_numeric:
+                decimal: "."
+            - make_alphanumeric
+            - make_ascii:
+                translate: False
+```
 
 ### Conformance to Yaml standards
 <span id="yamlstandards"></span>

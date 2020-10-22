@@ -87,40 +87,6 @@ def get_cleaned_dataframe(sheet, yaml_instructions):
     sc=DFCleaner(yaml_instructions, sheet)
     return sc.df
 
-base_yaml_string="""
-statementMapping: ""
-cleaningMapping:
-       - region: range: D6:K20
-         functions:
-            - ftfy
-            - strip_whitespace:
-                char: null # default all whitespace, can also be " " or  "\t"
-                where: start_and_end
-            - replace_regex:
-                to_replace: #required, no default
-                replacement: #required, no default
-            - remove_numbers:
-                where: everywhere
-            - remove_letters:
-                where: everywhere
-            - truncate:
-                length: #required, no default
-            - normalize_whitespace:
-                tab: False
-            - change_case:
-                case: "sentence" #can also be "lower", "upper", and "title"
-            - pad:
-                length: #required, no default
-                pad_text: #required, no default
-                where: start # or "end". does not allow "everywhere" or "start_and_end"
-            - make_numeric:
-                decimal: "."
-            - make_alphanumeric
-            - make_ascii:
-                translate: False
-"""
-
-
 
 def validate_cleaning_yaml(input):
     if not isinstance(input, list):
