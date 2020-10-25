@@ -18,7 +18,6 @@ def cell_tuple_to_str(col, row) -> str:
 
 def cell_str_to_tuple(cell: str):
     """
-    used exclusively in conversions
     This function converts the cell notation used by excel (letter + 1-indexed number, in a string)
     to 0-indexed tuples cell notation 
     Eg:  A6 to 0,5
