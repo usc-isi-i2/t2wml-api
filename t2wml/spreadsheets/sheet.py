@@ -53,7 +53,7 @@ class Sheet:
             data (dataframe, optional): dataframe of contents of sheet. For creating a sheet from already loaded data.
                                         Defaults to None.
         """
-        self.data_file_path = data_file_path
+        self.data_file_path = str(data_file_path)
         self.data_file_name = Path(data_file_path).name
         self.name = sheet_name
 
