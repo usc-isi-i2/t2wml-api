@@ -1,5 +1,9 @@
 T2WML API History
 ===================================
+Changes in version wip:
+------------------------
+* hot fix to how sparql queries are passed
+* added sheet to knowledge graph (optional, backwards compatible) and to_json functionality to sheet
 
 Changes in version 0.0.15:
 ------------------------

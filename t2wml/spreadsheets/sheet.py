@@ -86,3 +86,21 @@ class Sheet:
     @property
     def col_len(self):
         return self.data.shape[1]
+    
+    def to_json(self):
+        if self.cleaned_data:
+            cleaned=self.cleaned_data.to_json(orient='values')
+        else:
+            cleaned=None
+        return dict(cleaned=cleaned, 
+                    data=self.raw_data.to_json(orient="values"), 
+                    data_file_path=self.data_file_path, 
+                    sheet_name=self.name)
+
+    @staticmethod
+    def from_json(in_json):
+        cleaned=in_json.pop("cleaned")
+        s=Sheet(**in_json)
+        s.cleaned_data=cleaned
+        return s
+        

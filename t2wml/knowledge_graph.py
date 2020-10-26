@@ -22,10 +22,11 @@ class KnowledgeGraph:
             followed by a dictionary with the internal key within the qualifier (value, property, unit, etc)
         metadata (dict): information about the input usede to create the knowledge graph. (data_file, sheet_name)
     """
-    def __init__(self, statements, errors=None, metadata=None):
+    def __init__(self, statements, errors=None, metadata=None, sheet=None):
         self.statements = statements
         self.errors = errors or []
         self.metadata = metadata or {}
+        self.sheet = sheet
 
     @classmethod
     def load_json(cls, filename: str):
@@ -42,7 +43,10 @@ class KnowledgeGraph:
         statements = loaded["statements"]
         errors = loaded.get("errors", [])
         metadata = loaded.get("metadata", {})
-        return cls(statements, errors, metadata)
+        sheet=loaded.get("sheet", None)
+        if sheet:
+            sheet=Sheet.from_json(sheet)
+        return cls(statements, errors, metadata, sheet)
 
     @classmethod
     def generate(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier):
@@ -58,7 +62,7 @@ class KnowledgeGraph:
         """
         statements, errors, metadata = statement_mapper.get_all_statements(
             sheet, wikifier)
-        return cls(statements, errors, metadata)
+        return cls(statements, errors, metadata, sheet)
 
     @classmethod
     def generate_from_files(cls, data_file_path: str, sheet_name: str, yaml_file_path: str, wikifier_filepath:str):
@@ -102,7 +106,6 @@ class KnowledgeGraph:
             raise T2WMLExceptions.FileTypeNotSupportedException(
                 "No support for "+filetype+" format")
         return output
-
 
     def save_file(self, output_filename: str, filetype: str):
         """save json or kgtk output to a file
