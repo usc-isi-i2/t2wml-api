@@ -88,7 +88,7 @@ class Sheet:
         return self.data.shape[1]
     
     def to_json(self):
-        if self.cleaned_data:
+        if self.cleaned_data is not None:
             cleaned=self.cleaned_data.to_json(orient='values')
         else:
             cleaned=None
