@@ -42,7 +42,7 @@ class StatementMapper(ABC):
             except T2WMLExceptions.TemplateDidNotApplyToInput as e:
                 cell_errors[cell] = e.errors
             except Exception as e:
-                cell_errors[cell] = str(e)
+                cell_errors[cell] = {"fatal":str(e)}
 
         return statements, cell_errors, metadata
 
