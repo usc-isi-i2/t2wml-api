@@ -130,7 +130,7 @@ class Project:
         in_proj_dir=root in full_path.parents
         if in_proj_dir:
             file_path=full_path.relative_to(root)
-        return file_path.as_posix()
+        return Path(file_path).as_posix()
 
     def update_saved_state(self, current_data_file=None, current_sheet=None, current_yaml=None, current_wikifiers=None):
         if current_data_file:
