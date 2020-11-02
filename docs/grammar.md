@@ -145,7 +145,8 @@ Some of the functions receive no arguments, some receive optional arguments, and
 
 ```yaml
 cleaningMapping:
-       - region: range: D6:K20
+       - region: 
+            range: D6:K20
          functions:
             - ftfy
             - strip_whitespace:
