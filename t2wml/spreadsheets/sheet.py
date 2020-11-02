@@ -1,4 +1,6 @@
 from pathlib import Path
+import pandas as pd
+import json
 from t2wml.settings import t2wml_settings
 from t2wml.spreadsheets.utilities import PandasLoader
 from t2wml.spreadsheets.caching import PickleCacher, FakeCacher
@@ -89,18 +91,23 @@ class Sheet:
     
     def to_json(self):
         if self.cleaned_data is not None:
-            cleaned=self.cleaned_data.to_json(orient='values')
+            cleaned=json.loads(self.cleaned_data.to_json(orient='values'))
         else:
             cleaned=None
         return dict(cleaned=cleaned, 
-                    data=self.raw_data.to_json(orient="values"), 
+                    data=json.loads(self.cleaned_data.to_json(orient='values')),
                     data_file_path=self.data_file_path, 
                     sheet_name=self.name)
 
     @staticmethod
     def from_json(in_json):
         cleaned=in_json.pop("cleaned")
-        s=Sheet(**in_json)
+        if cleaned:
+            cleaned=pd.DataFrame(cleaned)
+        data=in_json.pop("data")
+        if data:
+            data=pd.DataFrame(data)
+        s=Sheet(data=data, **in_json)
         s.cleaned_data=cleaned
         return s
         
