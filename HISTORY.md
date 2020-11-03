@@ -1,9 +1,14 @@
 T2WML API History
 ===================================
-Changes in version wip:
+Changes in version 0.0.16:
 ------------------------
 * hot fix to how sparql queries are passed
 * added sheet to knowledge graph (optional, backwards compatible) and to_json functionality to sheet
+* bug fixes:
+   * cast to path before calling as_posix
+* slight output tweaks:
+   * return key for unexpected errors in statement as well
+   * slightly more information when wikify_region fails
 
 Changes in version 0.0.15:
 ------------------------
