@@ -185,7 +185,7 @@ def make_numeric(input, decimal=".", latex=False):
         input=float(input)
     except:
         print("Failed to make numeric: "+original_input)
-        return original_input
+        return ""
     return str(input)
 
 @string_modifier
