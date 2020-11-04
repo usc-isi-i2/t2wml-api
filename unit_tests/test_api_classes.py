@@ -26,17 +26,17 @@ class ClassesTest(unittest.TestCase):
         item = new_wf.item_table.get_item_by_string('Burundi')
         new_wf.print_data()
 
-    # def test_wikifier_service(self):
-    #     from t2wml.api import Wikifier, WikifierService, Sheet
-    #     test_folder = os.path.join(unit_test_folder, "error-catching")
-    #     data_file = os.path.join(test_folder, "input_1.csv")
-    #     region = "A4:C8"
-    #     sheet = Sheet(data_file, "input_1.csv")
-    #     ws = WikifierService()
-    #     df, problem_cells = ws.wikify_region(region, sheet)
-    #     wf = Wikifier()
-    #     wf.add_dataframe(df)
-    #     wf.item_table.get_item(0, 5, sheet=sheet)
+    def test_wikifier_service(self):
+        from t2wml.api import Wikifier, WikifierService, Sheet
+        test_folder = os.path.join(unit_test_folder, "error-catching")
+        data_file = os.path.join(test_folder, "input_1.csv")
+        region = "A4:C8"
+        sheet = Sheet(data_file, "input_1.csv")
+        ws = WikifierService()
+        df, problem_cells = ws.wikify_region(region, sheet)
+        wf = Wikifier()
+        wf.add_dataframe(df)
+        wf.item_table.get_item(0, 5, sheet=sheet)
 
     def test_custom_statement_mapper(self):
         from t2wml.mapping.statement_mapper import StatementMapper
