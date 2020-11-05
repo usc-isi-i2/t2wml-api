@@ -1,19 +1,5 @@
 class T2WMLException(Exception):
     message = "Undefined T2WML exception"
-    code = 400
-
-    def __init__(self, message=""):
-        super().__init__(message)
-        self.detail_message = message
-
-    @property
-    def error_dict(self):
-        return {
-            "errorCode": self.code,
-            "errorTitle": self.message,
-            "errorDescription": self.detail_message
-        }
-
 
 class UnsupportedPropertyType(T2WMLException):
     message = "Unsupported property"
@@ -33,7 +19,7 @@ class ErrorInYAMLFileException(InvalidYAMLFileException):
 
 class TemplateDidNotApplyToInput(InvalidYAMLFileException):
     def __init__(self, message="Could not apply", errors={}):
-        super().__init__(message)
+        self.message=message
         self.errors = errors
 
 
@@ -54,7 +40,6 @@ class ConstraintViolationErrorException(T2WMLException):
 
 
 class FileWithThatNameInProject(T2WMLException):
-    code=409
     message="A file with that name is already present in the project"
 
 class InvalidEntityDefinition(T2WMLException):
