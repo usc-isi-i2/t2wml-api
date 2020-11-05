@@ -3,7 +3,8 @@ import os
 
 REQUIREMENTS = [
     'PyYAML>=5.1.2',
-    'pandas>=1.0.3',
+    'numpy==1.19.1',
+    'pandas==1.1.0',
     'SPARQLWrapper>=1.8.5',
     'ftfy>=5.8',
     'requests>=2.24.0',
