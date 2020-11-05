@@ -1,6 +1,14 @@
 from pathlib import Path
 import pandas as pd
 
+def post_process_data(data):
+    data = data.fillna("")
+    data = data.replace(r'^\s+$', "", regex=True)
+    return data
+
+def load_pickle(pickle_path):
+    data = pd.read_pickle(pickle_path)
+    return post_process_data(data)
 
 class PandasLoader:
     # a wrapper to centralize and make uniform any loading of data files/sheets from pandas
@@ -9,11 +17,6 @@ class PandasLoader:
         file_extension = Path(file_path).suffix
         self.is_csv = True if file_extension.lower() == ".csv" else False
         self.pd_args = dict(dtype=str, header=None)
-
-    def post_process_data(self, data):
-        data = data.fillna("")
-        data = data.replace(r'^\s+$', "", regex=True)
-        return data
 
     def load_sheet(self, sheet_name):
         """
@@ -24,7 +27,7 @@ class PandasLoader:
         else:
             data = pd.read_excel(
                 self.file_path, sheet_name=sheet_name, **self.pd_args)
-        return self.post_process_data(data)
+        return post_process_data(data)
 
     def load_file(self):
         """
@@ -32,7 +35,7 @@ class PandasLoader:
         """
         if self.is_csv:
             data = pd.read_csv(self.file_path, **self.pd_args)
-            data = self.post_process_data(data)
+            data = post_process_data(data)
             sheet_name = Path(self.file_path).name
             return {sheet_name: data}
         else:
@@ -41,7 +44,7 @@ class PandasLoader:
                 self.file_path, sheet_name=None, **self.pd_args)
             for sheet_name in loaded_file:
                 data = loaded_file[sheet_name]
-                data = self.post_process_data(data)
+                data = post_process_data(data)
                 return_dict[sheet_name] = data
             return return_dict
 
@@ -51,10 +54,8 @@ class PandasLoader:
         else:
             xl = pd.ExcelFile(self.file_path)
             return xl.sheet_names
+    
 
-    def load_pickle(self, pickle_path):
-        data = pd.read_pickle(pickle_path)
-        return self.post_process_data(data)
 
 
 def get_first_sheet_name(file_path: str):

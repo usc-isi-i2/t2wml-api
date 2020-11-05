@@ -5,35 +5,16 @@ from pathlib import Path
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 from SPARQLWrapper.SPARQLExceptions import QueryBadFormed
 from t2wml.utils import t2wml_exceptions as T2WMLExceptions
-from t2wml.wikification.wikidata_provider import SparqlProvider, DictionaryProvider
+from t2wml.wikification.wikidata_provider import DictionaryProvider
+from t2wml.wikification.preloaded_properties import preloaded_properties
 from t2wml.settings import t2wml_settings
 
 
-def load_property_type_mapping() -> dict:
-    csv_path = Path(__file__).parent / 'property-type-mapping.csv'
-    if not csv_path.exists():
-        return {}
-
-    mapping = {}
-    with open(csv_path, 'r') as f:
-        reader = csv.reader(f)
-
-        # skip header
-        next(reader)
-
-        for row in reader:
-            mapping[row[0]] = row[1]
-    return mapping
 
 def get_provider():
     wikidata_provider = t2wml_settings.wikidata_provider
     if wikidata_provider is None:
-        wikidata_provider = SparqlProvider(t2wml_settings.sparql_endpoint)
-        t2wml_settings.wikidata_provider = wikidata_provider
-    elif wikidata_provider == 'DictionaryProvider':
-        ref_dict = load_property_type_mapping()
-        print('property type dict len = ', len(ref_dict))
-        wikidata_provider = DictionaryProvider(ref_dict)
+        wikidata_provider = DictionaryProvider(preloaded_properties)
         t2wml_settings.wikidata_provider = wikidata_provider
     return wikidata_provider
 
@@ -71,7 +52,7 @@ def validate_id(node_id):
     except ValueError: #conversion to int failed, is not Pnum or Qnum
         pass
 
-def add_entities_from_file(file_path: str):
+def add_entities_from_file(file_path: str, allow_wikidata_ids=False):
     """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
     If a kgtk-format tsv file, the property information will be loaded as follows:
     node1 is used as the wikidata_id.
@@ -114,7 +95,8 @@ def add_entities_from_file(file_path: str):
 
             try:
                 #validate ID
-                validate_id(node_id)
+                if not allow_wikidata_ids:
+                    validate_id(node_id)
 
                 #validate data types
                 if data_type:

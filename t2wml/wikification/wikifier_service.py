@@ -75,7 +75,7 @@ class WikifierService:
             return data
         else:
             raise requests.HTTPError(
-                "Failed to wikify: Received an error from the wikifier endpoint")
+                "Failed to wikify: Received an error from the wikifier endpoint. Error code {code}, reason: {reason}".format(code=response.status_code, reason=response.reason))
 
     def _normalize_dataframe(self, output, row_offset, context, flattened_sheet_data, empty_vals):
         output.row = output.row.astype('int32')

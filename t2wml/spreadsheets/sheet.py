@@ -1,4 +1,6 @@
 from pathlib import Path
+import pandas as pd
+import json
 from t2wml.settings import t2wml_settings
 from t2wml.spreadsheets.utilities import PandasLoader
 from t2wml.spreadsheets.caching import PickleCacher, FakeCacher
@@ -53,16 +55,24 @@ class Sheet:
             data (dataframe, optional): dataframe of contents of sheet. For creating a sheet from already loaded data.
                                         Defaults to None.
         """
-        self.data_file_path = data_file_path
+        self.data_file_path = str(data_file_path)
         self.data_file_name = Path(data_file_path).name
         self.name = sheet_name
 
+        self.cleaned_data=None #this is set from outside the class, if cleaning is run
+
         if data is not None:
-            self.data = data
+            self.raw_data = data
         else:
             cache_class = get_cache_class()
             sc = cache_class(data_file_path, sheet_name)
-            self.data = sc.get_sheet()
+            self.raw_data = sc.get_sheet()
+    
+    @property
+    def data(self):
+        if self.cleaned_data is not None:
+            return self.cleaned_data
+        return self.raw_data
 
     def __getitem__(self, params):
         try:
@@ -78,3 +88,26 @@ class Sheet:
     @property
     def col_len(self):
         return self.data.shape[1]
+    
+    def to_json(self):
+        if self.cleaned_data is not None:
+            cleaned=json.loads(self.cleaned_data.to_json(orient='values'))
+        else:
+            cleaned=None
+        return dict(cleaned=cleaned, 
+                    data=json.loads(self.cleaned_data.to_json(orient='values')),
+                    data_file_path=self.data_file_path, 
+                    sheet_name=self.name)
+
+    @staticmethod
+    def from_json(in_json):
+        cleaned=in_json.pop("cleaned")
+        if cleaned:
+            cleaned=pd.DataFrame(cleaned)
+        data=in_json.pop("data")
+        if data:
+            data=pd.DataFrame(data)
+        s=Sheet(data=data, **in_json)
+        s.cleaned_data=cleaned
+        return s
+        

@@ -71,7 +71,7 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
             result_dict["node2;kgtk:calendar"] = property_dict.get(
                 "calendar", "")
 
-        elif property_type in ["string", "monolingualtext", "externalidentifier", "url"]:
+        elif property_type in ["string", "monolingualtext", "externalid", "url"]:
             '''
             node2;kgtk:text: for text, the text without the language tag
             node2;kgtk:language: for text, the language tag

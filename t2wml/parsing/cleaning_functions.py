@@ -1,5 +1,9 @@
+import math
 import re
 import string
+import ftfy as FTFY
+from t2wml.parsing.classes import ReturnClass, RangeClass
+from text_unidecode import unidecode
 
 '''
 start: apply the operator starting at the beginning of the value and stop when it can no longer be applied, e.g., remove numbers and stop when a non-number is found
@@ -10,39 +14,36 @@ everywhere: start on the start and keep applying the operator after skipping the
 
 start="start"
 end="end"
-start_and_end="start-and-end"
+start_and_end="start_and_end"
 everywhere="everywhere"
 
-'''
-Example:
-cleaning:
-  - strip-whitespace: auto 
-    where: start-and-end
-  #- remove-symbols: auto 
-  #  where: start
-  #- remove-unicodes: auto
-  #  where: everywhere
-  - make_alphanumeric
-  - make_ascii
-  - remove-numbers: auto
-    where: end
-  - remove-letters: auto
-    where: everywhere
-  - remove-regex: <regex>
-    where: start
-  #- remove-long: 50
-  - truncate
-  - normalize-whitespace: auto
-  - replace-whitespace: _
-  - change-case: sentence
-  - pad: 10
-    text: 0
-    where: start
-  - make-numeric: auto
-  - fix-url: auto
+def string_modifier(func):
+    def wrapper(input, *args, **kwargs):
+        where=kwargs.get("where")
+        if where:
+            if where not in [start, end, start_and_end, everywhere]:
+                raise ValueError("Invalid argument for where: "+where)
 
-'''
+        if input:  # if value is None, don't modify
+            if isinstance(input, RangeClass):  # handle ranges separately:
+                for i, val in enumerate(input):
+                    if val:
+                        input[i] = func(str(input[i]), *args, **kwargs)
+            res_string = func(str(input), *args, **kwargs)
+            
+            try:
+                input.value = res_string
+                return input
+            except:
+                return res_string
+        return input
+    return wrapper
 
+@string_modifier
+def ftfy(input):
+    return FTFY.fix_text(input)
+
+@string_modifier
 def strip_whitespace(input, char=None, where=start_and_end):
     """
     Args:
@@ -54,58 +55,55 @@ def strip_whitespace(input, char=None, where=start_and_end):
         [type]: [description]
     """
     if where == everywhere:
-        return "".join(str(input).split(sep=char))
+        return "".join(input.split(sep=char))
     if where == start:
-        return str(input).lstrip(char)
+        return input.lstrip(char)
     if where == end:
-        return str(input).rstrip(char)
+        return input.rstrip(char)
     if where == start_and_end:
-        return str(input).strip(char)
+        return input.strip(char)
 
-
-def remove_numbers(input, numbers=None,  where=end):
-    ''' remove-numbers:
-    auto: all digits
-    list of specific numbers, e.g., "1, 2, 3, 5, 7, 11, 13, 17"
-    '''
-    if numbers:
-        numbers = sorted(numbers, key=lambda num:int(num))[::-1] #search for larger numbers first
-    else:
-        numbers=["\d*"]
-    for num in numbers: #if it was limited to single digits, easier, but since it needs to be specific numbers...
-        if where==everywhere:
-            input= re.sub(str(num), "", input)
-        if where==end or where ==start_and_end:
-            sub_string="^"+str(num)
-            input= re.sub(sub_string, "", input)
-        if where==start or where==start_and_end:
-            sub_string=str(num)+"$"
-            input= re.sub(sub_string, "", input)
+@string_modifier
+def replace_regex(input, to_replace, replacement="", count=0):
+    input=re.sub(to_replace, replacement, input, count)
     return input
 
+@string_modifier
+def remove_numbers(input, where=everywhere):
+    regex="\d*"
+    if where==everywhere:
+        input= re.sub(str(regex), "", input)
+    if where==start or where==start_and_end:
+        sub_string="^"+str(regex)
+        input= re.sub(sub_string, "", input)
+    if where==end or where ==start_and_end:
+        sub_string=str(regex)+"$"
+        input= re.sub(sub_string, "", input)
+    return input
 
-def remove_letters(input, letters=None, where=everywhere):
-    ''' remove-letters:
-    auto: all letters
-    list of specific letters, letter ranges or strings, e.g., "a, b, m-p, pedro, szekely"
-    ''' 
-    pass
+@string_modifier
+def remove_letters(input, where=everywhere):
+    regex="\D*"
+    if where==everywhere:
+        input= re.sub(str(regex), "", input)
+    if where==start or where==start_and_end:
+        sub_string="^"+str(regex)
+        input= re.sub(sub_string, "", input)
+    if where==end or where ==start_and_end:
+        sub_string=str(regex)+"$"
+        input= re.sub(sub_string, "", input)
+    return input
 
-def remove_regex(input, regex, where=start):
-    '''remove-regex:
-    if the regex has no group, it removes the part that matches; if there are groups, it removes all the groups.
-    where specifies the direction and the number of times it is matched
-    ''' 
-    pass
-
+@string_modifier
 def truncate(input, length):
     ''' remove-long:
     delete cell values where the string length is >= the specified number of characters
     ''' 
-    if len(str(input))>length:
-        return str(input)[:length]
+    if len(input)>length:
+        return input[:length]
     return input
 
+@string_modifier
 def normalize_whitespace(input, tab=False):
     ''' normalize-whitespace:
     auto: replaces multiple consecutive whitespace characters by one space
@@ -116,7 +114,7 @@ def normalize_whitespace(input, tab=False):
         replacement="\t"
     return re.sub("\s{1,}", replacement, input)
 
-
+@string_modifier
 def change_case(input, case="sentence"):
     ''' change-case:
     auto: changes the case to sentence case
@@ -126,15 +124,16 @@ def change_case(input, case="sentence"):
     title
     ''' 
     if case=="sentence":
-        return str(input).capitalize()
+        return input.capitalize()
     if case=="lower":
-        return str(input).lower()
+        return input.lower()
     if case=="upper":
-        return str(input).upper()
+        return input.upper()
     if case=="title":
-        return str(input).title()
+        return input.title()
 
-def pad(input, length, text, where=start):
+@string_modifier
+def pad(input, length, pad_text, where=start):
     ''' pad:
     the main argument is a length in number of characters
     text: what text to add, if the text is longer than one character 
@@ -142,24 +141,33 @@ def pad(input, length, text, where=start):
     depending on whether it is on the start or the end 
     (other values or where are errors)
     ''' 
+    pad_text=str(pad_text)
     if where not in [start, end]:
         raise ValueError("Only start and end are valid where values for pad")
+    if not len(input): #don't pad empty strings
+        return input
 
-    pad_length=length-len(str(input))
-    if pad_length<1:
-        return str(input)
-    if len(text)>1 and pad_length%len(text):
-        raise NotImplementedError("Still need to add support for not evenly divisible padding")
-    pad_times=int(pad_length/len(text))
-    padding=text*pad_times
-    if where==start:
-        return padding + str(input)
-    if where==end:
-        return str(input)+ padding
+    pad_length=length-len(input)
+    
 
+    if pad_length<1: #input longer than/equal to pad length, don't pad
+        return input
+    
+    pad_times=math.ceil(pad_length/len(pad_text))
+    pad_rem=pad_length%len(pad_text)
+    padding=pad_text*pad_times
+    if len(pad_text)>1 and pad_rem:
+        if where == end:
+            padding = padding[pad_rem:]
+        if where == start:
+            padding=padding[:-pad_rem]
+    if where == start:
+        return padding + input
+    if where == end:
+        return input+ padding
 
-
-def make_numeric(input):
+@string_modifier
+def make_numeric(input, decimal=".", latex=False):
     '''make-numeric:
     auto: smart function to make the values of a cell numeric
     remove leading and trailing non-numeric characters
@@ -167,25 +175,43 @@ def make_numeric(input):
     removes whitespace inside the number
     interprets exponential notation
     ''' 
-    pass
+    
+    original_input=input
+    if decimal!=".":
+        input=input.replace(".", "")
+        input=input.replace(decimal, ".")
+    input= re.sub("[^\d.|^\deE\d|-]", "", input)
+    try:
+        input=float(input)
+    except:
+        print("Failed to make numeric: "+original_input)
+        return ""
+    return str(input)
 
-def fix_url(input ):
-    ''' fix-url:
-    auto: remove leading junk, fix the obnoxious htxxxx prefix that you sometimes get, decode in case it was encoded
-    ''' 
-    pass
+@string_modifier
+def make_alphanumeric(input):
+    return ''.join(e for e in input if e.isalnum())
+
+@string_modifier
+def make_ascii(input, translate=False):
+    if translate:
+        return unidecode(input)
+    else:
+        #remove non-printable ascii as well
+        return ''.join(filter(lambda x: x in string.printable, input))
 
 cleaning_functions_dict=dict(
+    ftfy=ftfy, #v
     strip_whitespace=strip_whitespace, #v
     remove_numbers=remove_numbers, #v
-    #remove_letters=remove_letters,
-    #remove_regex=remove_regex,
+    remove_letters=remove_letters, #v confirm definition
+    replace_regex=replace_regex, #v
     truncate=truncate, #v
     normalize_whitespace=normalize_whitespace, #v
     change_case=change_case, #v
-    #pad=pad, #xv
-    #make_numeric=make_numeric,
-    #fix_url=fix_url
+    pad=pad, #v
+    make_numeric=make_numeric, #v may want to add additional support
+    make_alphanumeric=make_alphanumeric, #v confirm definition
+    make_ascii=make_ascii, #v confirm definition
 )
-
 

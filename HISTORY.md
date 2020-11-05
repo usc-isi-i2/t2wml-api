@@ -1,9 +1,30 @@
 T2WML API History
 ===================================
-Changes in version wip:
+Changes in version 0.0.16:
+------------------------
+* hot fix to how sparql queries are passed
+* added sheet to knowledge graph (optional, backwards compatible) and to_json functionality to sheet
+* bug fixes:
+   * cast to path before calling as_posix
+* slight output tweaks:
+   * return key for unexpected errors in statement as well
+   * slightly more information when wikify_region fails
+
+Changes in version 0.0.15:
 ------------------------
 * backwards incompatible: completely remove remaining ttl/rdf support
-* 
+* backwards incompatible: the setting cache_data_files is now a property and cannot be directly set (instead, it is true when cache_data_files_folder is provided)
+* new feature: as documented in grammar.md, a lot of cleaning functions added
+    * IMPORTANT: this includes an added requirement, text-unidecode
+    * backwards incompatible: some functions were renamed or replaced:
+        - `replace` is gone, there's `replace_regex` now
+        - `clean` has been renamed to `ftfy`
+        - `title`, `upper`, `lower` are gone, there's a function `change_case` instead
+        - `strip` is gone, use `strip_whitespace` instead
+* included in the added cleaning functionality is the ability to add a `cleaningMapping` section to the yaml file to apply cleaning functions to specific sections of the calculated sheet
+* the default sparql endpoint is now the public wikidata endpoint
+* default WikidataProvider is now a DictionaryProvider with preloaded properties (we may change how preloading works in future version)
+* allow uploading entities with wikidata IDs if user specifies `allow_wikidata_ids=True` in add_entities_from_file
 
 Changes in version 0.0.14:
 ------------------------
@@ -45,7 +66,6 @@ Changes in version 0.0.8:
 ------------------------
 * added the Project class
 * change settings to be class-based instead of a dictionary
-* add setting `cache_data_files_folder`
 * when caching, use an underscored version of the full path to the original file to create the cache name
 * add setting `warn_for_empty_cells`, default False
 * change how date parsing is handled: if format is provided, must stricly match format, otherwise will fuzzy-guess

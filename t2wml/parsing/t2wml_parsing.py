@@ -2,7 +2,7 @@ from t2wml.utils.bindings import bindings
 from t2wml.parsing.classes import (CellExpression, ItemExpression,
                                    ReturnClass)
 from t2wml.parsing.constants import char_dict
-from t2wml.parsing.functions import functions_dict
+from t2wml.parsing.template_functions import functions_dict
 from t2wml.parsing.cleaning_functions import cleaning_functions_dict
 
 eval_globals = dict()

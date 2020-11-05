@@ -8,7 +8,7 @@ except (ImportError, OSError):
     has_etk = False
 
 VALID_PROPERTY_TYPES=["globecoordinate", "quantity", "time", "string", "monolingualtext",
-                        "externalidentifier", "wikibaseitem", "wikibaseproperty", "url"]
+                        "externalid", "wikibaseitem", "wikibaseproperty", "url"]
 
 
 def translate_precision_to_integer(precision: str) -> int:

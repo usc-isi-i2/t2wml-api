@@ -122,10 +122,7 @@ def validate_yaml(yaml_file_path):
                 "Could not load Yaml File: invalid T2wml code")
 
     errors = ""
-    for key in yaml_file_data.keys():
-        if key != 'statementMapping':
-            errors += "Unrecognized key '" + key + "' found\n"
-
+    
     if 'statementMapping' not in yaml_file_data:
         errors += "Key 'statementMapping' not found\n"
     else:
