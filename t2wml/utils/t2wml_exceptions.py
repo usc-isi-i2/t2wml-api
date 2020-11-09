@@ -4,7 +4,9 @@ class T2WMLException(Exception):
         super().__init__(*args, **kwargs)
         self.detail_message=detail_message
     def __str__(self):
-        return self.message + ":" + self.detail_message
+        if self.detail_message:
+            return self.detail_message
+        return self.message 
 
 class FileWithThatNameInProject(T2WMLException):
     message="A file with that name is already present in the project"
