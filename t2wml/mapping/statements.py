@@ -4,7 +4,7 @@ from t2wml.parsing.t2wml_parsing import iter_on_n_for_code, T2WMLCode
 from t2wml.parsing.classes import ReturnClass
 from t2wml.spreadsheets.conversions import to_excel
 from t2wml.wikification.utility_functions import get_property_type
-from t2wml.utils.utilities import VALID_PROPERTY_TYPES, parse_datetime, translate_precision_to_integer
+from t2wml.utils.utilities import VALID_PROPERTY_TYPES, parse_datetime
 from t2wml.settings import t2wml_settings
 
 class Node:
