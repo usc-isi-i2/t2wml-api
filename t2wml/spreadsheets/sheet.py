@@ -95,7 +95,7 @@ class Sheet:
         else:
             cleaned=None
         return dict(cleaned=cleaned, 
-                    data=json.loads(self.cleaned_data.to_json(orient='values')),
+                    data=json.loads(self.data.to_json(orient='values')),
                     data_file_path=self.data_file_path, 
                     sheet_name=self.name)
 
