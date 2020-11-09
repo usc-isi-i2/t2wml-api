@@ -181,13 +181,11 @@ def make_numeric(input, decimal=".", latex=False):
         input=input.replace(decimal, ".")
     input= re.sub("[^\d.|^\deE\d|-]", "", input)
     try:
-        input=float(input)
-        if input.is_integer() and not ("." in original_input or "e" in original_input.lower()): #don't convert ints to floats
-            return str(int(input))
+        float(input)
     except:
         print("Failed to make numeric: "+original_input)
         return "" #if it's not numeric, return an empty cell
-    return str(input)
+    return input
 
 @string_modifier
 def make_alphanumeric(input):
