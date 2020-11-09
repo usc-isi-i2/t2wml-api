@@ -175,17 +175,18 @@ def make_numeric(input, decimal=".", latex=False):
     removes whitespace inside the number
     interprets exponential notation
     ''' 
-    
-    original_input=input
+    original_input=str(input)
     if decimal!=".":
         input=input.replace(".", "")
         input=input.replace(decimal, ".")
     input= re.sub("[^\d.|^\deE\d|-]", "", input)
     try:
         input=float(input)
+        if input.is_integer() and not ("." in original_input or "e" in original_input.lower()): #don't convert ints to floats
+            return str(int(input))
     except:
         print("Failed to make numeric: "+original_input)
-        return ""
+        return "" #if it's not numeric, return an empty cell
     return str(input)
 
 @string_modifier
