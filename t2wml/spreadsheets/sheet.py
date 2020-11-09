@@ -78,7 +78,7 @@ class Sheet:
         try:
             return self.data.iloc[params]
         except IndexError:
-            raise T2WMLExceptions.ValueOutOfBoundException(
+            raise T2WMLExceptions.CellOutsideofBoundsException(
                 "Cell " + to_excel(params[1], params[0]) + " is outside the bounds of the current data file")
 
     @property

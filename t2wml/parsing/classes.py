@@ -1,3 +1,4 @@
+from t2wml.utils.t2wml_exceptions import ModifyingItemsIsForbiddenException
 from t2wml.utils.bindings import bindings
 from t2wml.spreadsheets.conversions import to_excel
 
@@ -114,7 +115,7 @@ class ItemRange(RangeClass):
             self.data.append(row_arr)
 
     def __setitem__(self, flat_index, data):
-        raise ValueError("Should not be changing the value of Items")
+        raise ModifyingItemsIsForbiddenException("Should not be changing the value of Items")
 
 
 class ItemExpression:

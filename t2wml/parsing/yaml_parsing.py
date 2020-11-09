@@ -60,7 +60,7 @@ class TemplateParser(CodeParser):
                     compiled_statement = compile(fixed, "<string>", "eval")
                     return T2WMLCode(compiled_statement, fixed, input_str)
                 except Exception as e:
-                    raise T2WMLExceptions.InvalidYAMLFileException(
+                    raise T2WMLExceptions.ErrorInYAMLFileException(
                         "Invalid expression: "+str(input_str))
             else:
                 return input_str
@@ -76,7 +76,7 @@ class TemplateParser(CodeParser):
                     new_dict[key] = self.get_code_replacement(new_dict[key])
                 new_list.append(new_dict)
             else:
-                raise T2WMLExceptions.InvalidYAMLFileException(
+                raise T2WMLExceptions.ErrorInYAMLFileException(
                     "lists of non-dict items not currently supported")
         return new_list
 

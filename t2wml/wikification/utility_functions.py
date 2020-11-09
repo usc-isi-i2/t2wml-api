@@ -24,10 +24,10 @@ def get_property_type(prop):
         prop_type = _get_property_type(prop)
         return str(prop_type).lower()
     except QueryBadFormed:
-        raise T2WMLExceptions.MissingWikidataEntryException(
+        raise T2WMLExceptions.UnsupportedPropertyType(
             "The value given for property is not a valid property:" + str(prop))
     except ValueError:
-        raise T2WMLExceptions.MissingWikidataEntryException(
+        raise T2WMLExceptions.UnsupportedPropertyType(
             "Property not found:" + str(prop))
 
 
@@ -35,7 +35,7 @@ def _get_property_type(wikidata_property):
     provider = get_provider()
     property_type = provider.get_property_type(wikidata_property)
     if property_type == "Property Not Found":
-        raise ValueError("Property "+wikidata_property+" not found")
+        raise T2WMLExceptions.UnsupportedPropertyType("Property "+wikidata_property+" not found")
     return property_type
 
 
@@ -67,13 +67,14 @@ def add_entities_from_file(file_path: str, allow_wikidata_ids=False):
         file_path (str): location of the properties file
 
     Raises:
-        ValueError: invalid filetype (only tsv files are supported)
+        UnsupportedPropertyType: invalid filetype (only tsv files are supported)
+        InvalidEntityDefinition: if the id is invalid
 
     Returns:
         dict: a dictionary of "added", "present" (already present, updated), and "failed" properties from the file
     """
     if Path(file_path).suffix != ".tsv":
-        raise ValueError(
+        raise T2WMLExceptions.UnsupportedPropertyType(
             "Only .tsv property files are currently supported")
 
     input_dict=defaultdict(dict)

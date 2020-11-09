@@ -40,10 +40,10 @@ class YamlRegion(CodeParser, Region):
 
     def check_range_boundaries(self, region):
         if region['t_var_left'] > region['t_var_right']:
-            raise T2WMLExceptions.ConstraintViolationErrorException(
+            raise T2WMLExceptions.RegionConstraintViolationErrorException(
                 "Value of left should be less than or equal to right")
         if region['t_var_top'] > region['t_var_bottom']:
-            raise T2WMLExceptions.ConstraintViolationErrorException(
+            raise T2WMLExceptions.RegionConstraintViolationErrorException(
                 "Value of top should be less than or equal to bottom")
 
     def get_range_arguments(self, yaml_region):
@@ -95,7 +95,7 @@ class YamlRegion(CodeParser, Region):
                 try:
                     return iter_on_n_for_code(statement, context)
                 except Exception as e:
-                    raise T2WMLExceptions.InvalidYAMLFileException(
+                    raise T2WMLExceptions.ErrorInYAMLFileException(
                         "Failed to parse: "+statement.unmodified_str+ "(" + str(e) + ")")
 
             statement=str(statement)
@@ -107,19 +107,19 @@ class YamlRegion(CodeParser, Region):
             else:
                 return t2wml_parse(statement, context)
         except Exception as e:
-            raise T2WMLExceptions.InvalidYAMLFileException(
+            raise T2WMLExceptions.ErrorInYAMLFileException(
                 "Failed to parse:"+str(statement)+ "(" + str(e) + ")")
 
     def _check_for_recursion(self, region):
         if "right" in str(region.get("right", "")) \
                 or "left" in str(region.get("left", "")) \
                 or ("left" in str(region.get("right", "")) and "right" in str(region.get("left"))):
-            raise T2WMLExceptions.ConstraintViolationErrorException(
+            raise T2WMLExceptions.RegionConstraintViolationErrorException(
                 "Recursive definition of left and right region parameters.")
         if "top" in str(region.get("top", "")) or \
             "bottom" in str(region.get("bottom", "")) \
                 or ("top" in str(region.get("bottom", "")) and "bottom" in str(region.get("top", ""))):
-            raise T2WMLExceptions.ConstraintViolationErrorException(
+            raise T2WMLExceptions.RegionConstraintViolationErrorException(
                 "Recursive definition of top and bottom region parameters.")
 
     
@@ -134,7 +134,7 @@ class YamlRegion(CodeParser, Region):
                     col_arg+=" -> $col"
                 code_arg=self.get_code_replacement(col_arg)
                 if "$row" in str(col_arg):
-                    raise T2WMLExceptions.InvalidYAMLFileException("Cannot use $row in columns or skip_columns")
+                    raise T2WMLExceptions.ErrorInYAMLFileException("Cannot use $row in columns or skip_columns")
                 for col in range(self.range_args["t_var_left"], self.range_args["t_var_right"]+1):
                     context={"t_var_col":col}
                     context.update(self.range_args)
@@ -150,7 +150,7 @@ class YamlRegion(CodeParser, Region):
                     row_arg+=" -> $row"
                 code_arg=self.get_code_replacement(row_arg)
                 if "$col" in str(row_arg):
-                    raise T2WMLExceptions.InvalidYAMLFileException("Cannot use $col in rows or skip_rows")
+                    raise T2WMLExceptions.ErrorInYAMLFileException("Cannot use $col in rows or skip_rows")
                 for row in range(self.range_args["t_var_top"], self.range_args["t_var_bottom"]+1):
                     context={"t_var_row":row}
                     context.update(self.range_args)
@@ -200,12 +200,12 @@ class YamlRegion(CodeParser, Region):
                 try:
                     self.columns=[col for col in range(self.range_args["t_var_left"], self.range_args["t_var_right"]+1)]
                 except Exception as e:
-                    raise T2WMLExceptions.InvalidYAMLFileException("You have not specified a valid set of arguments (left+right, range, or columns) for columns")
+                    raise T2WMLExceptions.ErrorInYAMLFileException("You have not specified a valid set of arguments (left+right, range, or columns) for columns")
             if not self.rows:
                 try:
                     self.rows=[row for row in range(self.range_args["t_var_top"], self.range_args["t_var_bottom"]+1)]
                 except Exception as e:
-                    raise T2WMLExceptions.InvalidYAMLFileException("You have not specified a valid set of arguments (top+bottom, range, or rows) for rows")
+                    raise T2WMLExceptions.ErrorInYAMLFileException("You have not specified a valid set of arguments (top+bottom, range, or rows) for rows")
                     
             #get rid of any duplicates before removal
             self.skip_cols=set(self.skip_cols)
@@ -240,7 +240,7 @@ class YamlRegion(CodeParser, Region):
 
         
         if len(index_pairs)<1:
-             raise T2WMLExceptions.InvalidYAMLFileException("No data cells specified")
+             raise T2WMLExceptions.ErrorInYAMLFileException("No data cells specified")
 
         return index_pairs
     
