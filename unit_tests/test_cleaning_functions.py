@@ -65,7 +65,7 @@ class TestScripts(unittest.TestCase):
     def test_make_numeric(self):
         assert make_numeric("1.977$") == str(1.977)
         assert make_numeric("1.554.677,88€", decimal=",") == str(1554677.88)
-        assert make_numeric("1.577E20") == "1.577e+20"
+        assert float(make_numeric("1.577E20")) == 1.577e+20
     
     def test_replace_regex(self):
         assert replace_regex("cats and dogs and cats", "cats", "turtles") == "turtles and dogs and turtles"
