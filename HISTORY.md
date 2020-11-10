@@ -2,13 +2,18 @@ T2WML API History
 ===================================
 Changes in version 0.0.16:
 ------------------------
+
+* in make_numeric, return an empty string if fail to parse to number, and don;t convert floats to ints
 * hot fix to how sparql queries are passed
 * added sheet to knowledge graph (optional, backwards compatible) and to_json functionality to sheet
 * bug fixes:
    * cast to path before calling as_posix
+   * because of issues with numpy 1.19.4, make sure to list numpy version in requirements and setup
 * slight output tweaks:
    * return key for unexpected errors in statement as well
    * slightly more information when wikify_region fails
+* get rid of outdated error handling that included error codes for web
+* update to valid property types: case insensitively: "globecoordinate", "quantity", "time", "string", "monolingualtext", "externalid", "wikibaseitem", "wikibaseproperty", "url" (externalid replaces externalidentifier, which was wrong)
 
 Changes in version 0.0.15:
 ------------------------
