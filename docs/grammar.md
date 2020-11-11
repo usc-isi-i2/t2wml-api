@@ -75,9 +75,13 @@ So, if someone provides a base rectangle of A1:E7 and then provides columns [A, 
 
 The arguments `skip_columns`, `skip_rows`, and `skip_cells` subtract from the selected rectangle (or selected rows+columns). 
 
-All 6 arguments can be dynamically defined. When dynamically defined, the search for matches takes place exclusively within the base rectangle. So, going back to the example of A1:E7, if the columns argument was a dynamic definition that matched G, G would nonetheless not be included because the definition would not be searched for outside the rectangle. 
+`cells` takes precedence over any other arguments. For example, if in `cells` the user specifies A3, whose value is "dog", and in skip_cells the user says to skip all cells whose value is dog, A3 will *not* be skipped. 
 
-(A side effect of this is that dynamically defining the cells argument is pointless. There is ONE exception-- if none of the other arguments are provided, ONLY cells, then only the cells specified will be used, searching across the entire sheet.)
+**Dynamic definitions**:
+
+All 6 arguments can be dynamically defined. **IMPORTANT**: When dynamically defined, the search for matches takes place exclusively within the base rectangle. So, going back to the example of A1:E7, if the columns argument was a dynamic definition that matched G, G would nonetheless not be included because the definition would not be searched for outside the rectangle. 
+
+(This is especially important to be aware of for dynamically selecting cells, because a dynamic definition will NOT find cells outside of the rectangle. For cells outside of the rectangle you must specify them explicitly.)
 
 
 #### Region example one

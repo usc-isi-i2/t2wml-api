@@ -1,20 +1,8 @@
-from string import punctuation
 from t2wml.utils.bindings import bindings
 from t2wml.parsing.yaml_parsing import CodeParser
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.parsing.t2wml_parsing import iter_on_n, t2wml_parse, T2WMLCode, iter_on_n_for_code
 from t2wml.spreadsheets.conversions import cell_range_str_to_tuples, cell_str_to_tuple
-
-
-def string_is_valid(text: str) -> bool:
-    def check_special_characters(text: str) -> bool:
-        return all(char in punctuation for char in str(text))
-    if text is None or check_special_characters(text):
-        return False
-    text = text.strip().lower()
-    if text in ["", "#na", "nan"]:
-        return False
-    return True
 
 
 class Region:
@@ -218,23 +206,11 @@ class YamlRegion(CodeParser, Region):
             skip_cells=set(self.skip_cells)
             for column in self.columns:
                 for row in self.rows:
-                    if (column, row) not in skip_cells and \
-                        string_is_valid(str(bindings.excel_sheet[row-1][column-1])):
+                    if (column, row) not in skip_cells:
                             index_pairs.append((column, row))
             
-            for cell in self.cells:
-                (col, row)=cell
-                if cell not in skip_cells and\
-                        string_is_valid(str(bindings.excel_sheet[row-1][col-1])):
-                    index_pairs.append(cell)
-
-        else:
-            for (col, row) in self.cells:
-                if col not in self.skip_cols \
-                    and row not in self.skip_rows\
-                        and (col, row) not in self.skip_cells and\
-                            string_is_valid(str(bindings.excel_sheet[row-1][col-1])):
-                    index_pairs.append((col, row))
+        for (col, row) in self.cells:
+            index_pairs.append((col, row))
 
         
 
