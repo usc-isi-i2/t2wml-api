@@ -30,18 +30,13 @@ class Project:
         if title is None:
             title=Path(directory).stem
         self.title=title
-        if isinstance(data_files, list): #backwards compatibility
-            self.data_files={}
-            for file_path in data_files:
-                full_file_path=os.path.join(self.directory, file_path)
-                sf = SpreadsheetFile(full_file_path)
-                self.data_files[file_path]=sf.sheet_names
-        else:
-            self.data_files=data_files or {}
+        self._load_data_files_from_project(data_files)
+        self._load_val_arr_from_project(yaml_sheet_associations)
+
         self.yaml_files=yaml_files or []
         self.wikifier_files=wikifier_files or []
         self.entity_files=entity_files or []
-        self.yaml_sheet_associations=yaml_sheet_associations or {}
+
         self.sparql_endpoint=sparql_endpoint
         self.warn_for_empty_cells=warn_for_empty_cells
         self.handle_calendar=handle_calendar
@@ -52,23 +47,59 @@ class Project:
         else:
             self._saved_state=_saved_state
     
+    def _load_data_files_from_project(self, data_files):
+        self.data_files=data_files or {}
+
+        if isinstance(data_files, list): #backwards compatibility version 0.0.13 and earlier
+            warnings.warn("Using a project file from version 0.0.13 or earlier, updating to match more recent formats. Support for version 0.0.13 and earlier files may be deprecated in the future", DeprecationWarning)
+            for file_path in data_files:
+                full_file_path=os.path.join(self.directory, file_path)
+                sf = SpreadsheetFile(full_file_path)
+                self.data_files[file_path]=dict(val_arr= sf.sheet_names,
+                                                selected=sf.sheet_names[0])
+        else: 
+            if data_files:
+                #backwards compatibility 0.0.16 and earlier
+                if isinstance(list(data_files.values())[0], list):
+                    warnings.warn("Using a project file from version 0.0.16 or earlier, updating to match more recent formats", DeprecationWarning)
+                    for data_file_name, sheet_names in data_files.items():
+                        self.data_files[data_file_name]=dict(val_arr= sheet_names,
+                                                    selected= sheet_names[0])
+
+                
+    
+    def _load_val_arr_from_project(self, yaml_sheet_associations):
+        self.yaml_sheet_associations=yaml_sheet_associations or {}
+        #backwards compatibility 0.0.16 and earlier
+        if yaml_sheet_associations:
+            #there must be some less horrifyingly ugly way of writing the next line, but it's one line...
+            is_version_16_or_lower = isinstance(list(list(yaml_sheet_associations.values())[0].values())[0], list)
+            if is_version_16_or_lower:
+                new_style_yaml_associations={}
+                warnings.warn("Using a project file from version 0.0.16 or earlier, updating to match more recent formats", DeprecationWarning)
+                for file_key in yaml_sheet_associations:
+                    new_style_yaml_associations[file_key]={}
+                    for sheet_key in yaml_sheet_associations[file_key]:
+                        val_arr=yaml_sheet_associations[file_key][sheet_key]
+                        new_style_yaml_associations[file_key][sheet_key]=dict(
+                            val_arr=val_arr,
+                            selected=val_arr[-1]
+                        )
+                self.yaml_sheet_associations=new_style_yaml_associations
+    
+            
+    
     def get_default_saved_state(self):
         self._saved_state={}
         if self.data_files:
-            self.current_data_file=list(self.data_files.keys())[-1] #default to most recently added file
-            self.current_sheet=self.data_files[self.current_data_file][0] #default to first sheet
-            try:
-                self.current_yaml=self.yaml_sheet_associations[self.current_data_file][self.current_sheet][0]
-            except KeyError:
-                self._saved_state["current_yaml"]=None
+            self.current_data_file=list(self.data_files.keys())[-1] #default to most recently added file 
         else:
-            self._saved_state=dict(current_data_file=None, current_sheet=None, current_yaml=None)
+            self._saved_state=dict(current_data_file=None, current_yaml=None)
         if self.wikifier_files:
             self.current_wikifiers=[self.wikifier_files[-1]] #for now, default to last
         else:
             self._saved_state["current_wikifiers"]=None
-
-    
+        
     @property
     def current_data_file(self):
         return self._saved_state["current_data_file"]
@@ -77,39 +108,44 @@ class Project:
     def current_data_file(self, new_value):
         if new_value in self.data_files:
             self._saved_state["current_data_file"]=new_value
-            self.current_sheet=self.data_files[new_value][0] #default to first sheet
         else:
             raise ValueError("Can't set current data file to file not present in project")
     
     @property
     def current_sheet(self):
-        return self._saved_state["current_sheet"]
+        return self.data_files[self.current_data_file]["selected"]
     
     @current_sheet.setter
     def current_sheet(self, new_value):
-        if new_value in self.data_files[self.current_data_file]:
-            self._saved_state["current_sheet"]=new_value
+        if new_value in self.data_files[self.current_data_file]["val_arr"]:
+            self.data_files[self.current_data_file]["selected"]=new_value
         else:
             raise ValueError("Can't set current sheet to sheet not present in current data file")
-
-        #reset yaml
-        self.current_yaml=None
 
         try:
             self.current_yaml=self.yaml_sheet_associations[self.current_data_file][self.current_sheet][-1]
         except (KeyError, IndexError):
-            pass
+            self.current_yaml=None
+
     @property
     def current_yaml(self):
-        return self._saved_state["current_yaml"]
+        try:
+            current_yaml = self.yaml_sheet_associations[self.current_data_file][self.current_sheet].get("selected", None)
+        except:
+            return None
+        if not current_yaml:
+            try:
+                current_yaml=self.yaml_sheet_associations[self.current_data_file][self.current_sheet][-1]
+            except IndexError:
+                current_yaml=None
+        return current_yaml
     
     @current_yaml.setter
     def current_yaml(self, new_value):
         if new_value is None:
-            self._saved_state["current_yaml"]=None
             return
-        if new_value in self.yaml_sheet_associations[self.current_data_file][self.current_sheet]:
-            self._saved_state["current_yaml"]=new_value
+        if new_value in self.yaml_sheet_associations[self.current_data_file][self.current_sheet]["val_arr"]:
+            self.yaml_sheet_associations[self.current_data_file][self.current_sheet]["selected"]=new_value
         else:
             raise ValueError("Can't set current yaml to a yaml not associated with the current sheet")
     
@@ -132,6 +168,14 @@ class Project:
             file_path=full_path.relative_to(root)
         return Path(file_path).as_posix()
 
+    def update_current_saved_state(self):
+        self._saved_state=dict(
+            current_data_file=self.current_data_file,
+            current_sheet=self.current_sheet,
+            current_yaml=self.current_yaml,
+            current_wikifiers=self.current_wikifiers
+        )
+
     def update_saved_state(self, current_data_file=None, current_sheet=None, current_yaml=None, current_wikifiers=None):
         if current_data_file:
             self.current_data_file=self.normalize_path(current_data_file)
@@ -144,6 +188,8 @@ class Project:
         
         if current_wikifiers:
             self.current_wikifiers=[self.normalize_path(wf) for wf in current_wikifiers]
+        
+        self.update_current_saved_state()
 
     def _add_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         if os.path.isabs(file_path):
@@ -189,7 +235,7 @@ class Project:
         else:
             full_file_path=Path(self.directory) /  file_path
             sf = SpreadsheetFile(full_file_path)
-            self.data_files[file_path]=sf.sheet_names
+            self.data_files[file_path]=dict(val_arr=sf.sheet_names, selected=sf.sheet_names[0])
         return file_path
     
     def add_yaml_file(self, file_path, data_file=None, sheet_name=None, 
@@ -215,11 +261,11 @@ class Project:
                 if yaml_path in self.yaml_sheet_associations[data_path][sheet_name]:
                     print("that yaml association has already been added")
                 else:
-                    self.yaml_sheet_associations[data_path][sheet_name].append(yaml_path)
+                    self.yaml_sheet_associations[data_path][sheet_name]["val_arr"].append(yaml_path)
             except KeyError:
-                self.yaml_sheet_associations[data_path][sheet_name]=[yaml_path]
+                self.yaml_sheet_associations[data_path][sheet_name]=dict(val_arr=[yaml_path], selected=yaml_path)
         else:
-            self.yaml_sheet_associations[data_path]={sheet_name:[yaml_path]}
+            self.yaml_sheet_associations[data_path]={sheet_name:dict(val_arr=[yaml_path], selected=yaml_path)}
     
     def add_wikifier_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
