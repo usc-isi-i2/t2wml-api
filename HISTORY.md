@@ -1,8 +1,13 @@
 T2WML API History
 ===================================
+Changes in version 0.0.17:
+------------------------
+* add support for leave/replace/add ethiopian calendar to gregorian
+* change order of precedence when parsing regions - `cells` now supersedes all else
+* change to project file format- save selected yamls and sheets 
+
 Changes in version 0.0.16:
 ------------------------
-
 * in make_numeric, return an empty string if fail to parse to number, and don;t convert floats to ints
 * hot fix to how sparql queries are passed
 * added sheet to knowledge graph (optional, backwards compatible) and to_json functionality to sheet
