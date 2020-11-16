@@ -210,3 +210,8 @@ class EthiopianDateConverter(object):
 
         return ethiopian_year, ethiopian_month, ethiopian_date
     
+    @classmethod
+    def iso_to_gregorian_iso(cls, iso):
+        dt = datetime.datetime.fromisoformat(iso)
+        gregorian=cls.date_to_gregorian(dt)
+        return gregorian.isoformat()

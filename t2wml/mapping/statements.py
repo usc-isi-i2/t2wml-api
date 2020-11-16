@@ -1,19 +1,37 @@
+from copy import deepcopy
 from collections import defaultdict
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.parsing.t2wml_parsing import iter_on_n_for_code, T2WMLCode
 from t2wml.parsing.classes import ReturnClass
 from t2wml.spreadsheets.conversions import to_excel
 from t2wml.wikification.utility_functions import get_property_type
+from t2wml.utils.ethiopian_date import EthiopianDateConverter
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES, parse_datetime
 from t2wml.settings import t2wml_settings
 
+def handle_ethiopian_calendar(node, add_node_list):
+    calendar = node.__dict__.get("calendar")
+    if calendar in ["Q215271", "Ethiopian"]:
+        if t2wml_settings.handle_calendar!="leave":
+            try:
+                gregorian_value = EthiopianDateConverter.iso_to_gregorian_iso(node.value)
+                if t2wml_settings.handle_calendar=="replace":
+                    node.value=gregorian_value
+                if t2wml_settings.handle_calendar=="add":
+                    new_node=Node(**deepcopy(node.__dict__), validate=False)
+                    new_node.value=gregorian_value
+                    add_node_list.append(new_node)
+            except Exception as e:
+                node._errors["calendar"]="Failed to convert to gregorian calendar: "+str(e)
+
 class Node:
-    def __init__(self, property=None, value=None, **kwargs):
+    def __init__(self, property=None, value=None, validate=True, **kwargs):
         self._errors = defaultdict(str)
         self.property = property
         self.value = value
         self.__dict__.update(kwargs)
-        self.validate()
+        if validate:
+            self.validate()
 
     @property
     def errors(self):
@@ -73,6 +91,9 @@ class Node:
                 self.format=used_format
         except:
             self._errors["value"] += "Invalid datetime: "+str(self.value)
+        
+
+
 
     def serialize(self):
         return_dict = dict(self.__dict__)
@@ -101,6 +122,7 @@ class Statement(Node):
         except AttributeError:
             return False
 
+            
     def validate(self):
         try:
             item = self.item
@@ -109,11 +131,15 @@ class Statement(Node):
 
         self.node_class.validate(self)
 
+        gregorian_nodes=[]
+
         if self.has_qualifiers:
             qual_errors = {}
             new_qualifiers = []
             for i, q in enumerate(self.qualifier):
                 node_qual = self.node_class(context=self.context, **q)
+                handle_ethiopian_calendar(node_qual, gregorian_nodes)
+
                 if len(node_qual._errors):
                     qual_errors[str(i)] = node_qual.errors
                 if node_qual._errors["property"] or node_qual._errors["value"]:
@@ -124,6 +150,10 @@ class Statement(Node):
             if qual_errors:
                 self._errors["qualifier"] = qual_errors
             self.qualifier = new_qualifiers
+        
+        handle_ethiopian_calendar(self, gregorian_nodes)
+        if len(gregorian_nodes):
+            self.qualifier = self.qualifier+gregorian_nodes
 
         if self.has_references:
             for i, r in enumerate(self.references):
