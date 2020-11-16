@@ -388,6 +388,7 @@ example: `normalize_whitespace("Hello  you   hi\t this")` becomes "Hello you hi 
 `replace_regex(input, regex, replacement="", count=0)`: replace_regex uses underlying python [re.sub](https://docs.python.org/2/library/re.html#re.sub) functionality, `re.sub(regex, replacement, input, count)`. You can test that your regex performs as expected on websites like [regex101.com](https://regex101.com/) (make sure to select Python flavor and substitution). The default behavior for replacement is to replace with the empty string, ie remove. When count=0, it replaces everywhere. No `where` argument is provided, if you'd like to remove from the end, etc, you can arrange to do so with regex tokens like $ for end of string.
 
 examples:
+
 * `replace_regex("cats and dogs and cats", "cats", "turtles")` returns "turtles and dogs and turtles"
 * `replace_regex(" 30 456 e", "[^\d.-]", "")` returns "30456"
 * `replace_regex("123456790 ABC#%? .(朱惠英)", r'[^\x00-\x7f]', "")` returns "123456790 ABC#%? .()"
@@ -397,6 +398,7 @@ examples:
 `remove_numbers(input, where=everywhere)`: remove the digits 0-9
 
 examples: 
+
 * `remove_numbers("123 hello1234hi 123")` returns " hellohi "
 * `remove_numbers("123 hello1234hi 123", where=start)` returns " hello1234hi 123"
 
@@ -420,6 +422,7 @@ example: `truncate("QWERTYUIOPASDFGHJKL", 10)` returns "QWERTYUIOP"
 `pad(input, length, text, where=start)`: where can only be start or end. the main argument is a length in number of characters, which strings shorter than that length will be padded to. text is the string to be used in the padding, eg "\t". if the number of characters does not divide exactly then the cut-off depends on where. if where is start, the end of the pad string will be cut off, if where is end, the start of the pad string will be cut off. 
 
 examples: 
+
 * `pad("12345678", 11, "xo", where=start)` returns "xox12345678"
 * `pad("12345678", 11, "xo", where=end)` returns "12345678oxo"
 
@@ -430,6 +433,7 @@ example: `ftfy(schÃ¶n)` returns "schön"
 `make_numeric(input, decimal=".")`: makes the value of a cell numeric by removing non-numeric characters (except for `-`, `e`, and `.`). The decimal argument allows numeric formats which use a different decimal characer than `.`. Support for LaTeX style numbers is not yet supported but may be added.
 
 examples:
+
 *  `make_numeric("1.977$")` returns "1.977"
 * `make_numeric("1.554.677,88€", decimal=",")` returns "1554677.88"
 * `make_numeric("1.577E20")` returns "1.577e+20" (python scientific notation)
