@@ -61,7 +61,7 @@ class Project:
             if data_files:
                 #backwards compatibility 0.0.16 and earlier
                 if isinstance(list(data_files.values())[0], list):
-                    warnings.warn("Using a project file from version 0.0.16 or earlier, updating to match more recent formats", DeprecationWarning)
+                    #warnings.warn("Using a project file from version 0.0.16 or earlier, updating to match more recent formats", DeprecationWarning)
                     for data_file_name, sheet_names in data_files.items():
                         self.data_files[data_file_name]=dict(val_arr= sheet_names,
                                                     selected= sheet_names[0])
@@ -76,7 +76,7 @@ class Project:
             is_version_16_or_lower = isinstance(list(list(yaml_sheet_associations.values())[0].values())[0], list)
             if is_version_16_or_lower:
                 new_style_yaml_associations={}
-                warnings.warn("Using a project file from version 0.0.16 or earlier, updating to match more recent formats", DeprecationWarning)
+                #warnings.warn("Using a project file from version 0.0.16 or earlier, updating to match more recent formats", DeprecationWarning)
                 for file_key in yaml_sheet_associations:
                     new_style_yaml_associations[file_key]={}
                     for sheet_key in yaml_sheet_associations[file_key]:
