@@ -258,7 +258,7 @@ class Project:
             raise ValueError("That yaml file has not been added to project yet")
         if data_path in self.yaml_sheet_associations:
             try:
-                if yaml_path in self.yaml_sheet_associations[data_path][sheet_name]:
+                if yaml_path in self.yaml_sheet_associations[data_path][sheet_name]["val_arr"]:
                     print("that yaml association has already been added")
                 else:
                     self.yaml_sheet_associations[data_path][sheet_name]["val_arr"].append(yaml_path)
