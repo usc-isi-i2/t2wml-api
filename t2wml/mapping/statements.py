@@ -20,6 +20,8 @@ def handle_ethiopian_calendar(node, add_node_list):
                 if t2wml_settings.handle_calendar=="add":
                     new_node=Node(**deepcopy(node.__dict__), validate=False)
                     new_node.value=gregorian_value
+                    new_node.__dict__["calendar"]="Q1985727"
+                    #TODO: handle precision
                     add_node_list.append(new_node)
             except Exception as e:
                 node._errors["calendar"]="Failed to convert to gregorian calendar: "+str(e)

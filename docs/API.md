@@ -424,6 +424,7 @@ The settings are:
 * `wikidata_provider`: As discussed above in the WikidataProvider section. When set to None, a default wikidata_provider instance will be created, using the SparqlProvider class with a sparql_endpoint set to the sparql_endpoint in settings
 * `cache_data_files_folder`: storage location for cached data files. If not provided, data files will not be cached.
 * `warn_for_empty_cells`: empty cells in qualifiers are always skipped in output. This setting controls whether the presence of empty cells in qualifiers is treated as an error and added to the KnowledgeGraph errors, or such cells are simply skipped silently.
+* `handle_calendar`: Options for handling non-Gregorian calendars (currently only Ethiopian is supported). accepts: `leave` (leave as-is), `replace` (replace with Gregorian), `add` (add a qualifier to the statement with the Gregorian calendar value)
 
 example code:
 
