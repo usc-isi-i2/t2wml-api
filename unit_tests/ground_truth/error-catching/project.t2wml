@@ -1,0 +1,28 @@
+_saved_state:
+  current_data_file: input_1.csv
+  current_sheet: input_1.csv
+  current_wikifiers:
+  - wikifier_1.csv
+  current_yaml: error.yaml
+cache_id: c178c61a-bafd-47ae-a958-4fc47ecbd414
+data_files:
+  input_1.csv:
+    selected: input_1.csv
+    val_arr:
+    - input_1.csv
+entity_files:
+- homicide_properties.tsv
+handle_calendar: leave
+sparql_endpoint: https://query.wikidata.org/bigdata/namespace/wdq/sparql
+title: error-catching
+warn_for_empty_cells: false
+wikifier_files:
+- wikifier_1.csv
+yaml_files:
+- error.yaml
+yaml_sheet_associations:
+  input_1.csv:
+    input_1.csv:
+      selected: error.yaml
+      val_arr:
+      - error.yaml
