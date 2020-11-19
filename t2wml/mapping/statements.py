@@ -226,7 +226,7 @@ class NodeForEval(Node):
     def validate(self):
         try:
             (col, row)=self.parse_key("value")
-            if col and row:
+            if col is not None and row is not None:
                 self.context.update({"t_var_qcol":col+1, "t_var_qrow":row+1})
             else:
                 self.context.update({"t_var_qcol":None, "t_var_qrow":None})
