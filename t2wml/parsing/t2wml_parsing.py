@@ -5,6 +5,7 @@ from t2wml.parsing.constants import char_dict
 from t2wml.parsing.template_functions import functions_dict
 from t2wml.parsing.cleaning_functions import cleaning_functions_dict
 
+
 eval_globals = dict()
 eval_globals.update(char_dict)
 eval_globals.update(functions_dict)
@@ -20,6 +21,7 @@ class T2WMLCode:
         '''
         self.code = code
         self.has_n = "t_var_n" in code_str
+        self.has_q_var = "t_var_q" in code_str
         self.sheet_dependent = "t_var_sheet" in code_str
         self.is_variable = "t_var" in code_str
         self.code_str = code_str
@@ -58,6 +60,10 @@ def iter_on_n_for_code(input, context={}):
     if isinstance(input, str):
         return ReturnClass(None, None, input)
     if isinstance(input, T2WMLCode):
+        if input.has_q_var:
+            test=context.get("t_var_qrow", None)
+            if test is None:
+                raise ValueError("Can't use qcol/qrow if qualifier value isn't tied to a cell")
         if input.has_n:
             return iter_on_n(input.code, context)
         return t2wml_parse(input.code, context)

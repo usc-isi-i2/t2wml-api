@@ -139,16 +139,19 @@ class Statement(Node):
             qual_errors = {}
             new_qualifiers = []
             for i, q in enumerate(self.qualifier):
-                node_qual = self.node_class(context=self.context, **q)
-                handle_ethiopian_calendar(node_qual, gregorian_nodes)
+                try:
+                    node_qual = self.node_class(context=self.context, **q)
+                    handle_ethiopian_calendar(node_qual, gregorian_nodes)
 
-                if len(node_qual._errors):
-                    qual_errors[str(i)] = node_qual.errors
-                if node_qual._errors["property"] or node_qual._errors["value"]:
-                    pass  # discard qualifier
-                    # new_qualifiers.append(node_qual) #don't discard qualifier
-                else:
-                    new_qualifiers.append(node_qual)
+                    if len(node_qual._errors):
+                        qual_errors[str(i)] = node_qual.errors
+                    if node_qual._errors["property"] or node_qual._errors["value"]:
+                        pass  # discard qualifier
+                        # new_qualifiers.append(node_qual) #don't discard qualifier
+                    else:
+                        new_qualifiers.append(node_qual)
+                except Exception as e:
+                    self._errors["qualifier"]={"fatal": str(e)}
             if qual_errors:
                 self._errors["qualifier"] = qual_errors
             self.qualifier = new_qualifiers
@@ -182,51 +185,61 @@ class NodeForEval(Node):
         self.cells = {}
         super().__init__(property, value, **kwargs)
 
-    def validate(self):
-        keys = list(self.__dict__.keys())
-        for key in keys:
-            if isinstance(self.__dict__[key], T2WMLCode):
+    def parse_key(self, key):
+        cell_indices=None, None
+        if isinstance(self.__dict__[key], T2WMLCode):
+            try:
+                entry_parsed = iter_on_n_for_code(
+                    self.__dict__[key], self.context)
                 try:
-                    entry_parsed = iter_on_n_for_code(
-                        self.__dict__[key], self.context)
-                    try:
-                        value = entry_parsed.value
-                    except AttributeError:
-                        if not isinstance(entry_parsed, ReturnClass): #sometimes parses to a string or number, not a returnclass
-                            value=str(entry_parsed)
-                        else:
-                            value=None
-                    if value is None:
-                        self._errors[key] += "Failed to resolve"
-                        self.__dict__.pop(key)
-                        # self.__dict__[key]=self.__dict__[key].unmodified_str
-                    elif value=="":
-                        if t2wml_settings.warn_for_empty_cells:
-                            self._errors[key] += "Empty cell"
-                        self.__dict__.pop(key)
+                    value = entry_parsed.value
+                except AttributeError:
+                    if not isinstance(entry_parsed, ReturnClass): #sometimes parses to a string or number, not a returnclass
+                        value=str(entry_parsed)
                     else:
-                        self.__dict__[key] = value
-
-                    try:
-                        cell = to_excel(entry_parsed.col, entry_parsed.row)
-                        self.cells[key] = cell
-                    except AttributeError:
-                        pass
-
-                except Exception as e:
-                    self._errors[key] += str(e)
+                        value=None
+                if value is None:
+                    self._errors[key] += "Failed to resolve"
                     self.__dict__.pop(key)
                     # self.__dict__[key]=self.__dict__[key].unmodified_str
+                elif value=="":
+                    if t2wml_settings.warn_for_empty_cells:
+                        self._errors[key] += "Empty cell"
+                    self.__dict__.pop(key)
+                else:
+                    self.__dict__[key] = value
 
+                try:
+                    cell_indices= (entry_parsed.col, entry_parsed.row)
+                    cell = to_excel(entry_parsed.col, entry_parsed.row)
+                    self.cells[key] = cell
+                except AttributeError:
+                    pass
+
+            except Exception as e:
+                self._errors[key] += str(e)
+                self.__dict__.pop(key)
+                # self.__dict__[key]=self.__dict__[key].unmodified_str
+                
+        return cell_indices
+
+    def validate(self):
+        try:
+            (col, row)=self.parse_key("value")
+            if col and row:
+                self.context.update({"t_var_qcol":col+1, "t_var_qrow":row+1})
+            else:
+                self.context.update({"t_var_qcol":None, "t_var_qrow":None})
+        except Exception as e:
+            print(e)
+            raise e
+        for key in list(self.__dict__.keys()):
+            self.parse_key(key)
         Node.validate(self)
 
     def serialize(self):
         return_dict = super().serialize()
         return_dict.pop("context")
-        #return_dict.pop("cells")
-        #cell = self.cells.get("value")
-        #if cell:
-        #    return_dict["cell"] = cell
         return return_dict
 
 
@@ -241,8 +254,4 @@ class EvaluatedStatement(Statement, NodeForEval):
     def serialize(self):
         return_dict = super().serialize()
         return_dict.pop("cell", None)
-
-        #cell = self.cells.get("subject")
-        #if cell:
-        #    return_dict["cell"] = cell
         return return_dict
