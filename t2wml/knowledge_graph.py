@@ -15,7 +15,7 @@ class KnowledgeGraph:
     Attributes:
 
         statements(dict): A dictionary, keys cells (eg "A3"), 
-            containing json-serializable statements (value, property, item, qualifier, reference)
+            containing json-serializable statements (value, property, subject, qualifier, reference)
         errors (dict): A dictionary, keys cells (eg "A3"), 
             values the key for the problematic entity within the yaml (eg, value, item, qualifier)
             within qualifier, the key is the index of the qualifier in the qualifier array,

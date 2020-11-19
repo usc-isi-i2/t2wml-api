@@ -69,10 +69,10 @@ class TemplateParser(CodeParser):
 
     def get_code_replacement_for_list(self, in_list):
         new_list = []
-        for item in in_list:
-            if isinstance(item, dict):
-                new_dict = dict(item)
-                for key in item:
+        for thing in in_list:
+            if isinstance(thing, dict):
+                new_dict = dict(thing)
+                for key in thing:
                     new_dict[key] = self.get_code_replacement(new_dict[key])
                 new_list.append(new_dict)
             else:
@@ -156,7 +156,7 @@ def validate_yaml(yaml_file_path):
         if 'template' not in yaml_file_data['statementMapping']:
             errors += "Key 'template' (statementMapping -> X) not found\n"
         else:
-            allowed_keys = {'item', 'property', 'value', 'qualifier', 'reference',
+            allowed_keys = {'subject', 'property', 'value', 'qualifier', 'reference',
                             'unit', 'lower-bound', 'upper-bound',  # Quantity
                             # Coordinate (+precision below)
                             'longitude', 'latitude', 'globe',
@@ -165,17 +165,24 @@ def validate_yaml(yaml_file_path):
                             }
             yaml_template = yaml_file_data['statementMapping']['template']
             if isinstance(yaml_template, dict):
+                try:
+                    #backwards compatibility for versions before 0.0.18
+                    print("DeprecationWarning: using item key instead of subject key")
+                    subject= yaml_template.pop("item")
+                    yaml_template["subject"]=subject
+                except KeyError:
+                    pass
+
                 for key in yaml_template.keys():
                     if key not in allowed_keys:
                         errors += "Unrecognized key '" + key + \
                             "' (statementMapping -> template -> " + key + ") found\n"
 
-                for required_key in ['item', 'property', 'value']:
+                for required_key in ['subject', 'property', 'value']:
                     if required_key not in yaml_template:
                         errors += "Key '" + required_key + \
                             "' (statementMapping -> template -> X) not found\n"
 
-                # allowed_keys.pop("item") #remove item, which isn't allowed in attributes?
                 attributes = ['qualifier', 'reference']
                 for attribute in attributes:
                     if attribute in yaml_template:

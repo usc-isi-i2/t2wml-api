@@ -127,9 +127,9 @@ class Statement(Node):
             
     def validate(self):
         try:
-            item = self.item
+            subject = self.subject
         except AttributeError:
-            self._errors["item"] += "Missing item"
+            self._errors["subject"] += "Missing subject"
 
         self.node_class.validate(self)
 
@@ -161,7 +161,7 @@ class Statement(Node):
             for i, r in enumerate(self.references):
                 self.reference[i] = self.node_class(context=self.context, **r)
 
-        if len(set(["property", "value", "item"]).intersection(self._errors.keys())):
+        if len(set(["property", "value", "subject"]).intersection(self._errors.keys())):
             raise T2WMLExceptions.TemplateDidNotApplyToInput(
                 errors=self._errors)
 
@@ -223,10 +223,10 @@ class NodeForEval(Node):
     def serialize(self):
         return_dict = super().serialize()
         return_dict.pop("context")
-        return_dict.pop("cells")
-        cell = self.cells.get("value")
-        if cell:
-            return_dict["cell"] = cell
+        #return_dict.pop("cells")
+        #cell = self.cells.get("value")
+        #if cell:
+        #    return_dict["cell"] = cell
         return return_dict
 
 
@@ -242,7 +242,7 @@ class EvaluatedStatement(Statement, NodeForEval):
         return_dict = super().serialize()
         return_dict.pop("cell", None)
 
-        cell = self.cells.get("item")
-        if cell:
-            return_dict["cell"] = cell
+        #cell = self.cells.get("subject")
+        #if cell:
+        #    return_dict["cell"] = cell
         return return_dict
