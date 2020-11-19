@@ -167,8 +167,8 @@ def validate_yaml(yaml_file_path):
             if isinstance(yaml_template, dict):
                 try:
                     #backwards compatibility for versions before 0.0.18
-                    print("DeprecationWarning: using item key instead of subject key")
                     subject= yaml_template.pop("item")
+                    print("DeprecationWarning: using item key instead of subject key")
                     yaml_template["subject"]=subject
                 except KeyError:
                     pass
