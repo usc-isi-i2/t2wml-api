@@ -109,11 +109,11 @@ region:
 
 The template is used to build statements for each cell in the region.
 
-It must have the keys `item`, `property`, and `value`.
+It must have the keys `subject`, `property`, and `value`.
 
 It can also optionally have the attribute keys `qualifier` and `reference`, as well as the optional keys `calendar`, `precision`, `time_zone`, `format`, `lang`, `longitude`, `latitude`, `unit`.
 
-`qualifier` and `reference` both must be lists of dictionaries. the allowed keys in their dictionaries are `item`, `property`, `value`, as well as the optional keys above.
+`qualifier`  must be a list of dictionaries. the required keys in their dictionaries are  `property` and `value`, and the same optional keys as above are allowed.
 
 The values for the various keys can be defined in the T2WML language (`=value[$col, $row]` is a common occurence for the key `value`, for example).
 
@@ -122,7 +122,7 @@ The values for the various keys can be defined in the T2WML language (`=value[$c
 `````
 template: 
      value: =value[$col, $row]
-     item: Q1000
+     subject: Q1000
      property: P123
      qualifier:
            - property: P585
@@ -316,7 +316,7 @@ Example:
 
 The regex function uses Python's [re.search() function](https://docs.python.org/3/library/re.html) and hence Python's regex syntax. You can [test your regex](https://regex101.com/) to check that it is returning the results you expect.
 
-**WARNING**: Because of the need to [conform to Yaml standards](#yamlstandards), a regex containing a colon *followed by whitespace* `: `, or whitespace followed by an octothorpe ` #`, requires special handling. The recommended solution is to not use actual whitespace, but rather the whitespace character `\s`, eg: `:\s`, `\s#`. You can also single-quote the entire line while double-quoting the regex string, eg: `item '=regex(value[B, 2], "profile: (.*) \d{4}", 1)'`.
+**WARNING**: Because of the need to [conform to Yaml standards](#yamlstandards), a regex containing a colon *followed by whitespace* `: `, or whitespace followed by an octothorpe ` #`, requires special handling. The recommended solution is to not use actual whitespace, but rather the whitespace character `\s`, eg: `:\s`, `\s#`. You can also single-quote the entire line while double-quoting the regex string, eg: `value: '=regex(value[B, 2], "profile: (.*) \d{4}", 1)'`.
 
 #### Other
 <span id="other"></span>
@@ -333,7 +333,7 @@ It then looks up this string in the item table. If the string is not present in 
 
 Obviously the preferred way to get an item from a string is to use the wikifier. `get_item` was created for situations where simply grabbing the string from a cell was not sufficient, for example, if it is necessary to use a regex on the cell to get the needed string.
 
-example: `item: '=get_item(regex(value[B, 2], "profile: (.*) \d{4}", 1))'`
+example: `subject: '=get_item(regex(value[B, 2], "profile: (.*) \d{4}", 1))'`
 
 
 `concat(*args)`
@@ -353,7 +353,7 @@ For arguments that are ranges, rather than single values, concat will join every
 
 Would return the string “No-Fire-Maybe-Water-implies-Q6581072-Q6581097”
 
-Concat does not preserve row/column source information. This means that concat does not return information for highlighting in the spreadsheet, unlike string modifiers. (for example, if you define item in your template to be concat(something), you won’t get blue highlighting) 
+Concat does not preserve row/column source information. This means that concat does not return information for highlighting in the spreadsheet, unlike string modifiers. (for example, if you define subject in your template to be concat(something), you won’t get blue highlighting) 
 
 
 ### Miscellaneous

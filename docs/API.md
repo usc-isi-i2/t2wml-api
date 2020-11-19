@@ -202,13 +202,13 @@ All StatementMappers should implement the base template StatementMapper, which d
 * `get_all_statements(self, sheet, wikifier)` : returns statements, cell_errors, metadata. By default calls `get_cell_statement` in a loop using `iterator` . Does not need to be redefined unless user wants to customize something specific.
 * `do_init(self, sheet, wikifier)` : optional. used for any initalization needed before running get_cell_statement or get_all_statements. the argument `do_init=True` in get_cell_statement allows skipping the init function if calling from get_all_statements (it is set to false in get_all_statements). Other than passing sheet and wikifier, any other arguments needed for do_init would need to be set as properties of self and then accessed.
 
-a `statement` is a dictionary representation of the statement for a cell. It must define `item` , `property` , and `value` , and can also define a list of qualifiers ( `qualifier` ) and a list of references ( `reference` ), as well as any additional optional keys such as `unit` . 
+a `statement` is a dictionary representation of the statement for a cell. It must define `subject` , `property` , and `value` , and can also define a list of qualifiers ( `qualifier` ) and a list of references ( `reference` ), as well as any additional optional keys such as `unit` . 
 
 Example statement:
 
 ```js 
 {
-    "item": "Q190",
+    "subject": "Q190",
     "value": 3,
     "property": "P123",
     "qualifier": [
@@ -217,13 +217,13 @@ Example statement:
 }
 ```
 
-`error` is a dictionary, containing information about any errors that occured while processing the cell, matched to the key of the error's location in the result statement. For example, if the cell attempts to set a value for item that is invalid, error should contain "item":error message. If the property of a qualifier is invalid, that would be "qualifier":{index:{"property":error message}}
+`error` is a dictionary, containing information about any errors that occured while processing the cell, matched to the key of the error's location in the result statement. For example, if the cell attempts to set a value for subject that is invalid, error should contain "subject":"error message". If the property of a qualifier is invalid, that would be "qualifier":{index:{"property":error message}}
 
 Example error:
 
 ```js 
 {
-    "item": "Not found",
+    "subject": "Not found",
     "qualifier": [
         2: {
             "property": invalid date format
@@ -264,7 +264,7 @@ kg=KnowledgeGraph.generate(ym, sh, wf)
 
 <span id="custommapper"></span>
 
-Here's a simple custom StatementMapper class, for a sheet where the item is always next to the value and the property is a known constant. 
+Here's a simple custom StatementMapper class, for a sheet where the subject is always next to the value and the property is a known constant. 
 
 ```python 
 from t2wml.mapping.statement_mapper import StatementMapper
@@ -282,9 +282,9 @@ class SimpleSheetMapper(StatementMapper):
         statement={}
         try:
             item=wikifier.item_table.get_item(col-1, row)
-            statement["item"]=item
+            statement["subject"]=item
         except Exception as e:
-            error["item"]=str(e)
+            error["subject"]=str(e)
         
         try:
             value=sheet[col, row]
