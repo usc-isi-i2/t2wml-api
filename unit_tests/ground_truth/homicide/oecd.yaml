@@ -10,7 +10,7 @@ statementMapping:
         - =contains(value[$col, $row], "c") 
   template:
     # The country is extracted from B2
-    item: '=get_item(regex(value[B, 2], "profile: (.*) \d{4}", 1))' 
+    subject: '=get_item(regex(value[B, 2], "profile: (.*) \d{4}", 1))' 
     property: =item[B, $row, "property"]
     value: =replace_regex(value[$col, $row], "[^\d.-]", "")
     unit: =item[B, $row, "unit"] or item[C, $row, "unit"]
