@@ -1,5 +1,6 @@
 from copy import deepcopy
 from collections import defaultdict
+from t2wml.parsing.region import YamlRegion
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.parsing.t2wml_parsing import iter_on_n_for_code, T2WMLCode
 from t2wml.parsing.classes import ReturnClass
@@ -8,6 +9,10 @@ from t2wml.wikification.utility_functions import get_property_type
 from t2wml.utils.ethiopian_date import EthiopianDateConverter
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES, parse_datetime
 from t2wml.settings import t2wml_settings
+
+def fake_iter():
+    yield None, None
+
 
 def handle_ethiopian_calendar(node, add_node_list):
     calendar = node.__dict__.get("calendar")
@@ -123,50 +128,9 @@ class Statement(Node):
             return True
         except AttributeError:
             return False
-
-            
+    
     def validate(self):
-        try:
-            subject = self.subject
-        except AttributeError:
-            self._errors["subject"] += "Missing subject"
-
-        self.node_class.validate(self)
-
-        gregorian_nodes=[]
-
-        if self.has_qualifiers:
-            qual_errors = {}
-            new_qualifiers = []
-            for i, q in enumerate(self.qualifier):
-                try:
-                    node_qual = self.node_class(context=self.context, **q)
-                    handle_ethiopian_calendar(node_qual, gregorian_nodes)
-
-                    if len(node_qual._errors):
-                        qual_errors[str(i)] = node_qual.errors
-                    if node_qual._errors["property"] or node_qual._errors["value"]:
-                        pass  # discard qualifier
-                        # new_qualifiers.append(node_qual) #don't discard qualifier
-                    else:
-                        new_qualifiers.append(node_qual)
-                except Exception as e:
-                    self._errors["qualifier"]={"fatal": str(e)}
-            if qual_errors:
-                self._errors["qualifier"] = qual_errors
-            self.qualifier = new_qualifiers
-        
-        handle_ethiopian_calendar(self, gregorian_nodes)
-        if len(gregorian_nodes):
-            self.qualifier = self.qualifier+gregorian_nodes
-
-        if self.has_references:
-            for i, r in enumerate(self.references):
-                self.reference[i] = self.node_class(context=self.context, **r)
-
-        if len(set(["property", "value", "subject"]).intersection(self._errors.keys())):
-            raise T2WMLExceptions.TemplateDidNotApplyToInput(
-                errors=self._errors)
+        raise NotImplementedError
 
     def serialize(self):
         return_dict = super().serialize()
@@ -186,7 +150,8 @@ class NodeForEval(Node):
         super().__init__(property, value, **kwargs)
 
     def parse_key(self, key):
-        cell_indices=None, None
+        if key=="region": #skip
+            return 
         if isinstance(self.__dict__[key], T2WMLCode):
             try:
                 entry_parsed = iter_on_n_for_code(
@@ -210,7 +175,6 @@ class NodeForEval(Node):
                     self.__dict__[key] = value
 
                 try:
-                    cell_indices= (entry_parsed.col, entry_parsed.row)
                     cell = to_excel(entry_parsed.col, entry_parsed.row)
                     self.cells[key] = cell
                 except AttributeError:
@@ -220,26 +184,18 @@ class NodeForEval(Node):
                 self._errors[key] += str(e)
                 self.__dict__.pop(key)
                 # self.__dict__[key]=self.__dict__[key].unmodified_str
-                
-        return cell_indices
+
 
     def validate(self):
-        try:
-            (col, row)=self.parse_key("value")
-            if col is not None and row is not None:
-                self.context.update({"t_var_qcol":col+1, "t_var_qrow":row+1})
-            else:
-                self.context.update({"t_var_qcol":None, "t_var_qrow":None})
-        except Exception as e:
-            print(e)
-            raise e
         for key in list(self.__dict__.keys()):
             self.parse_key(key)
         Node.validate(self)
 
+
     def serialize(self):
         return_dict = super().serialize()
         return_dict.pop("context")
+        return_dict.pop("region", None)
         return return_dict
 
 
@@ -249,9 +205,67 @@ class EvaluatedStatement(Statement, NodeForEval):
         return NodeForEval
 
     def validate(self):
-        Statement.validate(self)
+        try:
+            subject = self.subject
+        except AttributeError:
+            self._errors["subject"] += "Missing subject"
+
+        self.node_class.validate(self)
+
+        gregorian_nodes=[]
+
+        if self.has_qualifiers:
+            qual_errors = {}
+            new_qualifiers = []
+            for i, q in enumerate(self.qualifier):
+                region=q.get("region", None)
+                if region:
+                    iterator=YamlRegion(region, context=self.context)
+                else:
+                    iterator=fake_iter()
+                for col, row in iterator:
+                    try:
+                        q_context=dict(t_var_qrow=row, t_var_qcol=col)
+                        q_context.update(self.context)
+                        node_qual = self.node_class(context=q_context, **q)
+                        handle_ethiopian_calendar(node_qual, gregorian_nodes)
+
+                        if len(node_qual._errors):
+                            qual_errors[str(i)] = node_qual.errors
+                        
+                        try:
+                            node_qual.value
+                        except AttributeError:
+                            if t2wml_settings.warn_for_empty_cells:
+                                node_qual._errors["value"] += "Empty cell"
+                            continue #either way, discard qualifier
+
+                        if node_qual._errors["property"] or node_qual._errors["value"]:
+                            continue  # discard qualifier
+                        
+                        else:
+                            new_qualifiers.append(node_qual)
+                    except Exception as e:
+                        self._errors["qualifier"]={"fatal": str(e)}
+            if qual_errors:
+                self._errors["qualifier"] = qual_errors
+            self.qualifier = new_qualifiers
+        
+        handle_ethiopian_calendar(self, gregorian_nodes)
+        if len(gregorian_nodes):
+            self.qualifier = self.qualifier+gregorian_nodes
+
+        if self.has_references:
+            for i, r in enumerate(self.references):
+                self.reference[i] = self.node_class(context=self.context, **r)
+
+        if len(set(["property", "value", "subject"]).intersection(self._errors.keys())):
+            raise T2WMLExceptions.TemplateDidNotApplyToInput(
+                errors=self._errors)
 
     def serialize(self):
         return_dict = super().serialize()
         return_dict.pop("cell", None)
         return return_dict
+
+

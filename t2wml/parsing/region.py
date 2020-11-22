@@ -18,7 +18,8 @@ class Region:
 
 
 class YamlRegion(CodeParser, Region):
-    def __init__(self, yaml_data):
+    def __init__(self, yaml_data, context=None):
+        self.context= context or {}
         self.yaml_data=yaml_data
         self.range_args = self.get_range_arguments(yaml_data)
         self.check_range_boundaries(self.range_args)
@@ -78,6 +79,7 @@ class YamlRegion(CodeParser, Region):
 
 
     def parse_region_expression(self, statement, context={}):
+        context.update(self.context)
         try:
             if isinstance(statement, T2WMLCode):
                 try:

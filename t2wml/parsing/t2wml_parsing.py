@@ -63,7 +63,7 @@ def iter_on_n_for_code(input, context={}):
         if input.has_q_var:
             test=context.get("t_var_qrow", None)
             if test is None:
-                raise ValueError("Can't use qcol/qrow if qualifier value isn't tied to a cell")
+                raise ValueError("qcol/qrow not defined- did you mean to specify a qualifier region?")
         if input.has_n:
             return iter_on_n(input.code, context)
         return t2wml_parse(input.code, context)

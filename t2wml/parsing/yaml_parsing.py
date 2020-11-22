@@ -66,30 +66,22 @@ class TemplateParser(CodeParser):
                 return input_str
         except ForwardSlashEscape as e:
             return e.new_str
-
-    def get_code_replacement_for_list(self, in_list):
-        new_list = []
-        for thing in in_list:
-            if isinstance(thing, dict):
-                new_dict = dict(thing)
-                for key in thing:
-                    new_dict[key] = self.get_code_replacement(new_dict[key])
-                new_list.append(new_dict)
+    
+    def recursive_get_code_replacement(self, input):
+            if isinstance(input, dict):
+                for key in input:
+                    input[key]=self.recursive_get_code_replacement(input[key])
+                return input
+            elif isinstance(input, list):
+                for index, thing in enumerate(input):
+                    input[index]=self.recursive_get_code_replacement(thing)
+                return input
             else:
-                raise T2WMLExceptions.ErrorInYAMLFileException(
-                    "lists of non-dict items not currently supported")
-        return new_list
+                return self.get_code_replacement(input)
 
     def create_eval_template(self, template):
         new_template = dict(template)
-
-        for key in template:
-            if isinstance(template[key], list):
-                new_template[key] = self.get_code_replacement_for_list(
-                    template[key])
-            else:
-                new_template[key] = self.get_code_replacement(template[key])
-
+        self.recursive_get_code_replacement(new_template)
         return new_template
 
 
@@ -162,6 +154,7 @@ def validate_yaml(yaml_file_path):
                             'longitude', 'latitude', 'globe',
                             'calendar', 'precision', 'time_zone', 'format',  # Time
                             'lang',  # change to language? #Text
+                            'region'
                             }
             yaml_template = yaml_file_data['statementMapping']['template']
             if isinstance(yaml_template, dict):
