@@ -150,8 +150,9 @@ class NodeForEval(Node):
         super().__init__(property, value, **kwargs)
 
     def parse_key(self, key):
+        cell_indices=None, None
         if key=="region": #skip
-            return 
+            return cell_indices
         if isinstance(self.__dict__[key], T2WMLCode):
             try:
                 entry_parsed = iter_on_n_for_code(
@@ -175,6 +176,7 @@ class NodeForEval(Node):
                     self.__dict__[key] = value
 
                 try:
+                    cell_indices= (entry_parsed.col, entry_parsed.row)
                     cell = to_excel(entry_parsed.col, entry_parsed.row)
                     self.cells[key] = cell
                 except AttributeError:
@@ -184,9 +186,14 @@ class NodeForEval(Node):
                 self._errors[key] += str(e)
                 self.__dict__.pop(key)
                 # self.__dict__[key]=self.__dict__[key].unmodified_str
-
+        return cell_indices
 
     def validate(self):
+        t_var_qcol=self.context.get("t_var_qcol", None) #if it isn't already defined outside
+        if t_var_qcol is None:
+            (col, row)=self.parse_key("value")
+            if col is not None:
+                self.context.update({"t_var_qcol":col+1, "t_var_qrow":row+1})
         for key in list(self.__dict__.keys()):
             self.parse_key(key)
         Node.validate(self)
@@ -211,6 +218,8 @@ class EvaluatedStatement(Statement, NodeForEval):
             self._errors["subject"] += "Missing subject"
 
         self.node_class.validate(self)
+        self.context.pop("t_var_qrow", None)
+        self.context.pop("t_var_qcol", None)
 
         gregorian_nodes=[]
 
@@ -242,7 +251,7 @@ class EvaluatedStatement(Statement, NodeForEval):
 
                         if node_qual._errors["property"] or node_qual._errors["value"]:
                             continue  # discard qualifier
-                        
+
                         else:
                             new_qualifiers.append(node_qual)
                     except Exception as e:
