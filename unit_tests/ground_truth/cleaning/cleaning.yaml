@@ -2,7 +2,7 @@ statementMapping:
     region: 
         - range: A1:B20 #fake region, whatever
     template:
-        item: Q123
+        subject: Q123
         value: 2
         property: P123
 cleaningMapping:

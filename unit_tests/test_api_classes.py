@@ -57,9 +57,9 @@ class ClassesTest(unittest.TestCase):
                 statement = {}
                 try:
                     item = wikifier.item_table.get_item(col-1, row)
-                    statement["item"] = item
+                    statement["subject"] = item
                 except Exception as e:
-                    error["item"] = str(e)
+                    error["subject"] = str(e)
 
                 try:
                     value = sheet[col, row]

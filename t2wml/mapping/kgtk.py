@@ -105,7 +105,7 @@ def create_kgtk(data, file_path, sheet_name):
             statement = data[cell]
             id = file_name + sheet_name + ";" + cell
             cell_result_dict = dict(
-                id=id, node1=statement["item"], label=statement["property"])
+                id=id, node1=statement["subject"], label=statement["property"])
             kgtk_add_property_type_specific_fields(statement, cell_result_dict)
             tsv_data.append(cell_result_dict)
 
