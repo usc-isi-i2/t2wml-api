@@ -100,8 +100,6 @@ class Node:
             self._errors["value"] += "Invalid datetime: "+str(self.value)
         
 
-
-
     def serialize(self):
         return_dict = dict(self.__dict__)
         return_dict.pop("_errors")
@@ -201,7 +199,7 @@ class NodeForEval(Node):
 
     def serialize(self):
         return_dict = super().serialize()
-        return_dict.pop("context")
+        return_dict.pop("context", None)
         return_dict.pop("region", None)
         return return_dict
 
@@ -275,9 +273,5 @@ class EvaluatedStatement(Statement, NodeForEval):
             raise T2WMLExceptions.TemplateDidNotApplyToInput(
                 errors=self._errors)
 
-    def serialize(self):
-        return_dict = super().serialize()
-        return_dict.pop("cell", None)
-        return return_dict
 
 
