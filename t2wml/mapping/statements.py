@@ -139,7 +139,7 @@ class Statement(Node):
                 return_dict["qualifier"][i] = q.serialize()
         if self.has_references:
             for i, q in enumerate(return_dict["reference"]):
-                return_dict["qualifier"][i] = q.serialize()
+                return_dict["reference"][i] = q.serialize()
         return return_dict
 
 
@@ -265,8 +265,11 @@ class EvaluatedStatement(Statement, NodeForEval):
             self.qualifier = self.qualifier+gregorian_nodes
 
         if self.has_references:
-            for i, r in enumerate(self.references):
-                self.reference[i] = self.node_class(context=self.context, **r)
+            for i, r in enumerate(self.reference):
+                try:
+                    self.reference[i] = self.node_class(context=self.context, **r)
+                except Exception as e: #problem with reference
+                    self._errors["reference"][i]=str(e)
 
         if len(set(["property", "value", "subject"]).intersection(self._errors.keys())):
             raise T2WMLExceptions.TemplateDidNotApplyToInput(
