@@ -8,7 +8,7 @@ from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet, SpreadsheetFile
 from t2wml.mapping.statement_mapper import YamlMapper
 from t2wml.knowledge_graph import KnowledgeGraph
-from t2wml.utils.t2wml_exceptions import FileWithThatNameInProject
+from t2wml.utils.t2wml_exceptions import FileWithThatNameInProject, FileNotPresentInProject, InvalidProjectDirectory
 from t2wml.settings import DEFAULT_SPARQL_ENDPOINT
 
 
@@ -25,7 +25,7 @@ class Project:
         if kwargs:
             warnings.warn("Passed unsupported arguments to Project, may be deprecated:"+str(kwargs.keys()), DeprecationWarning)
         if not os.path.isdir(directory):
-            raise ValueError("Project must be created with a valid project directory")
+            raise InvalidProjectDirectory("Project must be created with a valid project directory")
         self.directory=directory
         if title is None:
             title=Path(directory).stem
@@ -109,7 +109,7 @@ class Project:
         if new_value in self.data_files:
             self._saved_state["current_data_file"]=new_value
         else:
-            raise ValueError("Can't set current data file to file not present in project")
+            raise FileNotPresentInProject("Can't set current data file to file not present in project")
     
     @property
     def current_sheet(self):
@@ -120,7 +120,7 @@ class Project:
         if new_value in self.data_files[self.current_data_file]["val_arr"]:
             self.data_files[self.current_data_file]["selected"]=new_value
         else:
-            raise ValueError("Can't set current sheet to sheet not present in current data file")
+            raise FileNotPresentInProject("Can't set current sheet to sheet not present in current data file")
 
         try:
             self.current_yaml=self.yaml_sheet_associations[self.current_data_file][self.current_sheet][-1]
@@ -147,7 +147,7 @@ class Project:
         if new_value in self.yaml_sheet_associations[self.current_data_file][self.current_sheet]["val_arr"]:
             self.yaml_sheet_associations[self.current_data_file][self.current_sheet]["selected"]=new_value
         else:
-            raise ValueError("Can't set current yaml to a yaml not associated with the current sheet")
+            raise FileNotPresentInProject("Can't set current yaml to a yaml not associated with the current sheet")
     
     @property
     def current_wikifiers(self):
@@ -157,7 +157,7 @@ class Project:
     def current_wikifiers(self, new_value):
         for value in new_value:
             if value not in self.wikifier_files:
-                raise ValueError("Current wikifiers must only contain wikifiers added to the project")
+                raise FileNotPresentInProject("Current wikifiers must only contain wikifiers added to the project")
         self._saved_state["current_wikifiers"]=new_value
     
     def normalize_path(self, file_path):
@@ -203,9 +203,9 @@ class Project:
             in_proj_dir=os.path.isfile(full_path)
         if not in_proj_dir:
             if not os.path.isfile(file_path):
-                raise ValueError("Could not find file:"+file_path)
+                raise FileNotPresentInProject("Could not find file:"+file_path)
             if not copy_from_elsewhere:
-                raise ValueError("project files must be located in the project directory. did you mean to copy from elsewhere?")
+                raise InvalidProjectDirectory("project files must be located in the project directory. did you mean to copy from elsewhere?")
             file_name=Path(file_path).name
             dst=os.path.join(self.directory, file_name)
             if os.path.isfile(dst):
@@ -253,9 +253,9 @@ class Project:
         data_path=Path(data_path).as_posix()
         yaml_path=Path(yaml_path).as_posix()
         if data_path not in self.data_files:
-            raise ValueError("That data file has not been added to project yet")
+            raise FileNotPresentInProject("That data file has not been added to project yet")
         if yaml_path not in self.yaml_files:
-            raise ValueError("That yaml file has not been added to project yet")
+            raise FileNotPresentInProject("That yaml file has not been added to project yet")
         if data_path in self.yaml_sheet_associations:
             try:
                 if yaml_path in self.yaml_sheet_associations[data_path][sheet_name]["val_arr"]:
@@ -302,7 +302,7 @@ class Project:
         if os.path.isdir(filepath):
             filepath=os.path.join(filepath, "project.t2wml")
         if not os.path.isfile(filepath):
-            raise FileNotFoundError("Could not find project.t2wml file")
+            raise FileNotPresentInProject("Could not find project.t2wml file")
         try:
             with open(filepath, 'r', encoding="utf-8") as f:
                 proj_input=yaml.safe_load(f.read())
