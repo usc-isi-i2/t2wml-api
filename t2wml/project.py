@@ -256,6 +256,8 @@ class Project:
             raise FileNotPresentInProject("That data file has not been added to project yet")
         if yaml_path not in self.yaml_files:
             raise FileNotPresentInProject("That yaml file has not been added to project yet")
+        if sheet_name not in self.data_files[data_path]['val_arr']:
+            raise FileNotPresentInProject("That sheet name does not exist in the data file selected")
         if data_path in self.yaml_sheet_associations:
             try:
                 if yaml_path in self.yaml_sheet_associations[data_path][sheet_name]["val_arr"]:
