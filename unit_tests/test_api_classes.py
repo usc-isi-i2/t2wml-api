@@ -1,4 +1,5 @@
 import os
+from t2wml.utils.t2wml_exceptions import FileNotPresentInProject
 import unittest
 from pathlib import Path
 
@@ -123,8 +124,10 @@ class ProjectTest(unittest.TestCase):
         for file_name in os.listdir(yaml_folder):
             yaml_file=os.path.join("t2wml", file_name)
             sheet_name=file_name.split(".")[0]
-            sp.add_yaml_file(yaml_file, data_file1, sheet_name)
-        
+            try:
+                sp.add_yaml_file(yaml_file, data_file1, sheet_name)
+            except FileNotPresentInProject:
+                pass #there are some yamls for sheets that dont exist    
         #part 2:
         test_folder = os.path.join(unit_test_folder, "loop")
         properties_file = os.path.join(test_folder, "kgtk_properties.tsv")
