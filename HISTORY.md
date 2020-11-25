@@ -1,10 +1,13 @@
 T2WML API History
 ===================================
-Changes in version 0.0.18(wip):
+
+Changes in version 0.0.18:
 ------------------------
 * added support for qval, qcol, and region in qualifier
 * item in yaml and statements has been renamed to "subject". for now there is backwards compatibility for older style yamls.
 * statements no longer returns individual "cell" for item cell of statement and value of qualifier. instead, "cells" is returned, a dictionary of every field in the result (statement/qualifier) that was derived from a cell. (it will not work with concat, which does not support returning cell)
+* added some more T2WML exception types, for project in particular
+* fixed a small bug with references
 
 Changes in version 0.0.17:
 ------------------------
