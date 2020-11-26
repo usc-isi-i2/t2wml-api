@@ -24,7 +24,7 @@ def string_modifier(func):
             if where not in [start, end, start_and_end, everywhere]:
                 raise ValueError("Invalid argument for where: "+where)
 
-        if input:  # if value is None, don't modify
+        if input is not None:  # if value is None, don't modify
             if isinstance(input, RangeClass):  # handle ranges separately:
                 for i, val in enumerate(input):
                     if val:
@@ -199,6 +199,13 @@ def make_ascii(input, translate=False):
         #remove non-printable ascii as well
         return ''.join(filter(lambda x: x in string.printable, input))
 
+@string_modifier
+def fill_empty(input, replacement):
+    if "".join(input.split())=="":
+        return replacement
+    return input
+
+
 cleaning_functions_dict=dict(
     ftfy=ftfy, #v
     strip_whitespace=strip_whitespace, #v
@@ -212,5 +219,7 @@ cleaning_functions_dict=dict(
     make_numeric=make_numeric, #v may want to add additional support
     make_alphanumeric=make_alphanumeric, #v confirm definition
     make_ascii=make_ascii, #v confirm definition
+    fill_empty=fill_empty, #v
 )
+
 

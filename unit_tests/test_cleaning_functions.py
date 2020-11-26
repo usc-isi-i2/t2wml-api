@@ -73,6 +73,11 @@ class TestScripts(unittest.TestCase):
         assert replace_regex("123456790 ABC#%? .(朱惠英)", r'[^\x00-\x7f]', "") == "123456790 ABC#%? .()"
         assert replace_regex("dan dan dan", "dan", "bob", 1) == "bob dan dan"
 
+    def test_fill_empty(self):
+        assert fill_empty("  ", "dog") == "dog"
+        assert fill_empty("", "cat") == "cat"
+        assert fill_empty("\t\t  \t", "mouse") == "mouse"
+
 
 
 

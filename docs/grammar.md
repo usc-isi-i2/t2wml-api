@@ -178,6 +178,8 @@ cleaningMapping:
             - make_alphanumeric
             - make_ascii:
                 translate: False
+            - replace_empty:
+                replacement: #required, no default
 ```
 
 ### Conformance to Yaml standards
@@ -448,3 +450,7 @@ example:
 
 * `make_ascii("какой-то текст", translate=True)` returns "kakoi-to tekst", without translate the only ascii character there is the "-" so that's what would be returned
 * `make_ascii("Thanks 😊! (<hello>) חחחחⒶ")` would return `"Thanks ! (<hello>) "`
+
+`fill_empty(input, replacement)`: if a cell is empty (contains only whitespace characters or an empty string), fill it with `replacement`. 
+
+example: `fill_empty("", "0")` fills empty cells with string 0
