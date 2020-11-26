@@ -82,7 +82,7 @@ class YamlMapper(StatementMapper):
         return statement.serialize(), statement.errors
 
     def iterator(self):
-        region=YamlRegion(self.yaml_data['statementMapping']['region'][0])
+        region=YamlRegion(self.yaml_data['statementMapping']['region'])
         for col, row in region:
             yield col, row
 
