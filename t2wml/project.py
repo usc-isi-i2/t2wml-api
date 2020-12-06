@@ -18,8 +18,7 @@ class Project:
     def __init__(self, directory, title=None, 
                     data_files=None, yaml_files=None, wikifier_files=None, entity_files=None,
                     yaml_sheet_associations=None,
-                    sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False,
-                    datamart_integration=False, datamart_api=None, handle_calendar="leave",
+                    sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False, handle_calendar="leave",
                     _saved_state=None, cache_id=None,
                     **kwargs    
                 ):
@@ -40,8 +39,6 @@ class Project:
 
         self.sparql_endpoint=sparql_endpoint
         self.warn_for_empty_cells=warn_for_empty_cells
-        self.datamart_integration=datamart_integration
-        self.datamart_api=datamart_api
         self.handle_calendar=handle_calendar
 
         self.cache_id=cache_id
