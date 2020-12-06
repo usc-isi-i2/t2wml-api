@@ -1,6 +1,12 @@
 T2WML API History
 ===================================
 
+Changes in version 0.0.19:
+------------------------
+* added cleaning function fill_empty
+* region field of yaml no longer expectes/requires a list (list support now prints deprecation warning)
+* added munkres to requirements
+
 Changes in version 0.0.18:
 ------------------------
 * added support for qval, qcol, and region in qualifier
