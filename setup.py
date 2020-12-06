@@ -9,7 +9,8 @@ REQUIREMENTS = [
     'ftfy>=5.8',
     'requests>=2.24.0',
     'xlrd>=1.0.0',
-    'text-unidecode==1.3'
+    'text-unidecode==1.3',
+    'munkres==1.1.4'
 ]
 
 setuptools.setup(
