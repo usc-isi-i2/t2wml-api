@@ -52,7 +52,7 @@ def validate_id(node_id):
     except ValueError: #conversion to int failed, is not Pnum or Qnum
         pass
 
-def add_entities_from_file(file_path: str, allow_wikidata_ids=False):
+def add_entities_from_file(file_path: str, allow_wikidata_ids=True):
     """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
     If a kgtk-format tsv file, the property information will be loaded as follows:
     node1 is used as the wikidata_id.

@@ -4,7 +4,7 @@ from hashlib import sha256
 import pandas as pd
 import numpy as np
 from t2wml.spreadsheets.utilities import load_pickle
-from t2wml.parsing.region import YamlRegion
+from t2wml.input_processing.region import YamlRegion
 from t2wml.settings import t2wml_settings
 from t2wml.utils.t2wml_exceptions import ErrorInYAMLFileException
 from t2wml.parsing.cleaning_functions import cleaning_functions_dict

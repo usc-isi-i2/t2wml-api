@@ -3,9 +3,9 @@ from string import punctuation
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.mapping.statements import EvaluatedStatement
 from t2wml.utils.bindings import update_bindings, bindings
-from t2wml.parsing.yaml_parsing import validate_yaml, Template
-from t2wml.parsing.region import YamlRegion
-from t2wml.parsing.clean_yaml_parsing import get_cleaned_dataframe
+from t2wml.input_processing.yaml_parsing import validate_yaml, Template
+from t2wml.input_processing.region import YamlRegion
+from t2wml.input_processing.clean_yaml_parsing import get_cleaned_dataframe
 from t2wml.spreadsheets.conversions import to_excel
 
 def string_is_valid(text: str) -> bool:

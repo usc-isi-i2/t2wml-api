@@ -12,6 +12,7 @@ from t2wml.utils.t2wml_exceptions import FileWithThatNameInProject, FileNotPrese
 from t2wml.settings import DEFAULT_SPARQL_ENDPOINT
 
 
+
 class Project:
     def __init__(self, directory, title=None, 
                     data_files=None, yaml_files=None, wikifier_files=None, entity_files=None,

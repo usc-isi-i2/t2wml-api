@@ -1,6 +1,6 @@
 from copy import deepcopy
 from collections import defaultdict
-from t2wml.parsing.region import YamlRegion
+from t2wml.input_processing.region import YamlRegion
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.parsing.t2wml_parsing import iter_on_n_for_code, T2WMLCode
 from t2wml.parsing.classes import ReturnClass
