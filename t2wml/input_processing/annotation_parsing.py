@@ -1,6 +1,24 @@
+import json
 import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_range_str_to_tuples, cell_str_to_tuple, column_index_to_letter
+
+
+class YamlFormatter:
+    @staticmethod
+    def get_yaml_string(region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines):
+        yaml="""#AUTO-GENERATED YAML
+statementMapping:
+        region:
+            {region}
+        template:
+            subject: {mainSubjectLine}
+            property: {propertyLine}
+            value: =value[$col, $row]
+            {optionalsLines}
+            {qualifierLines}""".format(region=region, mainSubjectLine=mainSubjectLine, propertyLine=propertyLine, optionalsLines=optionalsLines, qualifierLines=qualifierLines)
+        return yaml
+    
 
 def get_cell_args(range_str):
     if ":" in range_str:
@@ -177,16 +195,70 @@ class Annotations:
                         qualifierLines+=self.get_qualifier_yaml(qualifier, data_region)
                 else:
                     qualifierLines=""
-                yaml="""#AUTO-GENERATED YAML
-statementMapping:
-        region:
-            {region}
-        template:
-            subject: {mainSubjectLine}
-            property: {propertyLine}
-            value: =value[$col, $row]
-            {optionalsLines}
-            {qualifierLines}""".format(region=region, mainSubjectLine=mainSubjectLine, propertyLine=propertyLine, optionalsLines=optionalsLines, qualifierLines=qualifierLines)
+                yaml=YamlFormatter.get_yaml_string(region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines)
                 yamls.append(yaml)
         return yamls
 
+
+
+
+
+class DynamicallyGeneratedAnnotation:
+    def __init__(self, data_regions=None, subject_regions=None, qualifier_regions=None, metadata_regions=None, property_regions=None):
+        self.data_regions= data_regions or []
+        self.subject_regions= subject_regions or []
+        self.qualifier_regions= qualifier_regions or []
+        self.metadata_regions= metadata_regions or []
+        self.property_regions= property_regions or []
+    
+    def _generate_alignments(self):
+        pass
+
+    def _generate_yaml(self, data_region, subject_region):
+        pass
+    
+    def generate_yaml(self):
+        return_string=""
+        
+        #check if no point in generating yet.
+        if not self.data_regions:
+            return_string+="# cannot create yaml without a dependent variable\n"
+        if not self.subject_regions:
+            return_string+="# cannot create yaml without a main subject\n"
+        if return_string:
+            return [return_string]
+        
+        alignments=self._generate_alignments()
+
+        return_arr=[]
+        for data_region in alignments.data_regions:
+            for subject_region in alignments.subject_regions:
+                yaml = self._generate_yaml(data_region, subject_region, alignments)
+                return_arr.append(yaml)
+        return return_arr
+    
+    def add_annotation(self, annotation):
+        role=annotation["role"]
+        if role=="dependentVar":
+            self.data_regions.append(annotation)
+        elif role=="mainSubject":
+            self.subject_regions.append(annotation)
+        elif role=="qualifier":
+            self.qualifier_regions.append(annotation)
+        elif role=="property":
+            self.property_regions.append(annotation)
+        elif role=="metadata":
+            self.metadata_regions.append(annotation)
+        else:
+            raise ValueError("unrecognized role type for annotation")
+    
+    def save(self, filepath):
+        with open(filepath, 'w', encoding="utf-8") as f:
+            f.write(json.dumps(self.__dict__))
+    
+    @classmethod
+    def load(cls, filepath):
+        with open(filepath, 'r', encoding="utf-8") as f:
+            annotations=json.load(f)
+        instance = cls(**annotations)
+        return instance
