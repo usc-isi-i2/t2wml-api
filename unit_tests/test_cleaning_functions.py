@@ -4,7 +4,7 @@ import yaml
 from pathlib import Path
 from t2wml.spreadsheets.sheet import SpreadsheetFile
 from t2wml.parsing.cleaning_functions import *
-from t2wml.parsing.clean_yaml_parsing import get_cleaned_dataframe
+from t2wml.input_processing.clean_yaml_parsing import get_cleaned_dataframe
 from t2wml.settings import t2wml_settings
 
 t2wml_settings.cache_data_files_folder=None
