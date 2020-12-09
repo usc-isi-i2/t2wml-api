@@ -5,43 +5,47 @@ from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_le
 COST_MATRIX_DEFAULT = 5
 
 class YamlFormatter:
+    #all the formatting and indentation in one convenient location
     @staticmethod
     def get_yaml_string(region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines):
         yaml="""#AUTO-GENERATED YAML
 statementMapping:
-        region:
-            {region}
-        template:
-            subject: {mainSubjectLine}
-            property: {propertyLine}
-            value: =value[$col, $row]
-            {optionalsLines}
-            {qualifierLines}""".format(region=region, mainSubjectLine=mainSubjectLine, propertyLine=propertyLine, optionalsLines=optionalsLines, qualifierLines=qualifierLines)
+    region:
+        {region}
+    template:
+        subject: {mainSubjectLine}
+        property: {propertyLine}
+        value: =value[$col, $row]
+{optionalsLines}
+        {qualifierLines}""".format(region=region, mainSubjectLine=mainSubjectLine, propertyLine=propertyLine, optionalsLines=optionalsLines, qualifierLines=qualifierLines)
         return yaml
     
     @staticmethod
     def get_qualifier_region_string(left, right, top, bottom):         
         region="""left: {left}
-                right: {right}
-                top: {top}
-                bottom: {bottom}""".format(left=left, right=right, top=top, bottom=bottom)
+            right: {right}
+            top: {top}
+            bottom: {bottom}""".format(left=left, right=right, top=top, bottom=bottom)
         return region
     
     @staticmethod
     def get_qualifier_string(propertyLine, optionalsLines, valueLine, region=None):
         if region is not None:
-            qualifier_string = """
-                - region: 
-                        {region}
-                  property: {propertyLine}
-                  value: {valueLine}
-                {optionalsLines}""".format(region=region, propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+            qualifier_string = """- region: 
+            {region}
+        property: {propertyLine}
+        value: {valueLine}
+{optionalsLines}""".format(region=region, propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
         else:
             qualifier_string = """
-                - property: {propertyLine}
-                  value: {valueLine}
-                {optionalsLines}""".format(propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+        - property: {propertyLine}
+          value: {valueLine}
+{optionalsLines}""".format(propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
         return qualifier_string
+    
+    @staticmethod
+    def get_optionals_string(optional_line, indent=8):
+        return """{indentation}{optional_line}""".format(indentation=" "*indent, optional_line=optional_line)
 
 
 
@@ -135,12 +139,13 @@ class ValueArgs:
 
 
 class DynamicallyGeneratedAnnotation:
-    def __init__(self, data_annotations=None, subject_annotations=None, qualifier_annotations=None, metadata_annotations=None, property_annotations=None):
+    def __init__(self, data_annotations=None, subject_annotations=None, qualifier_annotations=None, metadata_annotations=None, property_annotations=None, unit_annotations=None):
         self.data_annotations= data_annotations or []
         self.subject_annotations= subject_annotations or []
         self.qualifier_annotations= qualifier_annotations or []
         self.metadata_annotations= metadata_annotations or []
         self.property_annotations= property_annotations or []
+        self.unit_annotations= unit_annotations or []
 
     def _run_cost_matrix(self, match_candidates, targets_collection):
         if not len(match_candidates):
@@ -153,7 +158,7 @@ class DynamicallyGeneratedAnnotation:
         cost_matrix.fill(COST_MATRIX_DEFAULT)
         for c_i, candidate in enumerate(match_candidates):
             for r_i, target in enumerate(match_targets):
-                cost_matrix[c_i][r_i]=candidate.get_alignment(target)
+                cost_matrix[c_i][r_i]=candidate.get_alignment_value(target)
         
         m=Munkres()
         indexes=m.compute(cost_matrix)
@@ -169,10 +174,14 @@ class DynamicallyGeneratedAnnotation:
         else:
             propertyLine = property.get_expression(region, use_q)
         
+        indentation = 10 if use_q else 8
         optionalsLines=""
-        for key in region.matches:
-            if key!="property":
-                optionalsLines+=key + ": " + region.matches[key].get_expression(region, use_q) + "\n"
+        unit = region.matches.get("unit", None)
+        if unit is not None:
+            optionalsLines+=YamlFormatter.get_optionals_string("unit: " + unit.get_expression(region, use_q)+"\n", indentation)
+        for key in region.annotation:
+            if key not in ["role", "selections", "type"]:
+                optionalsLines+= YamlFormatter.get_optionals_string(key+": "+region.annotation[key]+"\n", indentation)
         
         return propertyLine, optionalsLines
 
@@ -241,9 +250,9 @@ class DynamicallyGeneratedAnnotation:
         qualifier_regions=[ValueArgs(q) for q in self.qualifier_annotations]
 
         property_regions=[ValueArgs(p) for p in self.property_annotations]
-        metadata_regions=[ValueArgs(m) for m in self.metadata_annotations]
+        unit_regions=[ValueArgs(m) for m in self.unit_annotations]
         self._run_cost_matrix(property_regions, [data_regions, qualifier_regions])
-        self._run_cost_matrix(metadata_regions, [data_regions, qualifier_regions])
+        self._run_cost_matrix(unit_regions, [data_regions, qualifier_regions])
         
         return_arr=[]
         for data_region in data_regions:
@@ -262,6 +271,8 @@ class DynamicallyGeneratedAnnotation:
             self.qualifier_annotations.append(annotation)
         elif role=="property":
             self.property_annotations.append(annotation)
+        elif role=="unit":
+            self.unit_annotations.append(annotation)
         elif role=="metadata":
             self.metadata_annotations.append(annotation)
         else:
