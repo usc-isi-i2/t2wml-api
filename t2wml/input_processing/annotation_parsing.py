@@ -2,7 +2,7 @@ import json
 import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
-COST_MATRIX_DEFAULT = 5
+COST_MATRIX_DEFAULT = 10
 
 class YamlFormatter:
     #all the formatting and indentation in one convenient location
@@ -107,9 +107,9 @@ class ValueArgs:
     def get_alignment_value(self, relative_args):
         #TODO: add costs for imperfect alignments
         if self.row_args==relative_args.row_args:
-            return 1
+            return 3
         if self.col_args==relative_args.col_args:
-            return 1
+            return 3
         return COST_MATRIX_DEFAULT
     
     def get_expression(self, relative_value_args, use_q=False):
@@ -138,7 +138,7 @@ class ValueArgs:
 
 
 
-class DynamicallyGeneratedAnnotation:
+class DynamicAnnotation:
     def __init__(self, data_annotations=None, subject_annotations=None, qualifier_annotations=None, metadata_annotations=None, property_annotations=None, unit_annotations=None):
         self.data_annotations= data_annotations or []
         self.subject_annotations= subject_annotations or []
@@ -158,6 +158,10 @@ class DynamicallyGeneratedAnnotation:
         cost_matrix.fill(COST_MATRIX_DEFAULT)
         for c_i, candidate in enumerate(match_candidates):
             for r_i, target in enumerate(match_targets):
+                if candidate.role in target.annotation:
+                    cost_matrix[c_i][r_i]=100 #no assigning dynamic to what already has const
+
+
                 cost_matrix[c_i][r_i]=candidate.get_alignment_value(target)
         
         m=Munkres()
@@ -278,6 +282,12 @@ class DynamicallyGeneratedAnnotation:
         else:
             raise ValueError("unrecognized role type for annotation")
     
+    def to_array(self):
+        arr=[]
+        for key in self.__dict__:
+            arr+=list(self.__dict__[key])
+        return arr
+
     def save(self, filepath):
         with open(filepath, 'w', encoding="utf-8") as f:
             f.write(json.dumps(self.__dict__))

@@ -139,16 +139,21 @@ class Project:
         if data_file and sheet_name:
             self.associate_yaml_with_sheet(file_path, data_file, sheet_name)
         return file_path
+    
+    def validate_data_file_and_sheet_name(self, data_path, sheet_name):
+        if data_path not in self.data_files:
+            raise FileNotPresentInProject("That data file has not been added to project yet")
+        if sheet_name not in self.data_files[data_path]['val_arr']:
+            raise FileNotPresentInProject("That sheet name does not exist in the data file selected")
 
     def associate_yaml_with_sheet(self, yaml_path, data_path, sheet_name):
         data_path=Path(data_path).as_posix()
         yaml_path=Path(yaml_path).as_posix()
-        if data_path not in self.data_files:
-            raise FileNotPresentInProject("That data file has not been added to project yet")
+
+        self.validate_data_file_and_sheet_name(data_path, sheet_name)
+
         if yaml_path not in self.yaml_files:
             raise FileNotPresentInProject("That yaml file has not been added to project yet")
-        if sheet_name not in self.data_files[data_path]['val_arr']:
-            raise FileNotPresentInProject("That sheet name does not exist in the data file selected")
         if data_path in self.yaml_sheet_associations:
             try:
                 if yaml_path in self.yaml_sheet_associations[data_path][sheet_name]["val_arr"]:
@@ -180,6 +185,24 @@ class Project:
             self.entity_files.append(file_path)
         return file_path
     
+    def add_annotation_file(self, annotation_path, data_path, sheet_name):
+        data_path=Path(data_path).as_posix()
+        annotation_path=Path(annotation_path).as_posix()
+        self.validate_data_file_and_sheet_name(data_path, sheet_name)
+        if data_path in self.annotations:
+            try:
+                if annotation_path in self.annotations[data_path][sheet_name]["val_arr"]:
+                    print("that yaml association has already been added")
+                else:
+                    self.annotations[data_path][sheet_name]["val_arr"].append(annotation_path)
+            except KeyError:
+                self.annotations[data_path][sheet_name]=dict(val_arr=[annotation_path], selected=annotation_path)
+        else:
+            self.annotations[data_path]={sheet_name:dict(val_arr=[annotation_path], selected=annotation_path)}
+
+
+
+
     def save(self):
         output_dict=dict(self.__dict__)
         output_dict.pop('directory')
@@ -267,6 +290,29 @@ class ProjectWithSavedState(Project):
             raise FileNotPresentInProject("Can't set current yaml to a yaml not associated with the current sheet")
     
     @property
+    def current_annotation(self):
+        try:
+            current_annotation = self.annotations[self.current_data_file][self.current_sheet].get("selected", None)
+        except:
+            return None
+        if not current_annotation:
+            try:
+                current_annotation=self.yaml_sheet_associations[self.current_data_file][self.current_sheet][-1]
+            except IndexError:
+                current_annotation=None
+        return current_annotation
+    
+    @current_annotation.setter
+    def current_annotation(self, new_value):
+        if new_value is None:
+            return
+        if new_value in self.annotations[self.current_data_file][self.current_sheet]["val_arr"]:
+            self.annotations[self.current_data_file][self.current_sheet]["selected"]=new_value
+        else:
+            raise FileNotPresentInProject("Can't set current yaml to a yaml not associated with the current sheet")
+    
+
+    @property
     def current_wikifiers(self):
         return self._saved_state["current_wikifiers"]
     
@@ -296,7 +342,7 @@ class ProjectWithSavedState(Project):
             file_path=full_path.relative_to(root)
         return Path(file_path).as_posix()
 
-    def update_saved_state(self, current_data_file=None, current_sheet=None, current_yaml=None, current_wikifiers=None):
+    def update_saved_state(self, current_data_file=None, current_sheet=None, current_yaml=None, current_wikifiers=None, current_annotation=None):
         if current_data_file:
             self.current_data_file=self._normalize_path(current_data_file)
 
@@ -305,6 +351,9 @@ class ProjectWithSavedState(Project):
                 
         if current_yaml:
             self.current_yaml=self._normalize_path(current_yaml)
+        
+        if current_annotation:
+            self.current_annotation=self._normalize_path(current_annotation)
         
         if current_wikifiers:
             self.current_wikifiers=[self._normalize_path(wf) for wf in current_wikifiers]
@@ -316,5 +365,6 @@ class ProjectWithSavedState(Project):
             current_data_file=self.current_data_file,
             current_sheet=self.current_sheet,
             current_yaml=self.current_yaml,
+            current_annotation=self.current_annotation,
             current_wikifiers=self.current_wikifiers
         )
