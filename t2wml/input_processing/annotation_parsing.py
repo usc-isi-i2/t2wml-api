@@ -3,6 +3,8 @@ import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
 COST_MATRIX_DEFAULT = 10
+    
+
 
 class YamlFormatter:
     #all the formatting and indentation in one convenient location
@@ -23,18 +25,19 @@ statementMapping:
     @staticmethod
     def get_qualifier_region_string(left, right, top, bottom):         
         region="""left: {left}
-            right: {right}
-            top: {top}
-            bottom: {bottom}""".format(left=left, right=right, top=top, bottom=bottom)
+                right: {right}
+                top: {top}
+                bottom: {bottom}""".format(left=left, right=right, top=top, bottom=bottom)
         return region
     
     @staticmethod
     def get_qualifier_string(propertyLine, optionalsLines, valueLine, region=None):
         if region is not None:
-            qualifier_string = """- region: 
-            {region}
-        property: {propertyLine}
-        value: {valueLine}
+            qualifier_string = """
+            - region: 
+                {region}
+              property: {propertyLine}
+              value: {valueLine}
 {optionalsLines}""".format(region=region, propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
         else:
             qualifier_string = """
@@ -138,14 +141,32 @@ class ValueArgs:
 
 
 
-class DynamicAnnotation:
-    def __init__(self, data_annotations=None, subject_annotations=None, qualifier_annotations=None, metadata_annotations=None, property_annotations=None, unit_annotations=None):
-        self.data_annotations= data_annotations or []
-        self.subject_annotations= subject_annotations or []
-        self.qualifier_annotations= qualifier_annotations or []
-        self.metadata_annotations= metadata_annotations or []
-        self.property_annotations= property_annotations or []
-        self.unit_annotations= unit_annotations or []
+
+class Annotation():
+    def __init__(self, annotation_blocks_array=None):
+        self.annotation_block_array=annotation_blocks_array or []
+        self.data_annotations=[]
+        self.subject_annotations=[]
+        self.qualifier_annotations=[]
+        self.property_annotations=[]
+        self.unit_annotations=[]
+        if annotation_blocks_array is not None:
+            for block in annotation_blocks_array:
+                role=block["role"]
+                if role=="dependentVar":
+                    self.data_annotations.append(block)
+                elif role=="mainSubject":
+                    self.subject_annotations.append(block)
+                elif role=="qualifier":
+                    self.qualifier_annotations.append(block)
+                elif role=="property":
+                    self.property_annotations.append(block)
+                elif role=="unit":
+                    self.unit_annotations.append(block)
+                elif role=="metadata":
+                    pass
+                else:
+                    raise ValueError("unrecognized role type for annotation")
 
     def _run_cost_matrix(self, match_candidates, targets_collection):
         if not len(match_candidates):
@@ -178,7 +199,7 @@ class DynamicAnnotation:
         else:
             propertyLine = property.get_expression(region, use_q)
         
-        indentation = 10 if use_q else 8
+        indentation = 14 if use_q else 8
         optionalsLines=""
         unit = region.matches.get("unit", None)
         if unit is not None:
@@ -265,36 +286,14 @@ class DynamicAnnotation:
                 return_arr.append(yaml)
         return return_arr
     
-    def add_annotation(self, annotation):
-        role=annotation["role"]
-        if role=="dependentVar":
-            self.data_annotations.append(annotation)
-        elif role=="mainSubject":
-            self.subject_annotations.append(annotation)
-        elif role=="qualifier":
-            self.qualifier_annotations.append(annotation)
-        elif role=="property":
-            self.property_annotations.append(annotation)
-        elif role=="unit":
-            self.unit_annotations.append(annotation)
-        elif role=="metadata":
-            self.metadata_annotations.append(annotation)
-        else:
-            raise ValueError("unrecognized role type for annotation")
-    
-    def to_array(self):
-        arr=[]
-        for key in self.__dict__:
-            arr+=list(self.__dict__[key])
-        return arr
 
     def save(self, filepath):
         with open(filepath, 'w', encoding="utf-8") as f:
-            f.write(json.dumps(self.__dict__))
+            f.write(json.dumps(self.annotation_block_array))
     
     @classmethod
     def load(cls, filepath):
         with open(filepath, 'r', encoding="utf-8") as f:
             annotations=json.load(f)
-        instance = cls(**annotations)
+        instance = cls(annotations)
         return instance
