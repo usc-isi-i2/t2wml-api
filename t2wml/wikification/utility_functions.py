@@ -52,7 +52,7 @@ def validate_id(node_id):
     except ValueError: #conversion to int failed, is not Pnum or Qnum
         pass
 
-def add_entities_from_file(file_path: str, allow_wikidata_ids=True):
+def add_entities_from_file(file_path: str, validate_ids=True):
     """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
     If a kgtk-format tsv file, the property information will be loaded as follows:
     node1 is used as the wikidata_id.
@@ -65,6 +65,7 @@ def add_entities_from_file(file_path: str, allow_wikidata_ids=True):
 
     Args:
         file_path (str): location of the properties file
+        validate_ids (bool): When true, only ids of form Pnum/Qnum will be allowed, and only with numbers greater than 10 thousand/1 billion
 
     Raises:
         UnsupportedPropertyType: invalid filetype (only tsv files are supported)
@@ -96,7 +97,7 @@ def add_entities_from_file(file_path: str, allow_wikidata_ids=True):
 
             try:
                 #validate ID
-                if not allow_wikidata_ids:
+                if validate_ids:
                     validate_id(node_id)
 
                 #validate data types
