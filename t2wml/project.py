@@ -185,9 +185,9 @@ class Project:
             self.entity_files.append(file_path)
         return file_path
     
-    def add_annotation_file(self, annotation_path, data_path, sheet_name):
+    def add_annotation_file(self, annotation_path, data_path, sheet_name, copy_from_elsewhere=False, overwrite=False, rename=False):
+        annotation_path=self._add_file(annotation_path, copy_from_elsewhere, overwrite, rename)
         data_path=Path(data_path).as_posix()
-        annotation_path=Path(annotation_path).as_posix()
         self.validate_data_file_and_sheet_name(data_path, sheet_name)
         if data_path in self.annotations:
             try:
@@ -199,6 +199,7 @@ class Project:
                 self.annotations[data_path][sheet_name]=dict(val_arr=[annotation_path], selected=annotation_path)
         else:
             self.annotations[data_path]={sheet_name:dict(val_arr=[annotation_path], selected=annotation_path)}
+        return annotation_path
 
 
 
