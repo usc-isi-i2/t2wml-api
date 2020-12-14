@@ -1,4 +1,4 @@
-from t2wml.mapping.annotation_mapping import Annotations, ValueArgs
+from t2wml.input_processing.annotation_parsing import Annotations, ValueArgs
 
 annotations=dict(
 
