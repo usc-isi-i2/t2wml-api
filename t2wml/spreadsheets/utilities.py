@@ -26,7 +26,7 @@ class PandasLoader:
             data = pd.read_csv(self.file_path, **self.pd_args)
         else:
             data = pd.read_excel(
-                self.file_path, sheet_name=sheet_name, **self.pd_args)
+                self.file_path, sheet_name=sheet_name, engine="openpyxl", **self.pd_args)
         return post_process_data(data)
 
     def load_file(self):
@@ -41,7 +41,7 @@ class PandasLoader:
         else:
             return_dict = {}
             loaded_file = pd.read_excel(
-                self.file_path, sheet_name=None, **self.pd_args)
+                self.file_path, sheet_name=None, engine="openpyxl", **self.pd_args)
             for sheet_name in loaded_file:
                 data = loaded_file[sheet_name]
                 data = post_process_data(data)
