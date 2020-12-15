@@ -54,9 +54,9 @@ class ValueArgs:
     def __init__(self, annotation):
         self.annotation = annotation
         self.role = annotation["role"]
-        self.type = annotation["type"]
+        self.type = annotation.get("type", "")
         self.selection = annotation["selections"][0]
-        self.use_item = annotation["type"] == "qNode"
+        self.use_item = self.type == "qNode" #for now
         self.cell_args = self.get_cell_args(self.selection)
         self.matches = {}
         self.match_found = False
@@ -226,11 +226,15 @@ class Annotation():
             match_candidates[c_i].match_found = True
 
     def get_optionals_and_property(self, region, use_q):
-        property = region.matches.get("property", None)
-        if property is None:
-            propertyLine = "#TODO-- no property alignment found"
+        const_property=region.annotation.get("property", None)
+        if const_property:
+            propertyLine=str(const_property)
         else:
-            propertyLine = property.get_expression(region, use_q)
+            property = region.matches.get("property", None)
+            if property is None:
+                propertyLine = "#TODO-- no property alignment found"
+            else:
+                propertyLine = property.get_expression(region, use_q)
 
         indentation = 10 if use_q else 8
         optionalsLines = ""
@@ -239,7 +243,7 @@ class Annotation():
             optionalsLines += YamlFormatter.get_optionals_string(
                 "unit: " + unit.get_expression(region, use_q)+"\n", indentation)
         for key in region.annotation:
-            if key not in ["role", "selections", "type"]:
+            if key not in ["role", "selections", "type", "property"]:
                 optionalsLines += YamlFormatter.get_optionals_string(
                     key+": "+region.annotation[key]+"\n", indentation)
 
@@ -283,9 +287,11 @@ class Annotation():
         return qualifier_string
 
     def _generate_yaml(self, data_region, subject_region, qualifier_regions):
-
         region = "range: {range_str}".format(range_str=data_region.range_str)
-        mainSubjectLine = subject_region.get_expression(data_region)
+        if subject_region is not None:
+            mainSubjectLine = subject_region.get_expression(data_region)
+        else: 
+            mainSubjectLine = "# subject region not specified"
 
         propertyLine, optionalsLines = self.get_optionals_and_property(
             data_region, use_q=False)
@@ -303,18 +309,15 @@ class Annotation():
         return self.comment_messages + yaml
 
     def generate_yaml(self, sheet=None):
-        return_string = self.comment_messages
-
         # check if no point in generating yet.
         if not self.data_annotations:
-            return_string += "# cannot create yaml without a dependent variable\n"
-        if not self.subject_annotations:
-            return_string += "# cannot create yaml without a main subject\n"
-        if return_string:
-            return [return_string]
+            return ["# cannot create yaml without a dependent variable\n"]
 
         data_regions = [ValueArgs(d) for d in self.data_annotations]
-        subject_regions = [ValueArgs(s) for s in self.subject_annotations]
+        if not self.subject_annotations:
+            subject_regions=[None]
+        else:
+            subject_regions = [ValueArgs(s) for s in self.subject_annotations]
         qualifier_regions = [ValueArgs(q) for q in self.qualifier_annotations]
 
         property_regions = [ValueArgs(p) for p in self.property_annotations]
