@@ -5,49 +5,55 @@ from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_le
 COST_MATRIX_DEFAULT = 10
 
 
+type_suggested_property_mapping={
+    "quantity": "P1114",
+    "time": "P585",
+    "monolingualString": "P2561",
+}
+
 class YamlFormatter:
-    # all the formatting and indentation in one convenient location
-    @staticmethod
-    def get_yaml_string(region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines):
-        yaml = """#AUTO-GENERATED YAML
-statementMapping:
-    region:
-        {region}
-    template:
-        subject: {mainSubjectLine}
-        property: {propertyLine}
-        value: =value[$col, $row]
-{optionalsLines}
-        {qualifierLines}""".format(region=region, mainSubjectLine=mainSubjectLine, propertyLine=propertyLine, optionalsLines=optionalsLines, qualifierLines=qualifierLines)
-        return yaml
+        # all the formatting and indentation in one convenient location
+        @staticmethod
+        def get_yaml_string(region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines):
+            yaml = """#AUTO-GENERATED YAML
+    statementMapping:
+        region:
+            {region}
+        template:
+            subject: {mainSubjectLine}
+            property: {propertyLine}
+            value: =value[$col, $row]
+    {optionalsLines}
+            {qualifierLines}""".format(region=region, mainSubjectLine=mainSubjectLine, propertyLine=propertyLine, optionalsLines=optionalsLines, qualifierLines=qualifierLines)
+            return yaml
 
-    @staticmethod
-    def get_qualifier_region_string(left, right, top, bottom):
-        region = """left: {left}
-                right: {right}
-                top: {top}
-                bottom: {bottom}""".format(left=left, right=right, top=top, bottom=bottom)
-        return region
+        @staticmethod
+        def get_qualifier_region_string(left, right, top, bottom):
+            region = """left: {left}
+                    right: {right}
+                    top: {top}
+                    bottom: {bottom}""".format(left=left, right=right, top=top, bottom=bottom)
+            return region
 
-    @staticmethod
-    def get_qualifier_string(propertyLine, optionalsLines, valueLine, region=None):
-        if region is not None:
-            qualifier_string = """
-            - region: 
-                {region}
-              property: {propertyLine}
-              value: {valueLine}
-{optionalsLines}""".format(region=region, propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
-        else:
-            qualifier_string = """
-        - property: {propertyLine}
-          value: {valueLine}
-{optionalsLines}""".format(propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
-        return qualifier_string
+        @staticmethod
+        def get_qualifier_string(propertyLine, optionalsLines, valueLine, region=None):
+            if region is not None:
+                qualifier_string = """
+                - region: 
+                    {region}
+                  property: {propertyLine}
+                  value: {valueLine}
+    {optionalsLines}""".format(region=region, propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+            else:
+                qualifier_string = """
+                - property: {propertyLine}
+                  value: {valueLine}
+    {optionalsLines}""".format(propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+            return qualifier_string
 
-    @staticmethod
-    def get_optionals_string(optional_line, indent=8):
-        return """{indentation}{optional_line}""".format(indentation=" "*indent, optional_line=optional_line)
+        @staticmethod
+        def get_optionals_string(optional_line, indent=8):
+            return """{indentation}{optional_line}""".format(indentation=" "*indent, optional_line=optional_line)
 
 
 class ValueArgs:
@@ -233,6 +239,10 @@ class Annotation():
             property = region.matches.get("property", None)
             if property is None:
                 propertyLine = "#TODO-- no property alignment found"
+                suggested_property=type_suggested_property_mapping.get(region.type, "")
+                if suggested_property:
+                    propertyLine = suggested_property + " #(auto-suggestion) " + propertyLine
+                
             else:
                 propertyLine = property.get_expression(region, use_q)
 
