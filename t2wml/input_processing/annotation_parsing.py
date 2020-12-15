@@ -43,12 +43,12 @@ class YamlFormatter:
                     {region}
                   property: {propertyLine}
                   value: {valueLine}
-    {optionalsLines}""".format(region=region, propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+        {optionalsLines}""".format(region=region, propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
             else:
                 qualifier_string = """
                 - property: {propertyLine}
                   value: {valueLine}
-    {optionalsLines}""".format(propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+        {optionalsLines}""".format(propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
             return qualifier_string
 
         @staticmethod
@@ -101,7 +101,7 @@ class ValueArgs:
     def __str__(self):
         return self.__repr__()
 
-    def get_alignment(self, relative_args):
+    def get_alignment_orientation(self, relative_args):
         # TODO: add heuristics for imperfect alignments
         if self.row_args == relative_args.row_args:
             return "row"
@@ -111,10 +111,15 @@ class ValueArgs:
 
     def get_alignment_value(self, relative_args):
         # TODO: add costs for imperfect alignments
-        if self.row_args == relative_args.row_args:
-            return 3
-        if self.col_args == relative_args.col_args:
-            return 3
+        if self.get_alignment_orientation(relative_args)=="row":
+            diff1 = abs(self.col_args[0] - relative_args.col_args[0])
+            diff2 = abs(self.col_args[1] - relative_args.col_args[1])
+
+            return min(diff1, diff2)
+        if self.get_alignment_orientation(relative_args)=="col":
+            diff1 = abs(self.row_args[0] - relative_args.row_args[0])
+            diff2 = abs(self.row_args[1] - relative_args.row_args[1])
+            return min(diff1, diff2)
         return COST_MATRIX_DEFAULT
 
     def get_expression(self, relative_value_args, use_q=False):
@@ -131,11 +136,11 @@ class ValueArgs:
         row_var = ", $qrow-$n" if use_q else ", $row-$n"
         col_var = "$qcol-$n, " if use_q else "$col-$n, "
 
-        if self.get_alignment(relative_value_args) == "row":
+        if self.get_alignment_orientation(relative_value_args) == "row":
             col = column_index_to_letter(self.cell_args[0][0])
             return return_string.format(indexer=col+row_var)
 
-        elif self.get_alignment(relative_value_args) == "col":
+        elif self.get_alignment_orientation(relative_value_args) == "col":
             row = str(self.cell_args[0][1]+1)
             return return_string.format(indexer=col_var+row)
         else:
