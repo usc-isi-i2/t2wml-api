@@ -78,11 +78,11 @@ class ValueArgs:
 
     @property
     def col_args(self):
-        return self.cell_args[0][0], self.cell_args[1][0]
+        return tuple(sorted([self.cell_args[0][0], self.cell_args[1][0]]))
 
     @property
     def row_args(self):
-        return self.cell_args[0][1], self.cell_args[1][1]
+        return tuple(sorted([self.cell_args[0][1], self.cell_args[1][1]]))
 
     @property
     def is_2D(self):
