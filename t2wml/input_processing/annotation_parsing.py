@@ -22,8 +22,7 @@ class YamlFormatter:
         template:
             subject: {mainSubjectLine}
             property: {propertyLine}
-            value: =value[$col, $row]
-    {optionalsLines}
+            value: =value[$col, $row]\n{optionalsLines}
             {qualifierLines}""".format(region=region, mainSubjectLine=mainSubjectLine, propertyLine=propertyLine, optionalsLines=optionalsLines, qualifierLines=qualifierLines)
             return yaml
 
@@ -42,13 +41,11 @@ class YamlFormatter:
                 - region: 
                     {region}
                   property: {propertyLine}
-                  value: {valueLine}
-        {optionalsLines}""".format(region=region, propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+                  value: {valueLine}\n{optionalsLines}""".format(region=region, propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
             else:
                 qualifier_string = """
                 - property: {propertyLine}
-                  value: {valueLine}
-        {optionalsLines}""".format(propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+                  value: {valueLine}\n{optionalsLines}""".format(propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
             return qualifier_string
 
         @staticmethod
@@ -251,7 +248,7 @@ class Annotation():
             else:
                 propertyLine = property.get_expression(region, use_q)
 
-        indentation = 10 if use_q else 8
+        indentation = 18 if use_q else 12
         optionalsLines = ""
         unit = region.matches.get("unit", None)
         if unit is not None:
@@ -275,7 +272,7 @@ class Annotation():
             else:
                 valueLine = "=value[$qcol, $qrow]"
 
-            alignment = qualifier_region.get_alignment(data_region)
+            alignment = qualifier_region.get_alignment_orientation(data_region)
             if alignment == False:
                 region = "range: "+qualifier_region.range_str
             else:
