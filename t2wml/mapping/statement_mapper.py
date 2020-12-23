@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
 from string import punctuation
+import json
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.mapping.statements import EvaluatedStatement
 from t2wml.utils.bindings import update_bindings, bindings
 from t2wml.input_processing.yaml_parsing import validate_yaml, Template
 from t2wml.input_processing.region import YamlRegion
 from t2wml.input_processing.clean_yaml_parsing import get_cleaned_dataframe
+from t2wml.input_processing.annotation_parsing import Annotation
 from t2wml.spreadsheets.conversions import to_excel
 
 def string_is_valid(text: str) -> bool:
@@ -94,3 +96,13 @@ class YamlMapper(StatementMapper):
             self._template = Template.create_from_yaml(
                 self.yaml_data['statementMapping']['template'])
             return self._template
+
+class AnnotationMapper(YamlMapper):
+    """A StatementMapper class that uses an annotation file to create a yaml text 
+    """
+    def __init__(self, file_path):
+        self.file_path = file_path
+        with open(file_path, 'r') as f:
+            annotation_blocks_arr=json.load(f)
+        self.annotation=Annotation(annotation_blocks_arr)
+        self.yaml_data = self.annotation.generate_yaml()
