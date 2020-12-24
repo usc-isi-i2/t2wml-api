@@ -18,7 +18,8 @@ class Project:
                     data_files=None, yaml_files=None, wikifier_files=None, entity_files=None,
                     yaml_sheet_associations=None, annotations=None,
                     sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False, handle_calendar="leave",
-                    cache_id=None,
+                    cache_id=None, 
+                    _saved_state=None, #deprecated but i don't want a trillion warnings
                     **kwargs    
                 ):
         if kwargs:
@@ -169,6 +170,7 @@ class Project:
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
         if file_path in self.wikifier_files:
             print("This file is already present in the project's wikifier files")
+            self.wikifier_files.append(self.wikifier_files.pop(file_path))
         else:
             self.wikifier_files.append(file_path)
         return file_path
