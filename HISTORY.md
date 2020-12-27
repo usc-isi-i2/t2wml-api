@@ -1,6 +1,14 @@
 T2WML API History
 ===================================
 
+Changes in version 0.0.20:
+------------------------
+* munkres package added to requirements
+* some module reorganization and cleanup
+* added annotation_parsing module and AnnotationMapping class
+* fix pandas xlrd bug
+* until proper multi-wikifier file management is added, always use most recently applied wikifier file.
+
 Changes in version 0.0.19:
 ------------------------
 * added cleaning function fill_empty
