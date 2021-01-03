@@ -98,13 +98,24 @@ class ValueArgs:
     def __str__(self):
         return self.__repr__()
 
-    def get_alignment_orientation(self, relative_args):
+    def get_alignment_orientation(self, relative_args, require_precise=False):
+        if require_precise:
+            if self.row_args == relative_args.row_args:
+                return "row"
+            if self.col_args == relative_args.col_args:
+                return "col"
+            return False
+
         # TODO: add heuristics for imperfect alignments
-        if self.row_args == relative_args.row_args:
+        row_val = abs(self.row_args[0]-relative_args.row_args[0]) + abs(self.row_args[1]-relative_args.row_args[1])
+        col_val = abs(self.col_args[0]-relative_args.col_args[0]) + abs(self.col_args[1]-relative_args.col_args[1])
+        
+        if row_val<col_val:
             return "row"
-        if self.col_args == relative_args.col_args:
+        if col_val<row_val:
             return "col"
-        return False
+        return False #??? when would they be equal?
+
 
     def get_alignment_value(self, relative_args):
         # TODO: add costs for imperfect alignments
@@ -271,7 +282,7 @@ class Annotation():
             else:
                 valueLine = "=value[$qcol, $qrow]"
 
-            alignment = qualifier_region.get_alignment_orientation(data_region)
+            alignment = qualifier_region.get_alignment_orientation(data_region, require_precise=True)
             if alignment == False:
                 region = "range: "+qualifier_region.range_str
             else:
