@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from string import punctuation
 import json
+import yaml
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.mapping.statements import EvaluatedStatement
 from t2wml.utils.bindings import update_bindings, bindings
@@ -105,4 +106,4 @@ class AnnotationMapper(YamlMapper):
         with open(file_path, 'r') as f:
             annotation_blocks_arr=json.load(f)
         self.annotation=Annotation(annotation_blocks_arr)
-        self.yaml_data = self.annotation.generate_yaml()
+        self.yaml_data = yaml.safe_load(self.annotation.generate_yaml()[0])
