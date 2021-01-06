@@ -183,6 +183,12 @@ class Annotation():
                     pass
                 else:
                     raise ValueError("unrecognized role type for annotation")
+    
+    @property
+    def potentially_enough_annotation_information(self):
+        if self.data_annotations and self.subject_annotations:
+            return True
+        return False
 
     def _create_targets(self, role, targets_collection):
         match_targets = []
