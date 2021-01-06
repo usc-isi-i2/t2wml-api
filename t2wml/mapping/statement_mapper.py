@@ -106,4 +106,17 @@ class AnnotationMapper(YamlMapper):
         with open(file_path, 'r') as f:
             annotation_blocks_arr=json.load(f)
         self.annotation=Annotation(annotation_blocks_arr)
-        self.yaml_data = yaml.safe_load(self.annotation.generate_yaml()[0])
+        if not self.annotation.annotation_block_array:
+            self.get_all_statements=self.empty_get_all_statements #override get all statements
+        else:
+            yamlContent=self.annotation.generate_yaml()[0]
+            self.yaml_data = yaml.safe_load(yamlContent)
+    
+    def empty_get_all_statements(self, sheet, wikifier):
+        statements = {}
+        cell_errors = {}
+        metadata = {
+            "data_file": sheet.data_file_name,
+            "sheet_name": sheet.name,
+        }
+        return statements, cell_errors, metadata
