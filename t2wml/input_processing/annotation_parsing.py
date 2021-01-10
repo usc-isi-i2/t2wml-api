@@ -3,6 +3,8 @@ from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
 import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
+from t2wml.utils.bindings import bindings
+
 COST_MATRIX_DEFAULT = 10
 
 
@@ -60,13 +62,17 @@ class ValueArgs:
         self.role = annotation["role"]
         self.type = annotation.get("type", "")
         self.selection = annotation["selections"][0]
-        self.use_item = self.type == "qNode" #for now
         self.cell_args = self.get_cell_args(self.selection)
         self.matches = {}
         self.match_found = False
 
     def get_cell_args(self, selection):
         return (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
+
+    @property
+    def use_item(self):
+        return self.type == "qNode" #for now
+
 
     @property
     def range_str(self):
