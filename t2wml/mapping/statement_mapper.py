@@ -106,11 +106,14 @@ class AnnotationMapper(YamlMapper):
         with open(file_path, 'r') as f:
             annotation_blocks_arr=json.load(f)
         self.annotation=Annotation(annotation_blocks_arr)
-        if self.annotation.potentially_enough_annotation_information:
-            yamlContent=self.annotation.generate_yaml()[0]
-            self.yaml_data = yaml.safe_load(yamlContent)
-        else:
+        if not self.annotation.potentially_enough_annotation_information:
             self.get_all_statements=self.empty_get_all_statements #override get_all_statements to not return anything
+
+    def do_init(self, sheet, wikifier):
+        item_table=wikifier.item_table
+        update_bindings(item_table=item_table, sheet=sheet)
+        yamlContent=self.annotation.generate_yaml(sheet=sheet, item_table=item_table)[0]
+        self.yaml_data = yaml.safe_load(yamlContent)
 
     
     def empty_get_all_statements(self, sheet, wikifier):
