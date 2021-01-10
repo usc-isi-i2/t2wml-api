@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from string import punctuation
 import json
+import yaml
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.mapping.statements import EvaluatedStatement
 from t2wml.utils.bindings import update_bindings, bindings
@@ -105,4 +106,21 @@ class AnnotationMapper(YamlMapper):
         with open(file_path, 'r') as f:
             annotation_blocks_arr=json.load(f)
         self.annotation=Annotation(annotation_blocks_arr)
-        self.yaml_data = self.annotation.generate_yaml()
+        if not self.annotation.potentially_enough_annotation_information:
+            self.get_all_statements=self.empty_get_all_statements #override get_all_statements to not return anything
+
+    def do_init(self, sheet, wikifier):
+        item_table=wikifier.item_table
+        update_bindings(item_table=item_table, sheet=sheet)
+        yamlContent=self.annotation.generate_yaml(sheet=sheet, item_table=item_table)[0]
+        self.yaml_data = yaml.safe_load(yamlContent)
+
+    
+    def empty_get_all_statements(self, sheet, wikifier):
+        statements = {}
+        cell_errors = {}
+        metadata = {
+            "data_file": sheet.data_file_name,
+            "sheet_name": sheet.name,
+        }
+        return statements, cell_errors, metadata

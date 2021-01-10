@@ -1,6 +1,14 @@
 T2WML API History
 ===================================
 
+Changes in version 0.0.21:
+------------------------
+* bug fix: not normalizing path when adding files
+* various tweaks to annotation parsing:
+    * rudimentary support for annotating with imprecise alignments
+    * in annotationmapper, if there isn't a valid annotation (dependent variable + main subject)- don't try generating statements
+    * add basic annotation validation (must be a list containing dict entries with a key "role")
+
 Changes in version 0.0.20:
 ------------------------
 * munkres package added to requirements

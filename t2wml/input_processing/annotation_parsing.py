@@ -1,7 +1,10 @@
 import json
+from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
 import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
+from t2wml.utils.bindings import bindings
+
 COST_MATRIX_DEFAULT = 10
 
 
@@ -59,13 +62,17 @@ class ValueArgs:
         self.role = annotation["role"]
         self.type = annotation.get("type", "")
         self.selection = annotation["selections"][0]
-        self.use_item = self.type == "qNode" #for now
         self.cell_args = self.get_cell_args(self.selection)
         self.matches = {}
         self.match_found = False
 
     def get_cell_args(self, selection):
         return (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
+
+    @property
+    def use_item(self):
+        return self.type == "qNode" #for now
+
 
     @property
     def range_str(self):
@@ -98,13 +105,24 @@ class ValueArgs:
     def __str__(self):
         return self.__repr__()
 
-    def get_alignment_orientation(self, relative_args):
+    def get_alignment_orientation(self, relative_args, require_precise=False):
+        if require_precise:
+            if self.row_args == relative_args.row_args:
+                return "row"
+            if self.col_args == relative_args.col_args:
+                return "col"
+            return False
+
         # TODO: add heuristics for imperfect alignments
-        if self.row_args == relative_args.row_args:
+        row_val = abs(self.row_args[0]-relative_args.row_args[0]) + abs(self.row_args[1]-relative_args.row_args[1])
+        col_val = abs(self.col_args[0]-relative_args.col_args[0]) + abs(self.col_args[1]-relative_args.col_args[1])
+        
+        if row_val<col_val:
             return "row"
-        if self.col_args == relative_args.col_args:
+        if col_val<row_val:
             return "col"
-        return False
+        return False #??? when would they be equal?
+
 
     def get_alignment_value(self, relative_args):
         # TODO: add costs for imperfect alignments
@@ -147,8 +165,10 @@ class ValueArgs:
 
 
 class Annotation():
+
     def __init__(self, annotation_blocks_array=None):
         self.annotation_block_array = annotation_blocks_array or []
+        self._validate_annotation(self.annotation_block_array)
         self.data_annotations = []
         self.subject_annotations = []
         self.qualifier_annotations = []
@@ -172,6 +192,32 @@ class Annotation():
                     pass
                 else:
                     raise ValueError("unrecognized role type for annotation")
+    
+    
+    def _validate_annotation(self, annotations):
+        if not isinstance(annotations, list):
+            raise InvalidAnnotationException("Annotations must be a list")
+        
+        for block in annotations:
+            if not isinstance(block, dict):
+                raise InvalidAnnotationException("Each annotation entry must be a dict")
+            try:
+                role = block["role"]
+            except KeyError:
+                raise InvalidAnnotationException("Each annotation entry must contain a field 'role'")
+            try:
+                test=block["selections"][0]
+            except KeyError:
+                raise InvalidAnnotationException("Each annotation entry must contain a field 'selections'")
+            except: 
+                raise InvalidAnnotationException("Each annotation entry must contain a field 'selections' with at least one entry")
+                
+
+    @property
+    def potentially_enough_annotation_information(self):
+        if self.data_annotations and self.subject_annotations:
+            return True
+        return False
 
     def _create_targets(self, role, targets_collection):
         match_targets = []
@@ -271,7 +317,7 @@ class Annotation():
             else:
                 valueLine = "=value[$qcol, $qrow]"
 
-            alignment = qualifier_region.get_alignment_orientation(data_region)
+            alignment = qualifier_region.get_alignment_orientation(data_region, require_precise=True)
             if alignment == False:
                 region = "range: "+qualifier_region.range_str
             else:
@@ -319,7 +365,7 @@ class Annotation():
             region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines)
         return self.comment_messages + yaml
 
-    def generate_yaml(self, sheet=None):
+    def generate_yaml(self, sheet=None, item_table=None):
         # check if no point in generating yet.
         if not self.data_annotations:
             return ["# cannot create yaml without a dependent variable\n"]

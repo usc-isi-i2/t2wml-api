@@ -148,8 +148,8 @@ class Project:
             raise FileNotPresentInProject("That sheet name does not exist in the data file selected")
 
     def associate_yaml_with_sheet(self, yaml_path, data_path, sheet_name):
-        data_path=Path(data_path).as_posix()
-        yaml_path=Path(yaml_path).as_posix()
+        data_path=self._normalize_path(data_path)
+        yaml_path=self._normalize_path(yaml_path)
 
         self.validate_data_file_and_sheet_name(data_path, sheet_name)
 
@@ -189,7 +189,7 @@ class Project:
     
     def add_annotation_file(self, annotation_path, data_path, sheet_name, copy_from_elsewhere=False, overwrite=False, rename=False):
         annotation_path=self._add_file(annotation_path, copy_from_elsewhere, overwrite, rename)
-        data_path=Path(data_path).as_posix()
+        data_path=self._normalize_path(data_path)
         self.validate_data_file_and_sheet_name(data_path, sheet_name)
         if data_path in self.annotations:
             try:
@@ -204,7 +204,13 @@ class Project:
         return annotation_path
 
 
-
+    def _normalize_path(self, file_path):
+        root=Path(self.directory)
+        full_path=Path(file_path)
+        in_proj_dir=root in full_path.parents
+        if in_proj_dir:
+            file_path=full_path.relative_to(root)
+        return Path(file_path).as_posix()
 
     def save(self):
         output_dict=dict(self.__dict__)
@@ -337,14 +343,6 @@ class ProjectWithSavedState(Project):
         else:
             self._saved_state["current_wikifiers"]=None
     
-    def _normalize_path(self, file_path):
-        root=Path(self.directory)
-        full_path=Path(file_path)
-        in_proj_dir=root in full_path.parents
-        if in_proj_dir:
-            file_path=full_path.relative_to(root)
-        return Path(file_path).as_posix()
-
     def update_saved_state(self, current_data_file=None, current_sheet=None, current_yaml=None, current_wikifiers=None, current_annotation=None):
         if current_data_file:
             self.current_data_file=self._normalize_path(current_data_file)
