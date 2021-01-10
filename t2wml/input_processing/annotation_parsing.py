@@ -171,7 +171,6 @@ class Annotation():
         self.comment_messages = ""
         if annotation_blocks_array is not None:
             for block in annotation_blocks_array:
-                role = block["role"]
                 if role == "dependentVar":
                     self.data_annotations.append(block)
                 elif role == "mainSubject":

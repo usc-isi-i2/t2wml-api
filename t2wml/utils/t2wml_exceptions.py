@@ -64,3 +64,7 @@ class ModifyingItemsIsForbiddenException(T2WMLException):
     message = "Cannot modify items from a function"
 
 
+class InvalidAnnotationException(T2WMLException):
+    message="Invalid annotation"
+
+
