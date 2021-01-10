@@ -36,6 +36,9 @@ class InvalidEntityDefinition(T2WMLException):
 class InvalidYAMLFileException(T2WMLException):
     message = "YAML file is either empty or not valid such that it cannot be loaded/parsed"
 
+class InvalidAnnotationException(T2WMLException):
+    message = "YAML file is either empty or not valid such that it cannot be loaded/parsed"
+
 class ErrorInYAMLFileException(T2WMLException):
     message = "Valid by yaml standards, the file is nonetheless missing required keys or otherwise does not match t2wml-yaml specifications"
 
@@ -59,8 +62,5 @@ class ItemNotFoundException(T2WMLException):
 class ModifyingItemsIsForbiddenException(T2WMLException):
     code=403
     message = "Cannot modify items from a function"
-
-
-
 
 

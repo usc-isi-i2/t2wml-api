@@ -1,4 +1,5 @@
 import json
+from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
 import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
@@ -158,8 +159,10 @@ class ValueArgs:
 
 
 class Annotation():
+
     def __init__(self, annotation_blocks_array=None):
         self.annotation_block_array = annotation_blocks_array or []
+        self._validate_annotation(self.annotation_block_array)
         self.data_annotations = []
         self.subject_annotations = []
         self.qualifier_annotations = []
@@ -184,6 +187,26 @@ class Annotation():
                 else:
                     raise ValueError("unrecognized role type for annotation")
     
+    
+    def _validate_annotation(self, annotations):
+        if not isinstance(annotations, list):
+            raise InvalidAnnotationException("Annotations must be a list")
+        
+        for block in annotations:
+            if not isinstance(block, dict):
+                raise InvalidAnnotationException("Each annotation entry must be a dict")
+            try:
+                role = block["role"]
+            except KeyError:
+                raise InvalidAnnotationException("Each annotation entry must contain a field 'role'")
+            try:
+                test=block["selections"][0]
+            except KeyError:
+                raise InvalidAnnotationException("Each annotation entry must contain a field 'selections'")
+            except: 
+                raise InvalidAnnotationException("Each annotation entry must contain a field 'selections' with at least one entry")
+                
+
     @property
     def potentially_enough_annotation_information(self):
         if self.data_annotations and self.subject_annotations:
@@ -336,7 +359,7 @@ class Annotation():
             region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines)
         return self.comment_messages + yaml
 
-    def generate_yaml(self, sheet=None):
+    def generate_yaml(self, sheet=None, item_table=None):
         # check if no point in generating yet.
         if not self.data_annotations:
             return ["# cannot create yaml without a dependent variable\n"]
