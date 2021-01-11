@@ -93,15 +93,14 @@ class KnowledgeGraph:
         Returns:
             data (str): json or kgtk output from statements
         """
-        data = self.statements
         file_path = self.metadata.get("data_file", "")
         sheet_name = self.metadata.get("sheet_name", "")
 
         if filetype == 'json':
             # insertion-ordered
-            output = json.dumps(data, indent=3, sort_keys=False)
+            output = json.dumps(self.statements, indent=3, sort_keys=False)
         elif filetype in ["kgtk", "tsv"]:
-            output = create_kgtk(data, file_path, sheet_name)
+            output = create_kgtk(self.statements, file_path, sheet_name)
         else:
             raise T2WMLExceptions.FileTypeNotSupportedException(
                 "No support for "+filetype+" format")

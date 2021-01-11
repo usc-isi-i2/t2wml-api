@@ -90,7 +90,7 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
 
 
 
-def create_kgtk(data, file_path, sheet_name):
+def create_kgtk(statements, file_path, sheet_name):
     file_name = Path(file_path).name
 
     file_extension = Path(file_path).suffix
@@ -100,9 +100,8 @@ def create_kgtk(data, file_path, sheet_name):
         sheet_name = "."+sheet_name
 
     tsv_data = []
-    for cell in data:
+    for cell, statement in statements.items():
         try:
-            statement = data[cell]
             id = file_name + sheet_name + ";" + cell
             cell_result_dict = dict(
                 id=id, node1=statement["subject"], label=statement["property"])
@@ -148,6 +147,6 @@ def create_kgtk(data, file_path, sheet_name):
     for entry in tsv_data:
         writer.writerow(entry)
 
-    data = string_stream.getvalue()
+    output = string_stream.getvalue()
     string_stream.close()
-    return data
+    return output
