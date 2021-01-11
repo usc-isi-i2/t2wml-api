@@ -1,6 +1,11 @@
 T2WML API History
 ===================================
 
+
+Changes in version 0.0.22:
+------------------------
+* HOTFIX: broken addition of wikifier files
+
 Changes in version 0.0.21:
 ------------------------
 * bug fix: not normalizing path when adding files
