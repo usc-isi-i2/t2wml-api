@@ -170,7 +170,8 @@ class Project:
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
         if file_path in self.wikifier_files:
             print("This file is already present in the project's wikifier files")
-            self.wikifier_files.append(self.wikifier_files.pop(file_path))
+            self.wikifier_files.remove(file_path)
+            self.wikifier_files.append(file_path)
         else:
             self.wikifier_files.append(file_path)
         return file_path
