@@ -5,8 +5,7 @@ from t2wml.mapping.kgtk import create_kgtk
 from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet
 from t2wml.mapping.statement_mapper import YamlMapper, StatementMapper
-
-
+from t2wml.mapping.canonical_spreadsheet import create_canonical_spreadsheet
 
 
 class KnowledgeGraph:
@@ -101,6 +100,8 @@ class KnowledgeGraph:
             output = json.dumps(self.statements, indent=3, sort_keys=False)
         elif filetype in ["kgtk", "tsv"]:
             output = create_kgtk(self.statements, file_path, sheet_name)
+        elif filetype == "csv":
+            output = create_canonical_spreadsheet(self.statements)
         else:
             raise T2WMLExceptions.FileTypeNotSupportedException(
                 "No support for "+filetype+" format")
