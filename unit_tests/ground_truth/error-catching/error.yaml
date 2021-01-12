@@ -1,6 +1,6 @@
 statementMapping:
   region:
-    - left: D
+      left: D
       right: F
       top: 4
       bottom: 9

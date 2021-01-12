@@ -1,6 +1,6 @@
 statementMapping:
     region: 
-        - range: A1:B20 #fake region, whatever
+          range: A1:B20 #fake region, whatever
     template:
         subject: Q123
         value: 2

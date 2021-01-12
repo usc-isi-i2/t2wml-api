@@ -1,6 +1,6 @@
 statementMapping:
   region:
-    - left: C
+      left: C
       right: D
       # this formula will bind multiple times: top == 4, 8, 12 
       # bottom is not specified, so the system should set bottom as

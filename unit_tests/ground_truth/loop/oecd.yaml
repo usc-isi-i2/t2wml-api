@@ -1,7 +1,7 @@
 # OECD mapping
 statementMapping:
   region: 
-    - left: D
+      left: D
       right: K
       top: 6
       bottom: =$end

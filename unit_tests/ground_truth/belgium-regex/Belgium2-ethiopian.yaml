@@ -1,7 +1,7 @@
 # OECD mapping
 statementMapping:
   region: 
-    - range: D6:K20
+      range: D6:K20
       skip_cells:
         - =value[$col, $row] == " .."
   template:

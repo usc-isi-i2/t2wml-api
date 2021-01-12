@@ -1,6 +1,6 @@
 statementMapping:
   region: 
-    - left: D
+      left: D
       right: K
       top: 6
       # find the bottom of the data
