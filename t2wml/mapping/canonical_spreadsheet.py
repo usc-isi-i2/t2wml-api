@@ -1,4 +1,5 @@
 import csv
+from io import StringIO
 
 def try_get_label(input):
     return input
@@ -32,11 +33,18 @@ def create_canonical_spreadsheet(statements):
                 statement_dict[key]=try_get_label(statement[key])
         dict_values.append(statement_dict)
     
-    with open(r'C:\Users\devora\C_sources\pedro\names.csv', 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=column_titles)
-        writer.writeheader()
-        for statement_dict in dict_values:
-            writer.writerow(statement_dict)
+    string_stream = StringIO("", newline="")
 
+    writer = csv.DictWriter(string_stream, column_titles,
+                            restval="", lineterminator="\n",
+                            escapechar='', quotechar='',
+                            dialect=csv.unix_dialect, quoting=csv.QUOTE_NONE)
+    writer.writeheader()
+    for entry in dict_values:
+        writer.writerow(entry)
+
+    output = string_stream.getvalue()
+    string_stream.close()
+    return output
 
 
