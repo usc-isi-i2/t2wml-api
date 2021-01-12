@@ -106,7 +106,7 @@ class ValueArgs:
         return self.__repr__()
 
     def get_alignment_orientation(self, relative_args, require_precise=False):
-        if require_precise:
+        if require_precise or True:
             if self.row_args == relative_args.row_args:
                 return "row"
             if self.col_args == relative_args.col_args:
@@ -125,6 +125,9 @@ class ValueArgs:
 
 
     def get_alignment_value(self, relative_args):
+        if self.get_alignment_orientation(relative_args):
+            return 1
+        return COST_MATRIX_DEFAULT
         # TODO: add costs for imperfect alignments
         if self.get_alignment_orientation(relative_args)=="row":
             diff1 = abs(self.col_args[0] - relative_args.col_args[0])
