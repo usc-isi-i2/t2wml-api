@@ -4,6 +4,7 @@ import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
 from t2wml.utils.bindings import bindings
+from t2wml.settings import t2wml_settings
 
 COST_MATRIX_DEFAULT = 10
 
@@ -290,9 +291,10 @@ class Annotation():
             property = region.matches.get("property", None)
             if property is None:
                 propertyLine = "#TODO-- no property alignment found"
-                suggested_property=type_suggested_property_mapping.get(region.type, "")
-                if suggested_property:
-                    propertyLine = suggested_property + " #(auto-suggestion) " + propertyLine
+                if not t2wml_settings.no_wikification:
+                    suggested_property=type_suggested_property_mapping.get(region.type, "")
+                    if suggested_property:
+                        propertyLine = suggested_property + " #(auto-suggestion) " + propertyLine
                 
             else:
                 propertyLine = property.get_expression(region, use_q)

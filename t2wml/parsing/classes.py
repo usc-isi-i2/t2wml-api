@@ -1,6 +1,7 @@
 from t2wml.utils.t2wml_exceptions import ModifyingItemsIsForbiddenException
 from t2wml.utils.bindings import bindings
 from t2wml.spreadsheets.conversions import to_excel
+from t2wml.settings import t2wml_settings
 
 
 def index_converter(arg):
@@ -93,7 +94,12 @@ class Item(ReturnClass):
     def __init__(self, col, row, context):
         super().__init__(col, row)
         item_table = bindings.item_table
-        self._value = item_table.get_item(self.col, self.row, context)
+        
+        if t2wml_settings.no_wikification:
+            data_sheet = bindings.excel_sheet
+            self._value = data_sheet[row, col]
+        else:
+            self._value = item_table.get_item(self.col, self.row, context)
 
 
 class ItemRange(RangeClass):

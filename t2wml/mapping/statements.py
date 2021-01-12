@@ -45,6 +45,8 @@ class Node:
         return dict(self._errors)
 
     def validate(self):
+        if t2wml_settings.no_wikification:
+            return
         try:
             if self.property:
                 try:

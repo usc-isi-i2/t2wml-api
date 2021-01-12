@@ -9,6 +9,7 @@ class T2WMLSettings:
         self.wikidata_provider=None #default is DictionaryProvider with preloaded properties
         self.warn_for_empty_cells=False
         self.handle_calendar="leave"
+        self.no_wikification=True
 
     @property
     def cache_data_files(self):
