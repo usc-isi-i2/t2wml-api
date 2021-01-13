@@ -1,5 +1,11 @@
 T2WML API History
 ===================================
+Changes in version 0.1.0:
+------------------------
+* remove imprecise alignment support in annotations until we have a better working version
+* add preliminary support for no_wikification setting and saving to a csv file
+* add functions for renaming and deleting files in a project
+* add description and url fields to project
 
 
 Changes in version 0.0.22:
