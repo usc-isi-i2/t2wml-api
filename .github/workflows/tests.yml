@@ -20,15 +20,15 @@ jobs:
       - name: Run Tests
         run: |
           python -m unittest discover
-      - name: Run coverage
-        run: |
-          coverage run --source t2wml -m unittest discover
-      - name: Upload coverall results
-        env:
-          GITHUB_TOKEN: ${{ secrets.github_token }}
-        run: |
-          pip install coveralls
-          coveralls
+      # - name: Run coverage
+      #   run: |
+      #     coverage run --source t2wml -m unittest discover
+      # - name: Upload coverall results
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.github_token }}
+      #   run: |
+      #     pip install coveralls
+      #     coveralls
 
 
 
