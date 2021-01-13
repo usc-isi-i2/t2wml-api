@@ -1,3 +1,4 @@
+from hashlib import new
 import yaml
 import os
 import warnings
@@ -212,17 +213,121 @@ class Project:
             file_path=full_path.relative_to(root)
         return Path(file_path).as_posix()
     
-    def path_in_files(self, name):
-        name = self._normalize_path(name)
-        if name in self.data_files:
+    def _get_full_path(self, file_path):
+        normalized_path=self._normalize_path(file_path)
+        return os.path.join(self.directory, normalized_path)
+    
+    def path_in_files(self, file_path):
+        file_path = self._normalize_path(file_path)
+        if file_path in self.data_files:
             return True
-        if name in self.yaml_files:
+        if file_path in self.yaml_files:
             return True
-        if name in self.wikifier_files:
+        if file_path in self.wikifier_files:
             return True
-        if name in self.entity_files:
+        if file_path in self.entity_files:
             return True
         return False
+    
+    def delete_file_from_project(self, file_path, delete_from_fs=False):
+        if not self.path_in_files(file_path):
+            raise ValueError("The file you are trying to delete does not exist in project")
+            
+        del_val=self._normalize_path(file_path)
+        
+
+        if del_val in self.data_files: #handle data files completely separately from everything else
+            for edit_dict in [self.annotations, self.data_files, self.yaml_sheet_associations]:
+                for key in edit_dict:
+                    if key==del_val:
+                        edit_dict.pop(del_val)
+        
+        elif del_val in self.entity_files: 
+            self.entity_files.remove(del_val)    
+        elif del_val in self.wikifier_files: 
+            self.wikifier_files.remove(del_val)  
+        else: #annotations and yamls
+            if del_val in self.yaml_files: 
+                self.yaml_files.remove(del_val)  
+
+            for edit_dict in [self.annotations, self.yaml_sheet_associations]:
+                for data_file in edit_dict:
+                    sheets_to_pop=[]
+                    for sheet_name in edit_dict[data_file]:
+                        arr_sel_dict=edit_dict[data_file][sheet_name]
+                        if del_val in arr_sel_dict["val_arr"]:
+                            if len(arr_sel_dict["val_arr"])==1:
+                                sheets_to_pop.append(sheet_name)
+                            else:
+                                arr_sel_dict["val_arr"].remove(del_val)
+                                if arr_sel_dict["selected"]==del_val:
+                                    if len(arr_sel_dict["val_arr"]):
+                                        arr_sel_dict["selected"]=arr_sel_dict["val_arr"][0]
+                    for sheet in sheets_to_pop:
+                        edit_dict[data_file].pop(sheet)
+                                
+
+        if delete_from_fs:
+            try:
+                del_path=self._get_full_path(del_val)
+                os.remove(del_path)
+            except Exception as e:
+                print(e)
+                
+
+
+
+        
+
+    def rename_file_in_project(self, old_name, new_name, rename_in_fs=False):
+        old_name=self._normalize_path(old_name)
+        new_name=self._normalize_path(new_name)
+
+        if not self.path_in_files(old_name):
+            raise ValueError("The file you are trying to rename does not exist in project")
+        new_file_path=self._get_full_path(new_name)
+        if os.path.isfile(new_file_path):
+            raise ValueError("The new name you have provided already exists in the project directory")
+            
+        if old_name in self.data_files: #handle data files completely separately from everything else
+            is_csv=False
+            old_csv_name=Path(old_name).stem
+            new_csv_name=Path(new_name).stem
+            if len(self.data_files[old_name]["val_arr"])==1 and self.data_files[old_name]["selected"]==old_csv_name: #it's a csv
+                is_csv=True
+            for edit_dict in [self.annotations, self.data_files, self.yaml_sheet_associations]:
+                for key in edit_dict:
+                    if key==old_name:
+                        edit_dict[new_name]=edit_dict.pop(old_name)
+                        if is_csv:
+                            try:
+                                edit_dict[new_name][new_csv_name]=edit_dict[new_name].pop(old_csv_name)
+                            except KeyError: #.data_files
+                                edit_dict[new_name]["selected"]=new_csv_name
+                                edit_dict[new_name]["val_arr"]=[new_csv_name]
+        
+        else:
+            self.entity_files=[new_name if x==old_name else x for x in self.entity_files]
+            self.wikifier_files=[new_name if x==old_name else x for x in self.wikifier_files]
+            self.yaml_files=[new_name if x==old_name else x for x in self.yaml_files]
+
+            for edit_dict in [self.annotations, self.yaml_sheet_associations]:
+                for data_file in edit_dict:
+                    for sheet_name in edit_dict[data_file]:
+                        arr_sel_dict=edit_dict[data_file][sheet_name]
+                        if old_name in arr_sel_dict["val_arr"]:
+                            if arr_sel_dict["selected"]==old_name:
+                                arr_sel_dict["selected"]=new_name
+                            arr_sel_dict["val_arr"]= [new_name if x==old_name else x for x in arr_sel_dict["val_arr"]]
+
+        
+        if rename_in_fs:
+            old_file_path=self._get_full_path(old_name)
+            os.rename(old_file_path, new_file_path)
+        
+
+    
+
 
     def save(self):
         output_dict=dict(self.__dict__)
@@ -381,3 +486,5 @@ class ProjectWithSavedState(Project):
             current_annotation=self.current_annotation,
             current_wikifiers=self.current_wikifiers
         )
+
+
