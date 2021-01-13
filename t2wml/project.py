@@ -204,7 +204,6 @@ class Project:
             self.annotations[data_path]={sheet_name:dict(val_arr=[annotation_path], selected=annotation_path)}
         return annotation_path
 
-
     def _normalize_path(self, file_path):
         root=Path(self.directory)
         full_path=Path(file_path)
@@ -212,6 +211,18 @@ class Project:
         if in_proj_dir:
             file_path=full_path.relative_to(root)
         return Path(file_path).as_posix()
+    
+    def path_in_files(self, name):
+        name = self._normalize_path(name)
+        if name in self.data_files:
+            return True
+        if name in self.yaml_files:
+            return True
+        if name in self.wikifier_files:
+            return True
+        if name in self.entity_files:
+            return True
+        return False
 
     def save(self):
         output_dict=dict(self.__dict__)
