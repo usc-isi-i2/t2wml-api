@@ -15,7 +15,7 @@ from t2wml.settings import DEFAULT_SPARQL_ENDPOINT
 
 
 class Project:
-    def __init__(self, directory, title=None, 
+    def __init__(self, directory, title=None, description="", url="",
                     data_files=None, yaml_files=None, wikifier_files=None, entity_files=None,
                     yaml_sheet_associations=None, annotations=None,
                     sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False, handle_calendar="leave",
@@ -31,6 +31,9 @@ class Project:
         if title is None:
             title=Path(directory).stem
         self.title=title
+        self.description=description
+        self.url=url
+
         self._load_data_files_from_project(data_files)
         self._load_yaml_sheet_associations(yaml_sheet_associations)
         self.annotations=annotations or {}
