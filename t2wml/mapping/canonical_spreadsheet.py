@@ -7,7 +7,7 @@ def try_get_label(input):
 
 
 def create_canonical_spreadsheet(statements):
-    column_titles=["subject", "property", "value"]
+    column_titles=["main_subject", "variable", "value"]
 
     dict_values=[]
     for cell, statement in statements.items():
@@ -27,9 +27,15 @@ def create_canonical_spreadsheet(statements):
                         if unit_heading not in column_titles:
                             column_titles.append(unit_heading)
                         statement_dict[unit_heading]=qualifier["unit"]
-            elif key in ["subject", "property", "value", "unit"]:
+            elif key=="subject":
+                statement_dict["main_subject"]=try_get_label(statement[key])
+            elif key=="property":
+                statement_dict["variable"]=try_get_label(statement[key])
+            elif key=="unit":
                 if key not in column_titles:
                     column_titles.append(key)
+                statement_dict[key]=try_get_label(statement[key])
+            elif key=="value":
                 statement_dict[key]=try_get_label(statement[key])
         dict_values.append(statement_dict)
     
