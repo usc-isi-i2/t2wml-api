@@ -64,6 +64,22 @@ def kgtk_to_dict(file_path):
             input_dict[node1][label]=value
     return dict(input_dict)
 
+def dict_to_kgtk(in_dict, out_path):
+    tsv_dict_columns=["id", "node1", "label", "node2"]
+    tsv_dict_arr=[]
+    for node1, node_dict in in_dict.items():
+        for label, value in node_dict.items():
+            tsv_dict_arr.append(dict(node1=node1, label=label, node2=value))
+    with open(out_path, 'w', encoding="utf-8") as f:
+        dw= csv.DictWriter(f, tsv_dict_columns,
+                            restval="", delimiter="\t", lineterminator="\n",
+                            escapechar='', quotechar='',
+                            dialect=csv.unix_dialect, quoting=csv.QUOTE_NONE)
+        dw.writeheader()
+        for line in tsv_dict_arr:
+            dw.writerow(line)
+
+
 
 def add_entities_from_file(file_path: str, validate_ids=True):
     """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
