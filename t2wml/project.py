@@ -216,7 +216,7 @@ class Project:
             file_path=full_path.relative_to(root)
         return Path(file_path).as_posix()
     
-    def _get_full_path(self, file_path):
+    def get_full_path(self, file_path):
         normalized_path=self._normalize_path(file_path)
         return os.path.join(self.directory, normalized_path)
     
@@ -272,7 +272,7 @@ class Project:
 
         if delete_from_fs:
             try:
-                del_path=self._get_full_path(del_val)
+                del_path=self.get_full_path(del_val)
                 os.remove(del_path)
             except Exception as e:
                 print(e)
@@ -288,7 +288,7 @@ class Project:
 
         if not self.path_in_files(old_name):
             raise ValueError("The file you are trying to rename does not exist in project")
-        new_file_path=self._get_full_path(new_name)
+        new_file_path=self.get_full_path(new_name)
         if os.path.isfile(new_file_path):
             raise ValueError("The new name you have provided already exists in the project directory")
             
@@ -325,7 +325,7 @@ class Project:
 
         
         if rename_in_fs:
-            old_file_path=self._get_full_path(old_name)
+            old_file_path=self.get_full_path(old_name)
             os.rename(old_file_path, new_file_path)
         
 
