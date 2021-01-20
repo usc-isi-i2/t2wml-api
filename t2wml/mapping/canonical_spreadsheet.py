@@ -36,9 +36,13 @@ def create_canonical_spreadsheet(statements):
     string_stream = StringIO("", newline="")
 
     writer = csv.DictWriter(string_stream, column_titles,
-                            restval="", lineterminator="\n",
-                            escapechar='', quotechar='',
-                            dialect=csv.unix_dialect, quoting=csv.QUOTE_NONE)
+                             restval="", 
+                             lineterminator="\n",
+                             escapechar="", 
+                             #quotechar='',
+                             dialect=csv.unix_dialect, 
+                             #quoting=csv.QUOTE_NONE
+                             )
     writer.writeheader()
     for entry in dict_values:
         writer.writerow(entry)
