@@ -26,12 +26,12 @@ def create_metadata_for_project(project):
     return metadata
 
 
-def create_metadata_for_property(project, name, description):
+def create_metadata_for_property(project, name, description, data_type="Quantity"):
     dataset_id=clean_id(project.title)
     property_id=clean_id(name)
     Pnode = f'P{dataset_id}{property_id}'
     Qnode = f'Q{dataset_id}{property_id}'
-    data_type="Quantity"
+    
     
     edges=[
         dict(node1=Qnode, label="description", node2=description),
@@ -49,8 +49,7 @@ def create_metadata_for_property(project, name, description):
 
     return edges
 
-def create_metadata_for_qualifier(qualifier, dataset_id, Property_Qnode):
-    data_type="String"
+def create_metadata_for_qualifier_property(qualifier, dataset_id, Property_Qnode, data_type="String"):
     Qualifier_PNode = f'P{dataset_id}-qualifier-{qualifier}'
     edges = [
             dict(node1=Property_Qnode, label="P2006020002", node2=Qualifier_PNode),
@@ -61,13 +60,13 @@ def create_metadata_for_qualifier(qualifier, dataset_id, Property_Qnode):
         ]
     return edges
 
-def create_metadata_for_qualifiers(project, property_name, qualifiers):
+def create_metadata_for_qualifier_properties(project, property_name, qualifiers):
     dataset_id=clean_id(project.title)
     property_id=clean_id(property_name)
     Property_Qnode = f'Q{dataset_id}{property_id}'
     edges=[    ]
     for qualifier in qualifiers:
-        new_edges = create_metadata_for_qualifier(qualifier, dataset_id, Property_Qnode)
+        new_edges = create_metadata_for_qualifier_property(qualifier, dataset_id, Property_Qnode)
         edges+=new_edges
     return edges
 
@@ -76,3 +75,16 @@ def connect_property_to_dataset_edge(project, property_name):
     property_id=clean_id(property_name)
     Property_Qnode = f'Q{dataset_id}{property_id}'
     edge = dict(node1=f'Q{dataset_id}', label="P2006020003", node2=Property_Qnode)
+
+
+def create_metadata_for_qnode(id, label, description=""):
+    edges = [
+            dict(node1=id, label="label", node2=label),
+        ]
+    if description:
+        edges.append(dict(node1=id, label="description", node2=description))
+    return edges
+
+
+def create_tag_edges():
+    pass #TODO
