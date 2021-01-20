@@ -52,6 +52,19 @@ def validate_id(node_id):
     except ValueError: #conversion to int failed, is not Pnum or Qnum
         pass
 
+
+def kgtk_to_dict(file_path):
+    input_dict=defaultdict(dict)
+    with open(file_path, 'r', encoding="utf-8") as f:
+        reader = csv.DictReader(f, delimiter="\t")
+        for row_dict in reader:
+            node1 = row_dict["node1"]
+            label = row_dict["label"]
+            value = row_dict["node2"]
+            input_dict[node1][label]=value
+    return dict(input_dict)
+
+
 def add_entities_from_file(file_path: str, validate_ids=True):
     """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
     If a kgtk-format tsv file, the property information will be loaded as follows:
