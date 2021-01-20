@@ -72,7 +72,11 @@ class ValueArgs:
 
     @property
     def use_item(self):
-        return self.type == "qNode" #for now
+        if self.type == "qNode":
+            return True
+        if self.role in ["property", "mainSubject"]:
+            return True
+        return False
 
 
     @property
