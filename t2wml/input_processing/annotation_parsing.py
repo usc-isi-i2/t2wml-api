@@ -10,9 +10,9 @@ COST_MATRIX_DEFAULT = 10
 
 
 type_suggested_property_mapping={
-    "quantity": "P1114",
+    #"quantity": "P1114",
     "time": "P585",
-    "monolingualString": "P2561",
+    #"monolingualtext": "P2561",
 }
 
 class YamlFormatter:
@@ -72,7 +72,7 @@ class ValueArgs:
 
     @property
     def use_item(self):
-        if self.type == "qNode":
+        if self.type == "wikibaseitem":
             return True
         if self.role in ["property", "mainSubject"]:
             return True
