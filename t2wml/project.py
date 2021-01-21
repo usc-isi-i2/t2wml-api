@@ -4,11 +4,7 @@ import os
 import warnings
 from pathlib import Path
 from shutil import copyfile
-from t2wml.wikification.utility_functions import add_entities_from_file
-from t2wml.wikification.item_table import Wikifier
-from t2wml.spreadsheets.sheet import Sheet, SpreadsheetFile
-from t2wml.mapping.statement_mapper import YamlMapper
-from t2wml.knowledge_graph import KnowledgeGraph
+from t2wml.spreadsheets.sheet import SpreadsheetFile
 from t2wml.utils.t2wml_exceptions import FileWithThatNameInProject, FileNotPresentInProject, InvalidProjectDirectory
 from t2wml.settings import DEFAULT_SPARQL_ENDPOINT
 
