@@ -2,10 +2,11 @@
 import csv
 from io import StringIO
 from pathlib import Path
-from t2wml.mapping.datamart_edges import create_project_rows
+from t2wml.mapping.datamart_edges import create_metadata_for_project, create_metadata_for_variable
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.wikification.utility_functions import get_property_type
+from t2wml.wikification.utility_functions import kgtk_to_dict
 
 class EmptyValueException(Exception):
     pass
@@ -90,6 +91,29 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
             result_dict["node2;kgtk:symbol"] = value
 
 
+def handle_additional_edges(project, statements):
+    tsv_data=[]
+    tsv_data+=create_metadata_for_project(project)
+    variable_ids=set()
+    qualifier_ids=set()
+    qnode_ids=set()
+    entity_dict={}
+    for file in project.entity_files:
+        full_path=project.get_full_path(file)
+        entity_dict.update(kgtk_to_dict(full_path))
+
+    for cell, statement in statements.items():
+        variable=statement["property"]
+        if variable not in variable_ids:
+            variable_ids.add(variable)
+            variable_dict=entity_dict.get(variable, None)
+            if variable_dict is not None:
+                label=variable_dict.get("label", "A "+variable)
+                description=variable_dict.get("description", variable+" relation")
+                data_type=variable_dict.get("data_type", "quantity")
+                tsv_data+=create_metadata_for_variable(project, variable, label, description, data_type)
+
+    return tsv_data
 
 
 def create_kgtk(statements, file_path, sheet_name, project=None):
@@ -104,7 +128,7 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
     tsv_data = []
 
     if project:
-        tsv_data+=create_project_rows(project)
+        tsv_data+=handle_additional_edges(project, statements)
 
     for cell, statement in statements.items():
         try:
