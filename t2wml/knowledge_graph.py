@@ -83,7 +83,7 @@ class KnowledgeGraph:
         sheet = Sheet(data_file_path, sheet_name)
         return cls.generate(cell_mapper, sheet, wikifier)
 
-    def get_output(self, filetype: str):
+    def get_output(self, filetype: str, project=None):
         """returns json or kgtk output of the KnowledgeGraph statements, in a string
 
         Args:
@@ -99,7 +99,7 @@ class KnowledgeGraph:
             # insertion-ordered
             output = json.dumps(self.statements, indent=3, sort_keys=False)
         elif filetype in ["kgtk", "tsv"]:
-            output = create_kgtk(self.statements, file_path, sheet_name)
+            output = create_kgtk(self.statements, file_path, sheet_name, project=project)
         elif filetype == "csv":
             output = create_canonical_spreadsheet(self.statements)
         else:

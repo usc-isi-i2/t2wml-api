@@ -2,6 +2,7 @@
 import csv
 from io import StringIO
 from pathlib import Path
+from t2wml.mapping.datamart_edges import create_project_rows
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.wikification.utility_functions import get_property_type
@@ -90,7 +91,8 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
 
 
 
-def create_kgtk(statements, file_path, sheet_name):
+
+def create_kgtk(statements, file_path, sheet_name, project=None):
     file_name = Path(file_path).name
 
     file_extension = Path(file_path).suffix
@@ -100,6 +102,10 @@ def create_kgtk(statements, file_path, sheet_name):
         sheet_name = "."+sheet_name
 
     tsv_data = []
+
+    if project:
+        tsv_data+=create_project_rows(project)
+
     for cell, statement in statements.items():
         try:
             id = file_name + sheet_name + ";" + cell

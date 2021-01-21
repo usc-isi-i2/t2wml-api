@@ -1,6 +1,7 @@
 
 import re
 import datetime
+from t2wml.wikification.utility_functions import kgtk_to_dict
 
 def clean_id(input):
     input = re.sub(r'[^A-Za-z0-9\s]+', '', input)
@@ -26,23 +27,23 @@ def create_metadata_for_project(project):
     return metadata
 
 
-def create_metadata_for_property(project, name, description, data_type="Quantity"):
+def create_metadata_for_property(project, label, description, data_type="Quantity", **kwa):
     dataset_id=clean_id(project.title)
-    property_id=clean_id(name)
+    property_id=clean_id(label)
     Pnode = f'P{dataset_id}{property_id}'
     Qnode = f'Q{dataset_id}{property_id}'
     
     
     edges=[
         dict(node1=Qnode, label="description", node2=description),
-        dict(node1=Qnode, label="label", node2=name),
-        dict(node1=Qnode, label="P1476", node2=name),
+        dict(node1=Qnode, label="label", node2=label),
+        dict(node1=Qnode, label="P1476", node2=label),
         dict(node1=Qnode, label="P1687", node2=Pnode),
         dict(node1=Qnode, label="P1813", node2=property_id),
         dict(node1=Qnode, label="P2006020004", node2=dataset_id),
         dict(node1=Qnode, label="P31", node2="Q50701"),
         dict(node1=Pnode, label="P31", node2="Q18616576"),
-        dict(node1=Pnode, label="label", node2=name),
+        dict(node1=Pnode, label="label", node2=label),
         dict(node1=Pnode, label="data_type", node2=data_type),
         dict(node1=Pnode, label="wikidata_data_type", node2=data_type),
     ]
@@ -77,7 +78,7 @@ def connect_property_to_dataset_edge(project, property_name):
     edge = dict(node1=f'Q{dataset_id}', label="P2006020003", node2=Property_Qnode)
 
 
-def create_metadata_for_qnode(id, label, description=""):
+def create_metadata_for_qnode(id, label, description="", **kwargs):
     edges = [
             dict(node1=id, label="label", node2=label),
         ]
@@ -88,3 +89,8 @@ def create_metadata_for_qnode(id, label, description=""):
 
 def create_tag_edges():
     pass #TODO
+
+def create_project_rows(project):
+    rows = []
+    return rows
+
