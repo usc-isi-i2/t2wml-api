@@ -65,7 +65,7 @@ class ValueArgs:
         self.selection = annotation["selections"][0]
         self.cell_args = self.get_cell_args(self.selection)
         self.matches = {}
-        self.match_found = False
+        self.matched_to=None
 
     def get_cell_args(self, selection):
         return (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
@@ -172,8 +172,10 @@ class ValueArgs:
             return "#TODO: ????? -Don't know how to match with imperfect alignment yet"
 
 
-class Annotation():
 
+
+
+class Annotation():
     def __init__(self, annotation_blocks_array=None):
         self.annotation_block_array = annotation_blocks_array or []
         self._validate_annotation(self.annotation_block_array)
@@ -205,12 +207,21 @@ class Annotation():
     def _validate_annotation(self, annotations):
         if not isinstance(annotations, list):
             raise InvalidAnnotationException("Annotations must be a list")
+
+        subject_count=0
+        var_count=0
         
         for block in annotations:
             if not isinstance(block, dict):
                 raise InvalidAnnotationException("Each annotation entry must be a dict")
             try:
                 role = block["role"]
+
+                if role == "dependentVar":
+                    var_count+=1 
+                elif role == "mainSubject":
+                    subject_count+=1
+                
             except KeyError:
                 raise InvalidAnnotationException("Each annotation entry must contain a field 'role'")
             try:
@@ -219,7 +230,9 @@ class Annotation():
                 raise InvalidAnnotationException("Each annotation entry must contain a field 'selections'")
             except: 
                 raise InvalidAnnotationException("Each annotation entry must contain a field 'selections' with at least one entry")
-                
+
+        if subject_count>1 or var_count>1: 
+            raise InvalidAnnotationException("Each annotation can contain only one region for main subject and one region for dependent variable")
 
     @property
     def potentially_enough_annotation_information(self):
@@ -285,7 +298,7 @@ class Annotation():
         for (c_i, t_i) in indexes:
             match_vector = match_candidates[c_i].role
             match_targets[t_i].matches[match_vector] = match_candidates[c_i]
-            match_candidates[c_i].match_found = True
+            match_candidates[c_i].matched_to = match_targets[t_i]
 
     def get_optionals_and_property(self, region, use_q):
         const_property=region.annotation.get("property", None)
@@ -373,7 +386,7 @@ class Annotation():
         yaml = YamlFormatter.get_yaml_string(
             region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines)
         return self.comment_messages + yaml
-
+    
     def generate_yaml(self, sheet=None, item_table=None):
         # check if no point in generating yet.
         if not self.data_annotations:
@@ -410,3 +423,5 @@ class Annotation():
             annotations = json.load(f)
         instance = cls(annotations)
         return instance
+
+
