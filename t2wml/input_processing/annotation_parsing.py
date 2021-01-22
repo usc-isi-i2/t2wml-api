@@ -176,6 +176,20 @@ class ValueArgs:
 
 
 class Annotation():
+    def get_custom_properties_and_qnodes(self, sheet, item_table):
+        custom_properties=set()
+        custom_items=set()
+        data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
+
+        #check all properties
+        #check all main subject
+        
+        #check anything whose type is wikidataitem
+        for block in self.annotation_blocks_array:
+            type=block.type
+            if type=="wikidataitem":
+                pass
+
     def __init__(self, annotation_blocks_array=None):
         self.annotation_block_array = annotation_blocks_array or []
         self._validate_annotation(self.annotation_block_array)
@@ -365,7 +379,11 @@ class Annotation():
 
         return qualifier_string
 
-    def _generate_yaml(self, data_region, subject_region, qualifier_regions):
+    def generate_yaml(self, sheet=None, item_table=None):
+        if not self.data_annotations:
+            return ["# cannot create yaml without a dependent variable\n"]
+        data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
+
         region = "range: {range_str}".format(range_str=data_region.range_str)
         if subject_region is not None:
             mainSubjectLine = subject_region.get_expression(data_region)
@@ -385,13 +403,10 @@ class Annotation():
 
         yaml = YamlFormatter.get_yaml_string(
             region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines)
-        return self.comment_messages + yaml
+        yaml = self.comment_messages + yaml
+        return [yaml] #array for now... 
     
-    def generate_yaml(self, sheet=None, item_table=None):
-        # check if no point in generating yet.
-        if not self.data_annotations:
-            return ["# cannot create yaml without a dependent variable\n"]
-
+    def initialize(self, sheet=None, item_table=None):
         data_regions = [ValueArgs(d) for d in self.data_annotations]
         if not self.subject_annotations:
             subject_regions=[None]
@@ -404,15 +419,8 @@ class Annotation():
         self._run_cost_matrix(
             property_regions, [data_regions, qualifier_regions])
         self._run_cost_matrix(unit_regions, [data_regions, qualifier_regions])
-
-        return_arr = []
-        for data_region in data_regions:
-            for subject_region in subject_regions:
-                yaml = self._generate_yaml(
-                    data_region, subject_region, qualifier_regions)
-                return_arr.append(yaml)
-        return return_arr
-
+        return data_regions[0], subject_regions[0], qualifier_regions
+    
     def save(self, filepath):
         with open(filepath, 'w', encoding="utf-8") as f:
             f.write(json.dumps(self.annotation_block_array))
