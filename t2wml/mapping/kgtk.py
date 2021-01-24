@@ -42,6 +42,7 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
     else:
         try:
             value = property_dict["value"]
+            result_dict["node2"] = value
         except:
             raise EmptyValueException(f'Cell {property_dict["cell"]} has no value')
 
@@ -96,7 +97,7 @@ def handle_additional_edges(project, statements):
     tsv_data=[]
     tsv_data+=create_metadata_for_project(project)
     variable_ids=set()
-    qualifier_ids=set()
+    qualifier_ids=set(["P585", "P248"])
     qnode_ids=set()
     entity_dict={}
     for file in project.entity_files:
@@ -121,18 +122,34 @@ def handle_additional_edges(project, statements):
             property=qualifier["property"]
             if property not in qualifier_ids:
                 qualifier_ids.add(property)
-                variable_dict=entity_dict.get(property, None)
-                if variable_dict is not None:
-                    label=variable_dict.get("label", "A "+variable)
+                variable_dict=entity_dict.get(property, {})
+                if True:# variable_dict is not None:
+                    label=variable_dict.get("label", "A "+property)
                     #description=variable_dict.get("description", variable+" relation")
                     data_type=variable_dict.get("data_type", "string")
-                    create_metadata_for_qualifier_property(project, variable, property, label, data_type)
+                    tsv_data+=create_metadata_for_qualifier_property(project, variable, property, label, data_type)
         
         subject=statement["subject"]
         if subject not in qnode_ids:
             qnode_ids.add(subject)
             #TODO
         #TODO: find any other nodes that are of type qNode
+    for result_dict in tsv_data:
+        property_type=result_dict.pop("type")
+        result_dict["node2;kgtk:data_type"]=property_type
+        value=result_dict["node2"]
+
+        if property_type == "quantity":
+            result_dict["node2;kgtk:number"] = value
+
+        elif property_type == "date_and_times":
+            result_dict["node2;kgtk:date_and_time"] = enclose_in_quotes(value)
+
+        elif property_type == "string":
+            result_dict["node2;kgtk:text"] = enclose_in_quotes(value)
+
+        elif property_type == "symbol":
+            result_dict["node2;kgtk:symbol"] = value
     return tsv_data
 
 
@@ -160,11 +177,8 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
 
             qualifiers = statement.get("qualifier", [])
             for qualifier in qualifiers:
-                # commented out. for now, do not generate an id at all for qualifier edges.
-                #second_cell=qualifier.get("cell", "")
-                #q_id = file_name + "." + sheet_name + ";" + cell +";"+second_cell
                 qualifier_result_dict = dict(id=id+"-"+qualifier["property"],
-                    node1=id, label=qualifier["property"], node2=qualifier.get("value", ""))
+                    node1=id, label=qualifier["property"])
 
                 try:
                     kgtk_add_property_type_specific_fields(
@@ -181,7 +195,7 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
             raise(e)
 
     string_stream = StringIO("", newline="")
-    fieldnames = ["id", "node1", "label", "node2", "type", "node2;kgtk:data_type",
+    fieldnames = ["id", "node1", "label", "node2", "node2;kgtk:data_type",
                   "node2;kgtk:number", "node2;kgtk:low_tolerance", "node2;kgtk:high_tolerance", "node2;kgtk:units_node",
                   "node2;kgtk:date_and_time", "node2;kgtk:precision", "node2;kgtk:calendar",
                   "node2;kgtk:truth",

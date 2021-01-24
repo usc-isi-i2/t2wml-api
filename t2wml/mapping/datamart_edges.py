@@ -29,7 +29,7 @@ wikidata_sparql_to_wikidata = {
 wikidata_to_datamart = {
 'GlobeCoordinate': 'location',
 'Quantity': 'quantity',
-'Time': 'date_and_time',
+'Time': 'date_and_times',
 'String': 'string',
 'MonolingualText': 'string',
 'ExternalIdentifier': 'symbol',
@@ -63,21 +63,22 @@ def create_metadata_for_project(project):
     metadata = [
         #no needs for serial number as there's only one edge each
         get_edge(node1=dataset_qnode, label="P31", node2="Q1172284", type="symbol"), # this is a dataset
-        get_edge(node1=dataset_qnode, label="P1813", node2=project.title, type="string"), # this is its name that we expose
+        get_edge(node1=dataset_qnode, label="P1813", node2=clean_id(project.title), type="string"), # this is its name that we expose
         get_edge(node1=dataset_qnode, label="label", node2=project.title, type="string"), # an informative label
         get_edge(node1=dataset_qnode, label="P1476", node2=project.title, type="string"), # a title, same as label
         get_edge(node1=dataset_qnode, label="description", node2=project.description, type="string"), # a description
         get_edge(node1=dataset_qnode, label="P2699", node2=project.url, type="string"), #source url for dataset
-        get_edge(node1=dataset_qnode, label="P5017", node2=timestamp, type="date_and_time") #last update date, in YYYY-mm-DDTHH:mm format
+        get_edge(node1=dataset_qnode, label="P5017", node2=timestamp, type="date_and_times") #last update date, in YYYY-mm-DDTHH:mm format
     ]
 
     return metadata
 
 def add_qualifier_property_to_variable(project, variable_id, qualifier_property_id):
-    dataset_Qnode=f'Q-{clean_id(project.title)}'
+    dataset_Qnode=f'Q{clean_id(project.title)}'
+    variable_id=variable_id #Knock off the P in the beginning
     variable_Qnode = f'Q{variable_id}'
-    return dict(id=f'{dataset_Qnode}-{variable_Qnode}-P2006060002-{qualifier_property_id}',
-                node1=variable_Qnode, node2="P2006060002", label=qualifier_property_id, type="symbol")
+    return dict(id=f'{dataset_Qnode}-{variable_Qnode}-P2006020002-{qualifier_property_id}',
+                node1=f'{dataset_Qnode}-{variable_Qnode}', label="P2006020002", node2=qualifier_property_id, type="symbol")
     
 
 
@@ -103,13 +104,14 @@ def create_metadata_for_variable(project, variable_id, label, description, data_
     (you can query variables that have A:B, or A:C, or even A:*)
 
     '''
-    dataset_Qnode=f'Q-{clean_id(project.title)}'
+    dataset_Qnode=f'Q{clean_id(project.title)}'
+    variable_id=variable_id[1:] #knock off the P
     Pnode = f'P{variable_id}'
     Qnode = f'Q{variable_id}'
 
     def get_Q_edge(node1, label, node2, type):
         #id = datasetQnode-variableQnode-node1-label
-        return dict(node1=node1, label=label, node2=node2, type=type, id=f'{dataset_Qnode}-{Qnode}-{node1}-{label}')
+        return dict(node1=f'{dataset_Qnode}-{node1}', label=label, node2=node2, type=type, id=f'{dataset_Qnode}-{node1}-{label}')
     
     
     def get_P_edge(node1, label, node2, type):
@@ -121,10 +123,10 @@ def create_metadata_for_variable(project, variable_id, label, description, data_
 
     edges=[
         #The following edges describe the variable metadata in Datamart
-        dict(id=f'{dataset_Qnode}-P2006020003-{Qnode}', node1=dataset_Qnode, label="P2006020003", node2=Qnode, type="symbol"), #the <dataset_id> dataset has the <Qnode> variable
+        dict(id=f'{dataset_Qnode}-P2006020003-{Qnode}', node1=dataset_Qnode, label="P2006020003", node2=f'{dataset_Qnode}-{Qnode}', type="symbol"), #the <dataset_id> dataset has the <Qnode> variable
         get_Q_edge(node1=Qnode, label="P2006020004", node2=dataset_Qnode, type="symbol"), # the dataset of <Qnode> variable is <dataset_id> dataset
         get_Q_edge(node1=Qnode, label="P31", node2="Q50701", type="symbol"), #<Qnode> is a variable
-        get_Q_edge(node1=Qnode, label="P1813", node2=label, type="string"), #name of variable (?)
+        get_Q_edge(node1=Qnode, label="P1813", node2=clean_id(label), type="string"), #name of variable (?)
         get_Q_edge(node1=Qnode, label="label", node2=label, type="string"), #label of variable
         get_Q_edge(node1=Qnode, label="P1476", node2=label, type="string"), #title of variable, same as label
         get_Q_edge(node1=Qnode, label="description", node2=description, type="string"), #description
@@ -149,12 +151,12 @@ def create_metadata_for_variable(project, variable_id, label, description, data_
     return edges
 
 def create_metadata_for_qualifier_property(project, variable_id, qualifier_property_id, label, data_type):
-    dataset_Qnode=f'Q-{clean_id(project.title)}'
+    dataset_Qnode=f'Q{clean_id(project.title)}'
     def get_edge(node1, label, node2, type):
         return dict(node1=node1, label=label, node2=node2, type=type, id=f"{dataset_Qnode}-{node1}-{label}")
 
     edges = [
-            add_qualifier_property_to_variable(project, variable_id, qualifier_property_id),
+            add_qualifier_property_to_variable(project, variable_id[1:], qualifier_property_id),
             get_edge(node1=qualifier_property_id, label="label", node2=label, type="string"),
             get_edge(node1=qualifier_property_id, label="P31", node2="Q18616576", type="symbol"), #do we need this?
             get_edge(node1=qualifier_property_id, label="data_type", node2=wikidata_to_datamart[wikidata_sparql_to_wikidata[data_type]], type="string"), #do we need this?
