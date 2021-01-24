@@ -54,6 +54,7 @@ def validate_id(node_id):
 
 
 def kgtk_to_dict(file_path):
+    #if label is P2010050001 (datamart tag), the key is tags and a list is generated
     input_dict=defaultdict(dict)
     with open(file_path, 'r', encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter="\t")
@@ -61,7 +62,13 @@ def kgtk_to_dict(file_path):
             node1 = row_dict["node1"]
             label = row_dict["label"]
             value = row_dict["node2"]
-            input_dict[node1][label]=value
+            if label == "P2010050001":
+                if "tags" in input_dict[node1]:
+                    input_dict[node1]["tags"].append(value)
+                else:
+                    input_dict[node1]["tags"]=[value]
+            else:
+                input_dict[node1][label]=value
     return dict(input_dict)
 
 def dict_to_kgtk(in_dict, out_path):
@@ -69,7 +76,11 @@ def dict_to_kgtk(in_dict, out_path):
     tsv_dict_arr=[]
     for node1, node_dict in in_dict.items():
         for label, value in node_dict.items():
-            tsv_dict_arr.append(dict(node1=node1, label=label, node2=value))
+            if label=="tags":
+                for tag in value:
+                    tsv_dict_arr.append(dict(node1=node1, label="P2010050001", node2=tag))
+            else:
+                tsv_dict_arr.append(dict(node1=node1, label=label, node2=value))
     with open(out_path, 'w', encoding="utf-8") as f:
         dw= csv.DictWriter(f, tsv_dict_columns,
                             restval="", delimiter="\t", lineterminator="\n",
