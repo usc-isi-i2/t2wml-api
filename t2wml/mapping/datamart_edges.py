@@ -58,7 +58,7 @@ def create_metadata_for_project(project):
 
     dataset_id=clean_id(project.title)
     dataset_qnode = "Q"+dataset_id
-    timestamp=datetime.datetime.utcnow()
+    timestamp=datetime.datetime.now().isoformat()
 
     metadata = [
         #no needs for serial number as there's only one edge each
