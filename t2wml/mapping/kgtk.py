@@ -32,7 +32,7 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
         node2;kgtk:latitude: for coordinates, the latitude
         node2;kgtk:longitude: for coordinates, the longitude
         '''
-        result_dict["node2;kgtk:data_type"] = "location_coordinates"
+        result_dict["type"]=result_dict["node2;kgtk:data_type"] = "location_coordinates"
         result_dict["node2;kgtk:latitude"] = property_dict["latitude"]
         result_dict["node2;kgtk:longitude"] = property_dict["longitude"]
         result_dict["node2;kgtk:precision"] = property_dict.get(
@@ -52,7 +52,7 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
             node2;kgtk:low_tolerance: for quantities, the lower bound of the value (cannot do it in T2WML yet)
             node2;kgtk:high_tolerance: for quantities, the upper bound of the value (cannot do it in T2WML yet)
             '''
-            result_dict["node2;kgtk:data_type"] = "quantity"
+            result_dict["type"]=result_dict["node2;kgtk:data_type"] = "quantity"
             result_dict["node2;kgtk:number"] = value
             result_dict["node2;kgtk:units_node"] = property_dict.get(
                 "unit", "")
@@ -67,7 +67,7 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
             node2;kgtk:precision: for dates, the precision, as an integer (need to verify this with KGTK folks, could be that we use human readable strings such as year, month
             node2;kgtk:calendar: for dates, the qnode of the calendar, if specified
             '''
-            result_dict["node2;kgtk:data_type"] = "date_and_times"
+            result_dict["type"]=result_dict["node2;kgtk:data_type"] = "date_and_times"
             result_dict["node2;kgtk:date_and_time"] = enclose_in_quotes(value)
             result_dict["node2;kgtk:precision"] = property_dict.get(
                 "precision", "")
@@ -79,7 +79,7 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
             node2;kgtk:text: for text, the text without the language tag
             node2;kgtk:language: for text, the language tag
             '''
-            result_dict["node2;kgtk:data_type"] = "string"
+            result_dict["type"]=result_dict["node2;kgtk:data_type"] = "string"
             result_dict["node2;kgtk:text"] = enclose_in_quotes(value)
             result_dict["node2;kgtk:language"] = enclose_in_quotes(
                 property_dict.get("lang", ""))
@@ -88,7 +88,7 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
             '''
             node2;kgtk:symbol: when node2 is another item, the item goes here"
             '''
-            result_dict["node2;kgtk:data_type"] = "symbol"
+            result_dict["type"]=result_dict["node2;kgtk:data_type"] = "symbol"
             result_dict["node2;kgtk:symbol"] = value
 
 
@@ -163,8 +163,8 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
                 # commented out. for now, do not generate an id at all for qualifier edges.
                 #second_cell=qualifier.get("cell", "")
                 #q_id = file_name + "." + sheet_name + ";" + cell +";"+second_cell
-                qualifier_result_dict = dict(
-                    node1=id, label=qualifier["property"])
+                qualifier_result_dict = dict(id=id+"-"+qualifier["property"],
+                    node1=id, label=qualifier["property"], node2=qualifier.get("value", ""))
 
                 try:
                     kgtk_add_property_type_specific_fields(
@@ -181,7 +181,7 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
             raise(e)
 
     string_stream = StringIO("", newline="")
-    fieldnames = ["id", "node1", "label", "node2", "node2;kgtk:data_type",
+    fieldnames = ["id", "node1", "label", "node2", "type", "node2;kgtk:data_type",
                   "node2;kgtk:number", "node2;kgtk:low_tolerance", "node2;kgtk:high_tolerance", "node2;kgtk:units_node",
                   "node2;kgtk:date_and_time", "node2;kgtk:precision", "node2;kgtk:calendar",
                   "node2;kgtk:truth",
