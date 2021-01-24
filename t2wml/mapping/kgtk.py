@@ -2,7 +2,8 @@
 import csv
 from io import StringIO
 from pathlib import Path
-from t2wml.mapping.datamart_edges import create_metadata_for_project, create_metadata_for_variable
+from t2wml.mapping.datamart_edges import (create_metadata_for_project, create_metadata_for_variable, 
+                create_metadata_for_qualifier_property)
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.wikification.utility_functions import get_property_type
@@ -111,8 +112,27 @@ def handle_additional_edges(project, statements):
                 label=variable_dict.get("label", "A "+variable)
                 description=variable_dict.get("description", variable+" relation")
                 data_type=variable_dict.get("data_type", "quantity")
-                tsv_data+=create_metadata_for_variable(project, variable, label, description, data_type)
+                tags=variable_dict.get("tags", [])
+                #TODO: P31?
+                tsv_data+=create_metadata_for_variable(project, variable, label, description, data_type, tags)
 
+        qualifiers=statement.get("qualifier", [])
+        for qualifier in qualifiers:
+            property=qualifier["property"]
+            if property not in qualifier_ids:
+                qualifier_ids.add(property)
+                variable_dict=entity_dict.get(property, None)
+                if variable_dict is not None:
+                    label=variable_dict.get("label", "A "+variable)
+                    #description=variable_dict.get("description", variable+" relation")
+                    data_type=variable_dict.get("data_type", "string")
+                    create_metadata_for_qualifier_property(project, variable, property, label, data_type)
+        
+        subject=statement["subject"]
+        if subject not in qnode_ids:
+            qnode_ids.add(subject)
+            #TODO
+        #TODO: find any other nodes that are of type qNode
     return tsv_data
 
 

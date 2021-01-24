@@ -78,16 +78,10 @@ def add_qualifier_property_to_variable(project, variable_id, qualifier_property_
     variable_Qnode = f'Q{variable_id}'
     return dict(id=f'{dataset_Qnode}-{variable_Qnode}-P2006060002-{qualifier_property_id}',
                 node1=variable_Qnode, node2="P2006060002", label=qualifier_property_id, type="symbol")
-
-def add_tag_to_variable(project, variable_id, tag_part_one, tag_part_two, serial_number):
-    dataset_Qnode=f'Q-{clean_id(project.title)}'
-    variable_Qnode = f'Q{variable_id}'
-    return dict(id=f'{dataset_Qnode}-{variable_Qnode}-P2010050001-{serial_number}',
-                node1=variable_Qnode, node2="P2010050001", label=tag_part_one+":"+tag_part_two, type="string")
     
 
 
-def create_metadata_for_variable(project, variable_id, label, description, data_type):
+def create_metadata_for_variable(project, variable_id, label, description, data_type, tags=[]):
     '''
     Unlike datasets, which only have the dataset definition metadata described above, 
     variables have both metadata defining them and their qualifiers, and data.
@@ -127,28 +121,30 @@ def create_metadata_for_variable(project, variable_id, label, description, data_
 
     edges=[
         #The following edges describe the variable metadata in Datamart
-        dict(id=f'QWGI-P2006020003-{dataset_Qnode}-{Qnode}', node1=dataset_Qnode, label="P2006020003", node2=Qnode, type="symbol"), #the <dataset_id> dataset has the <Qnode> variable
+        dict(id=f'{dataset_Qnode}-P2006020003-{Qnode}', node1=dataset_Qnode, label="P2006020003", node2=Qnode, type="symbol"), #the <dataset_id> dataset has the <Qnode> variable
         get_Q_edge(node1=Qnode, label="P2006020004", node2=dataset_Qnode, type="symbol"), # the dataset of <Qnode> variable is <dataset_id> dataset
         get_Q_edge(node1=Qnode, label="P31", node2="Q50701", type="symbol"), #<Qnode> is a variable
         get_Q_edge(node1=Qnode, label="P1813", node2=label, type="string"), #name of variable (?)
         get_Q_edge(node1=Qnode, label="label", node2=label, type="string"), #label of variable
         get_Q_edge(node1=Qnode, label="P1476", node2=label, type="string"), #title of variable, same as label
         get_Q_edge(node1=Qnode, label="description", node2=description, type="string"), #description
-        get_Q_edge(node1=Qnode, label="P1687", node2=Pnode), #<Qnode> corresponds to property <Pnode>
+        get_Q_edge(node1=Qnode, label="P1687", node2=Pnode, type="symbol"), #<Qnode> corresponds to property <Pnode>
 
         # datamart requires qualifiers P585 and P248:
         add_qualifier_property_to_variable(project, variable_id, "P585"),
         add_qualifier_property_to_variable(project, variable_id, "P248"),
         
         # We also need to define the corresponding property Phomicides, with the following edges:
-        get_P_edge(node1=Pnode, label="data_type", node2=wikidata_to_datamart[wikidata_sparql_to_wikidata[data_type]]), #datatype for variable
-        get_P_edge(node1=Pnode, label="P31", node2="Q18616576"), #this is a property
-        get_P_edge(node1=Pnode, label="label", node2=label), #label (can allow user to edit?)
-
-        get_P_edge(node1=Pnode, label="wikidata_data_type", node2= wikidata_sparql_to_wikidata[data_type]), #do we still need this?
-
+        get_P_edge(node1=Pnode, label="data_type", node2=wikidata_to_datamart[wikidata_sparql_to_wikidata[data_type]], type="string"), #datatype for variable
+        get_P_edge(node1=Pnode, label="P31", node2="Q18616576", type="symbol"), #this is a property
+        get_P_edge(node1=Pnode, label="label", node2=label, type="string"), #label (can allow user to edit?)
+        get_P_edge(node1=Pnode, label="wikidata_data_type", node2= wikidata_sparql_to_wikidata[data_type], type="string"), #do we still need this?
 
     ]
+
+    #handle any tags:
+    for index, tag in enumerate(tags):
+        edges.append(dict(node1=Qnode, label="P2010050001", node2=tag, type="string", id=f'{dataset_Qnode}-{Qnode}-P2010050001-{index}'))
 
     return edges
 
@@ -159,7 +155,6 @@ def create_metadata_for_qualifier_property(project, variable_id, qualifier_prope
 
     edges = [
             add_qualifier_property_to_variable(project, variable_id, qualifier_property_id),
-
             get_edge(node1=qualifier_property_id, label="label", node2=label, type="string"),
             get_edge(node1=qualifier_property_id, label="P31", node2="Q18616576", type="symbol"), #do we need this?
             get_edge(node1=qualifier_property_id, label="data_type", node2=wikidata_to_datamart[wikidata_sparql_to_wikidata[data_type]], type="string"), #do we need this?
