@@ -3,7 +3,6 @@ from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
 import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
-from t2wml.utils.bindings import bindings
 from t2wml.settings import t2wml_settings
 
 COST_MATRIX_DEFAULT = 10
@@ -176,20 +175,6 @@ class ValueArgs:
 
 
 class Annotation():
-    def get_custom_properties_and_qnodes(self, sheet, item_table):
-        custom_properties=set()
-        custom_items=set()
-        data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
-
-        #check all properties
-        #check all main subject
-        
-        #check anything whose type is wikidataitem
-        for block in self.annotation_blocks_array:
-            type=block.type
-            if type=="wikidataitem":
-                pass
-
     def __init__(self, annotation_blocks_array=None):
         self.annotation_block_array = annotation_blocks_array or []
         self._validate_annotation(self.annotation_block_array)
@@ -433,3 +418,46 @@ class Annotation():
         return instance
 
 
+    def _get_properties(self, region, sheet):
+        const_property=region.annotation.get("property")
+        if const_property:
+            return [const_property]
+        else:
+            range_property = region.matches.get("property")
+            if range_property:
+                range_properties=[]
+                for row in range(range_property.row_args[0], range_property.row_args[1]+1):
+                    for col in range(range_property.col_args[0], range_property.col_args[1]+1):
+                        cell=sheet[row][col]
+                        range_properties.append(cell)
+                return range_properties
+            else:
+                return []
+
+    def get_custom_properties_and_qnodes(self, sheet, item_table):
+        custom_properties=set()
+        custom_items=set()
+        data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
+
+        #check all properties
+        custom_properties.update(self._get_properties(data_region, sheet))
+        for qualifier_region in qualifier_regions:
+            custom_properties.update(self._get_properties(qualifier_region, sheet))
+
+        #check all main subject
+        for row in range(subject_region.row_args[0], subject_region.row_args[1]+1):
+            for col in range(subject_region.col_args[0], subject_region.col_args[1]+1):
+                cell=sheet[row][col]
+                custom_items.add(cell)
+        
+        #check anything whose type is wikibaseitem
+        for block in self.annotation_block_array:
+            type=block.get("type")
+            if type=="wikibaseitem":
+                b=ValueArgs(block)
+                for row in range(b.row_args[0], b.row_args[1]+1):
+                    for col in range(b.col_args[0], b.col_args[1]+1):
+                        cell=sheet[row][col]
+                        custom_items.add(cell)
+        
+        return list(custom_properties), list(custom_items)
