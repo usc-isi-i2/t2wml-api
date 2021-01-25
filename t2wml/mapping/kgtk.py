@@ -3,7 +3,7 @@ import csv
 from io import StringIO
 from pathlib import Path
 from t2wml.mapping.datamart_edges import (create_metadata_for_project, create_metadata_for_variable, 
-                create_metadata_for_qualifier_property)
+                create_metadata_for_qualifier_property, link_statement_to_dataset)
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.wikification.utility_functions import get_property_type
@@ -170,6 +170,10 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
     for cell, statement in statements.items():
         try:
             id = file_name + sheet_name + ";" + cell
+
+            if project:
+                tsv_data.append(link_statement_to_dataset(project, id))
+
             cell_result_dict = dict(
                 id=id, node1=statement["subject"], label=statement["property"])
             kgtk_add_property_type_specific_fields(statement, cell_result_dict)

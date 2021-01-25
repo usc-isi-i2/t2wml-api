@@ -178,3 +178,10 @@ def create_metadata_for_custom_qnode(id, label, description="", **kwargs): #do w
     return edges
 
 
+def link_statement_to_dataset(project, statement_id):
+    dataset_Qnode=f'Q{clean_id(project.title)}'
+    result_dict = dict(node1=statement_id, label="P2006020004", node2=dataset_Qnode, id=f"{dataset_Qnode}-P2006020004-{statement_id}")
+    result_dict["node2;kgtk:data_type"]="symbol"
+    result_dict["node2;kgtk:symbol"] = dataset_Qnode
+    return result_dict
+
