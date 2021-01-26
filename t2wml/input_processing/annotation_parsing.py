@@ -1,3 +1,4 @@
+import os
 import json
 from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
 import numpy as np
@@ -71,7 +72,7 @@ class ValueArgs:
 
     @property
     def use_item(self):
-        if self.type == "wikibaseitem":
+        if self.type in ["wikibaseitem", "WikibaseItem"]:
             return True
         if self.role in ["property", "mainSubject"]:
             return True
@@ -129,8 +130,10 @@ class ValueArgs:
 
 
     def get_alignment_value(self, relative_args):
-        if self.get_alignment_orientation(relative_args):
+        if self.get_alignment_orientation(relative_args)=="col":
             return 1
+        if self.get_alignment_orientation(relative_args)=="row":
+            return 2
         return COST_MATRIX_DEFAULT
         # TODO: add costs for imperfect alignments
         if self.get_alignment_orientation(relative_args)=="row":
@@ -419,22 +422,22 @@ class Annotation():
 
 
     def _get_properties(self, region, sheet):
-        const_property=region.annotation.get("property")
-        if const_property:
-            return [const_property]
-        else:
+        #const_property=region.annotation.get("property")
+        #if const_property:
+        #    return [ (const_property, region.type)]
+        #else:
             range_property = region.matches.get("property")
             if range_property:
-                range_properties=[]
+                range_properties=set()
                 for row in range(range_property.row_args[0], range_property.row_args[1]+1):
                     for col in range(range_property.col_args[0], range_property.col_args[1]+1):
                         cell=sheet[row][col]
-                        range_properties.append(cell)
-                return range_properties
+                        range_properties.add((cell, region.type))
+                return list(range_properties)
             else:
                 return []
 
-    def get_custom_properties_and_qnodes(self, sheet, item_table):
+    def get_custom_properties_and_qnodes(self, sheet, item_table=None):
         custom_properties=set()
         custom_items=set()
         data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
@@ -453,7 +456,7 @@ class Annotation():
         #check anything whose type is wikibaseitem
         for block in self.annotation_block_array:
             type=block.get("type")
-            if type=="wikibaseitem":
+            if type in ["wikibaseitem", "WikibaseItem"]:
                 b=ValueArgs(block)
                 for row in range(b.row_args[0], b.row_args[1]+1):
                     for col in range(b.col_args[0], b.col_args[1]+1):
@@ -461,3 +464,83 @@ class Annotation():
                         custom_items.add(cell)
         
         return list(custom_properties), list(custom_items)
+
+class AnnotationNodeGenerator:
+    def __init__(self, annotation, project):
+        self.annotation=annotation
+        self.project=project
+        if not os.path.isdir(self.autogen_dir):
+            os.mkdir(self.autogen_dir)
+        
+    
+    @property
+    def autogen_dir(self):
+        return os.path.join(self.project.directory, "annotations", "autogen-files")
+    
+    def preload(self, sheet, wikifier):
+        properties, items = self.annotation.get_custom_properties_and_qnodes(sheet)
+        items_to_add, properties_to_add=self._preload_wikifier(sheet, wikifier, items, properties)
+        self._preload_entities(sheet, properties_to_add, items_to_add)
+        self.project.save()
+
+    def _preload_wikifier(self, sheet, wikifier, items, properties):
+        import pandas as pd
+        from t2wml.utils.bindings import update_bindings
+        from t2wml.wikification.utility_functions import get_provider, dict_to_kgtk
+        prov=get_provider()
+
+
+        item_table=wikifier.item_table
+        update_bindings(item_table=item_table, sheet=sheet)
+
+        columns=['row', 'column', 'value', 'context', 'item']
+        dataframe_rows=[]
+        items_to_add_ids=[]
+        properties_to_add=[]
+        for item in items:
+            try:
+                wikifier.item_table.get_item_by_string(item)
+            except:
+                dataframe_rows.append(['', '', item, '', "Q"+item])
+                items_to_add_ids.append(item)
+
+        for property in properties:
+            content, data_type=property
+            try: 
+                prov.get_property_type(content)
+            except:
+                dataframe_rows.append(['', '', content, '', "P"+content])
+                properties_to_add.append(property)
+        
+        df=pd.DataFrame(dataframe_rows, columns=columns)
+        wikifier.add_dataframe(df)
+        combined_df=pd.concat(wikifier._data_frames)
+        filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
+        combined_df.to_csv(filepath, index=False)
+        self.project.add_wikifier_file(filepath)
+        return items_to_add_ids, properties_to_add
+            
+
+    def _preload_entities(self, sheet, properties, items):
+        from t2wml.wikification.utility_functions import dict_to_kgtk
+
+        nodes_dict={}
+        for property in properties:
+            content, data_type=property
+            node_id="P"+content
+            label=content
+            description=content+" relation"
+            nodes_dict[node_id]=dict(data_type=data_type, label=label, description=description)
+
+        for item in items:
+            content=item
+            node_id="Q"+content
+            label=content
+            description="A "+content
+            nodes_dict[node_id]=dict(label=label, description=description)
+        
+        filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
+        dict_to_kgtk(nodes_dict, filepath)
+        self.project.add_entity_file(filepath)
+
+
