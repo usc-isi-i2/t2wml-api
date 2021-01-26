@@ -5,6 +5,7 @@ import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
 from t2wml.settings import t2wml_settings
+from t2wml.mapping.datamart_edges import clean_id
 
 COST_MATRIX_DEFAULT = 10
 
@@ -477,6 +478,16 @@ class AnnotationNodeGenerator:
     def autogen_dir(self):
         return os.path.join(self.project.directory, "annotations", "autogen-files")
     
+    @property
+    def project_id(self):
+        return clean_id(self.project.title)
+    
+    def get_Qnode(self, item):
+        return f"Q{self.project_id}-{clean_id(item)}"
+    
+    def get_Pnode(self, property):
+        return f"P{self.project_id}-{clean_id(property)}"
+
     def preload(self, sheet, wikifier):
         properties, items = self.annotation.get_custom_properties_and_qnodes(sheet)
         items_to_add, properties_to_add=self._preload_wikifier(sheet, wikifier, items, properties)
@@ -501,22 +512,28 @@ class AnnotationNodeGenerator:
             try:
                 wikifier.item_table.get_item_by_string(item)
             except:
-                dataframe_rows.append(['', '', item, '', "Q"+item])
+                dataframe_rows.append(['', '', item, '', self.get_Qnode(item)])
                 items_to_add_ids.append(item)
 
-        for property in properties:
-            content, data_type=property
+        for (property, data_type) in properties:
             try: 
-                prov.get_property_type(content)
+                wp = prov.get_property_type(property)
+                if wp == "Property Not Found":
+                    raise ValueError
             except:
-                dataframe_rows.append(['', '', content, '', "P"+content])
-                properties_to_add.append(property)
+                dataframe_rows.append(['', '', property, '', self.get_Pnode(property)])
+                properties_to_add.append((property, data_type))
         
         df=pd.DataFrame(dataframe_rows, columns=columns)
-        wikifier.add_dataframe(df)
-        combined_df=pd.concat(wikifier._data_frames)
+
         filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
-        combined_df.to_csv(filepath, index=False)
+        if os.path.isfile(filepath):
+            org_df=pd.read_csv(filepath)
+            df=pd.concat([org_df, df])
+        wikifier.add_dataframe(df)
+        #combined_df=pd.concat(wikifier._data_frames)
+        
+        df.to_csv(filepath, index=False)
         self.project.add_wikifier_file(filepath)
         return items_to_add_ids, properties_to_add
             
@@ -525,22 +542,18 @@ class AnnotationNodeGenerator:
         from t2wml.wikification.utility_functions import dict_to_kgtk
 
         nodes_dict={}
-        for property in properties:
-            content, data_type=property
-            node_id="P"+content
-            label=content
-            description=content+" relation"
+        for (property, data_type) in properties:
+            node_id=self.get_Pnode(property)
+            label=property
+            description=property+" relation"
             nodes_dict[node_id]=dict(data_type=data_type, label=label, description=description)
 
         for item in items:
-            content=item
-            node_id="Q"+content
-            label=content
-            description="A "+content
+            node_id=self.get_Qnode(item)
+            label=item
+            description="A "+item
             nodes_dict[node_id]=dict(label=label, description=description)
         
         filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
         dict_to_kgtk(nodes_dict, filepath)
         self.project.add_entity_file(filepath)
-
-
