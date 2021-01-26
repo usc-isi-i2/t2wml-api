@@ -97,3 +97,25 @@ class DictionaryProvider(SparqlProvider):
     def __init__(self, ref_dict, sparql_endpoint=None, *args, **kwargs):
         super().__init__(sparql_endpoint)
         self.cache = ref_dict
+
+class KGTKFileProvider():
+    def __init__(self, file_path):
+        from t2wml.wikification.utility_functions import kgtk_to_dict
+        self.properties=kgtk_to_dict(file_path)
+
+    def get_property_type(self, wikidata_property, *args, **kwargs):
+        try:
+            property_dict=self.properties[wikidata_property]
+            return property_dict["data_type"]
+        except KeyError:
+            raise ValueError("Property "+wikidata_property+" not found")
+        
+    def save_entry(self, property, data_type, *args, **kwargs):
+        self.properties[property]=dict(kwargs)
+        self.properties[property]["data_type"]=data_type
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        pass
