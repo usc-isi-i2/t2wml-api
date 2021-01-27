@@ -12,9 +12,9 @@ from t2wml.settings import t2wml_settings
 
 
 class StatementError:
-    def __init__(self, message, field, qualifier=False, level=None):
+    def __init__(self, message, field, qualifier=-1, level=None):
         #set role
-        if qualifier:
+        if qualifier>-1:
             role="qualifier"
             level="Minor" if level is None else level
         else:
@@ -31,7 +31,7 @@ class StatementError:
 
         self.role=role
         self.message=message
-        self.qualifier=qualifier
+        self.qualifier_index=qualifier
         self.level=level
         self.field=field
 
@@ -57,15 +57,15 @@ def handle_ethiopian_calendar(node, add_node_list):
             except Exception as e:
                 node._errors.append(StatementError(field="calendar",
                                                     message="Failed to convert to gregorian calendar: "+str(e),
-                                                    qualifier=node.is_qualifier),
+                                                    qualifier=node.qualifier_index),
                                                     level="Minor")
 
 class Node:
-    def __init__(self, property=None, value=None, validate=True, is_qualifier=False, **kwargs):
+    def __init__(self, property=None, value=None, validate=True, qualifier_index=-1, **kwargs):
         self._errors = []
         self.property = property
         self.value = value
-        self.is_qualifier=is_qualifier
+        self.qualifier_index=qualifier_index
         self.__dict__.update(kwargs)
         if validate:
             self.validate()
@@ -85,12 +85,12 @@ class Node:
                 except Exception as e:
                     self._errors.append(StatementError(field="property",
                                                     message="Could not get property type for " + str(self.property),
-                                                    qualifier=self.is_qualifier))
+                                                    qualifier=self.qualifier_index))
                     property_type = "Not found"
             else:
                 self._errors.append(StatementError(field="property",
                                                     message="Missing property",
-                                                    qualifier=self.is_qualifier))
+                                                    qualifier=self.qualifier_index))
                 property_type = "Not found"
         except AttributeError:  # we init value, but it might be popped elsewhere, don't assume it exists
             #Not creating an error here because it's created when we pop elsewhere?
@@ -104,7 +104,7 @@ class Node:
                     except:
                         self._errors.append(StatementError(field="value",
                                                     message="Quantity type property must have numeric value",
-                                                    qualifier=self.is_qualifier))
+                                                    qualifier=self.qualifier_index))
 
                 if property_type == "time":
                     self.validate_datetime()
@@ -116,11 +116,11 @@ class Node:
                     except AttributeError:
                         self._errors.append(StatementError(field="value",
                                                     message="GlobeCoordinates must specify longitude and latitude or point value",
-                                                    qualifier=self.is_qualifier))
+                                                    qualifier=self.qualifier_index))
                 else:
                     self._errors.append(StatementError(field="value",
                                                     message="Missing value field",
-                                                    qualifier=self.is_qualifier))
+                                                    qualifier=self.qualifier_index))
         except AttributeError:  # we init value, but it might be popped elsewhere, don't assume it exists
             #Not creating an error here because it's created when we pop elsewhere?
             pass
@@ -128,7 +128,7 @@ class Node:
         if property_type not in VALID_PROPERTY_TYPES and property_type!="Not found":
             self._errors.append(StatementError(field="property",
                                                 message="Unsupported property type: "+property_type,
-                                                qualifier=self.is_qualifier))
+                                                qualifier=self.qualifier_index))
 
     def validate_datetime(self):
         try:
@@ -145,13 +145,13 @@ class Node:
         except:
             self._errors.append(StatementError(field="value",
                                                message="Invalid datetime: "+str(self.value),
-                                               qualifier=self.is_qualifier))
+                                               qualifier=self.qualifier_index))
         
 
     def serialize(self):
         return_dict = dict(self.__dict__)
         return_dict.pop("_errors")
-        return_dict.pop("is_qualifier")
+        return_dict.pop("qualifier_index")
         return return_dict
 
 
@@ -214,13 +214,13 @@ class NodeForEval(Node):
                 if value is None:
                     self._errors.append(StatementError(field=key,
                                                     message=f"Failed to resolve for {key} ({self.__dict__[key].unmodified_str})",
-                                                    qualifier=self.is_qualifier))
+                                                    qualifier=self.qualifier_index))
                     self.__dict__.pop(key)
                 elif value=="":
                     if t2wml_settings.warn_for_empty_cells:
                         self._errors.append(StatementError(field=key,
                                             message="Empty cell",
-                                            qualifier=self.is_qualifier,
+                                            qualifier=self.qualifier_index,
                                             type="Minor"))
                     self.__dict__.pop(key)
                 else:
@@ -236,7 +236,7 @@ class NodeForEval(Node):
             except Exception as e:
                 self._errors.append(StatementError(field=key,
                                     message=f"Error parsing {key} ({self.__dict__[key].unmodified_str}): {str(e)}",
-                                                    qualifier=self.is_qualifier))
+                                                    qualifier=self.qualifier_index))
                 self.__dict__.pop(key)
         return cell_indices
 
@@ -289,7 +289,7 @@ class EvaluatedStatement(Statement, NodeForEval):
                     try:
                         q_context=dict(t_var_qrow=row, t_var_qcol=col)
                         q_context.update(self.context)
-                        node_qual = self.node_class(context=q_context, is_qualifier=True, **q)
+                        node_qual = self.node_class(context=q_context, qualifier_index=i, **q)
                         handle_ethiopian_calendar(node_qual, gregorian_nodes)
 
                         self._errors+=node_qual.errors
@@ -300,7 +300,7 @@ class EvaluatedStatement(Statement, NodeForEval):
                             if t2wml_settings.warn_for_empty_cells:
                                 self._errors.append((StatementError(field="value",
                                                     message="Empty cell",
-                                                    qualifier=True)))
+                                                    qualifier=i)))
                             continue #either way, discard qualifier
                         
                         discard_qual=False
@@ -315,7 +315,7 @@ class EvaluatedStatement(Statement, NodeForEval):
                     except Exception as e:
                         self._errors.append((StatementError(field="fatal",
                                                     message=str(e),
-                                                    qualifier=True)))
+                                                    qualifier=i)))
             self.qualifier = new_qualifiers
         
         handle_ethiopian_calendar(self, gregorian_nodes)

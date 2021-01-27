@@ -202,35 +202,6 @@
                 }
             ]
         },
-        "E6": {
-            "cells": {
-                "value": "E6",
-                "subject": "A6"
-            },
-            "property": "P100024",
-            "value": "1",
-            "subject": "Q970",
-            "qualifier": [
-                {
-                    "cells": {
-                        "value": "E3"
-                    },
-                    "property": "P585",
-                    "value": "2001-01-01T00:00:00",
-                    "calendar": "Q1985727",
-                    "precision": 9,
-                    "time_zone": 0,
-                    "format": "%Y"
-                },
-                {
-                    "cells": {
-                        "value": "C6"
-                    },
-                    "property": "P6001",
-                    "value": "Q6581072"
-                }
-            ]
-        },
         "E7": {
             "cells": {
                 "value": "E7",
@@ -424,7 +395,7 @@
             {
                 "role": "subject",
                 "message": "Failed to resolve for subject (=item[A, $row])",
-                "qualifier": false,
+                "qualifier_index": -1,
                 "level": "Major",
                 "field": "subject"
             }
@@ -433,7 +404,7 @@
             {
                 "role": "qualifier",
                 "message": "Failed to resolve for value (=item[B, $row])",
-                "qualifier": true,
+                "qualifier_index": 2,
                 "level": "Minor",
                 "field": "value"
             }
@@ -442,7 +413,7 @@
             {
                 "role": "qualifier",
                 "message": "Failed to resolve for value (=item[C, $row])",
-                "qualifier": true,
+                "qualifier_index": 1,
                 "level": "Minor",
                 "field": "value"
             }
@@ -451,16 +422,23 @@
             {
                 "role": "subject",
                 "message": "Failed to resolve for subject (=item[A, $row])",
-                "qualifier": false,
+                "qualifier_index": -1,
                 "level": "Major",
                 "field": "subject"
             }
         ],
         "E6": [
             {
+                "role": "value",
+                "message": "Quantity type property must have numeric value",
+                "qualifier_index": -1,
+                "level": "Major",
+                "field": "value"
+            },
+            {
                 "role": "qualifier",
                 "message": "Failed to resolve for value (=item[B, $row])",
-                "qualifier": true,
+                "qualifier_index": 2,
                 "level": "Minor",
                 "field": "value"
             }
@@ -469,7 +447,7 @@
             {
                 "role": "qualifier",
                 "message": "Failed to resolve for value (=item[C, $row])",
-                "qualifier": true,
+                "qualifier_index": 1,
                 "level": "Minor",
                 "field": "value"
             }
@@ -478,7 +456,7 @@
             {
                 "role": "qualifier",
                 "message": "Invalid datetime: Bad date time",
-                "qualifier": true,
+                "qualifier_index": 0,
                 "level": "Minor",
                 "field": "value"
             }
@@ -487,14 +465,14 @@
             {
                 "role": "subject",
                 "message": "Failed to resolve for subject (=item[A, $row])",
-                "qualifier": false,
+                "qualifier_index": -1,
                 "level": "Major",
                 "field": "subject"
             },
             {
                 "role": "qualifier",
                 "message": "Invalid datetime: Bad date time",
-                "qualifier": true,
+                "qualifier_index": 0,
                 "level": "Minor",
                 "field": "value"
             }
@@ -503,14 +481,14 @@
             {
                 "role": "qualifier",
                 "message": "Invalid datetime: Bad date time",
-                "qualifier": true,
+                "qualifier_index": 0,
                 "level": "Minor",
                 "field": "value"
             },
             {
                 "role": "qualifier",
                 "message": "Failed to resolve for value (=item[B, $row])",
-                "qualifier": true,
+                "qualifier_index": 2,
                 "level": "Minor",
                 "field": "value"
             }
@@ -519,14 +497,14 @@
             {
                 "role": "qualifier",
                 "message": "Invalid datetime: Bad date time",
-                "qualifier": true,
+                "qualifier_index": 0,
                 "level": "Minor",
                 "field": "value"
             },
             {
                 "role": "qualifier",
                 "message": "Failed to resolve for value (=item[C, $row])",
-                "qualifier": true,
+                "qualifier_index": 1,
                 "level": "Minor",
                 "field": "value"
             }
@@ -535,7 +513,7 @@
             {
                 "role": "qualifier",
                 "message": "Invalid datetime: Bad date time",
-                "qualifier": true,
+                "qualifier_index": 0,
                 "level": "Minor",
                 "field": "value"
             }
