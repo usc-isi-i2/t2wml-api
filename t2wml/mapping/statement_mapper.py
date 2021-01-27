@@ -3,7 +3,7 @@ from string import punctuation
 import json
 import yaml
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
-from t2wml.mapping.statements import EvaluatedStatement
+from t2wml.mapping.statements import EvaluatedStatement, StatementError
 from t2wml.utils.bindings import update_bindings, bindings
 from t2wml.input_processing.yaml_parsing import validate_yaml, Template
 from t2wml.input_processing.region import YamlRegion
@@ -46,6 +46,7 @@ class StatementMapper(ABC):
         }
 
         for col, row in self.iterator():
+            errors=[]
             if string_is_valid(str(bindings.excel_sheet[row-1][col-1])):
                 cell = to_excel(col-1, row-1)
                 try:
@@ -53,11 +54,15 @@ class StatementMapper(ABC):
                         sheet, wikifier, col, row, do_init=False)
                     statements[cell] = statement
                     if inner_errors:
-                        cell_errors[cell] = inner_errors
+                        errors = inner_errors
                 except T2WMLExceptions.TemplateDidNotApplyToInput as e:
-                    cell_errors[cell] = e.errors
+                    errors = e.errors
                 except Exception as e:
-                    cell_errors[cell] = {"fatal":str(e)}
+                    errors = [StatementError(message=str(e),
+                                                       field="fatal",
+                                                       level="Major")]
+                if errors:
+                    cell_errors[cell] = [error.__dict__ if isinstance(error, StatementError) else error for error in errors ]
 
         return statements, cell_errors, metadata
 
@@ -118,7 +123,7 @@ class AnnotationMapper(YamlMapper):
     
     def empty_get_all_statements(self, sheet, wikifier):
         statements = {}
-        cell_errors = {}
+        cell_errors = []
         metadata = {
             "data_file": sheet.data_file_name,
             "sheet_name": sheet.name,

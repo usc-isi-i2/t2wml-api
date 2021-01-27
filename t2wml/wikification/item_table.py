@@ -35,7 +35,7 @@ class ItemTable:
         lookup = self.lookup_table.get(context)
         if not lookup:
             raise ItemNotFoundException(
-                "No values defined for context: {}".format(context))
+                "Search for cell item failed. (No values defined for context: {})".format(context))
         if not sheet:
             sheet = bindings.excel_sheet
         value = str(sheet[row, column])
@@ -50,7 +50,7 @@ class ItemTable:
         lookup = self.lookup_table.get(context)
         if not lookup:
             raise ItemNotFoundException(
-                "No values defined for context: {}".format(context))
+                "Search for cell item failed. (No values defined for context: {})".format(context))
 
         item = lookup.get(str(('', '', value)))
         if item:
