@@ -500,7 +500,6 @@ class AnnotationNodeGenerator:
         dataframe_rows=[]
         nodes_dict={}
         item_entities=set()
-        property_entities=set()
 
         #part one: wikification
         for (row, col) in items:
@@ -511,22 +510,22 @@ class AnnotationNodeGenerator:
                 dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string)])
                 item_entities.add(item_string)
         
-        prov=get_default_provider() #wikidata entities (temporary)
         for (row, col, data_type) in properties:
             property=sheet[row][col]
             try:
                 exists = wikifier.item_table.get_item(col, row, sheet=sheet)
             except:
-                try:
-                    wp = prov.get_property_type(property)
-                    if wp == "Property Not Found":
-                        raise ValueError
-                    pnode=property
-                except:
-                    pnode=self.get_Pnode(property)
-                    property_entities.add((property, data_type))
-
+                pnode=self.get_Pnode(property)
                 dataframe_rows.append([row, col, property, '', pnode])
+        
+        df=pd.DataFrame(dataframe_rows, columns=columns)
+        filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
+        if os.path.isfile(filepath):
+            org_df=pd.read_csv(filepath)
+            df=pd.concat([org_df, df])
+        df.to_csv(filepath, index=False)
+        wikifier.add_dataframe(df)
+        self.project.add_wikifier_file(filepath)
                 
         #part two: entity creation
         prov=get_provider()
@@ -535,23 +534,23 @@ class AnnotationNodeGenerator:
             label=item
             description="A "+item
             nodes_dict[node_id]=dict(label=label, description=description)
-        for property, data_type in property_entities:
-            node_id=self.get_Pnode(property)
-            label=property
-            description=property+" relation"
-            nodes_dict[node_id]=dict(data_type=data_type, label=label, description=description)
-            prov.save_entry(property, data_type)
+        for (row, col, data_type) in properties:
+            property = sheet[row][col]
+            node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
+
+
+            node_dict=dict(data_type=data_type, 
+                            label=property, 
+                            description=property+" relation")
+            try: #check if entity definition already present
+                node_dict_2=prov.get_entity(node_id)
+                if not node_dict_2:
+                    raise ValueError
+            except:
+                nodes_dict[node_id]=dict(node_dict) 
+                node_dict.pop("data_type")
+                prov.save_entry(node_id, data_type, from_file=True, **node_dict)
         
-        df=pd.DataFrame(dataframe_rows, columns=columns)
-
-        filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
-        if os.path.isfile(filepath):
-            org_df=pd.read_csv(filepath)
-            df=pd.concat([org_df, df])
-        df.to_csv(filepath, index=False)
-        wikifier.add_dataframe(df)
-        self.project.add_wikifier_file(filepath)
-
         filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
         if os.path.isfile(filepath):
             nodes_dict_2=kgtk_to_dict(filepath)
