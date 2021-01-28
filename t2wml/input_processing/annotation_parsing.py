@@ -505,7 +505,9 @@ class AnnotationNodeGenerator:
         for (row, col) in items:
             item_string=sheet[row][col]
             try:
-                exists = wikifier.item_table.get_item(col, row, sheet=sheet)
+                exists = wikifier.item_table.get_item(col, row, sheet=sheet)                
+                if not exists:
+                    raise ValueError
             except:
                 dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string)])
                 item_entities.add(item_string)
@@ -514,6 +516,8 @@ class AnnotationNodeGenerator:
             property=sheet[row][col]
             try:
                 exists = wikifier.item_table.get_item(col, row, sheet=sheet)
+                if not exists:
+                    raise ValueError
             except:
                 pnode=self.get_Pnode(property)
                 dataframe_rows.append([row, col, property, '', pnode])
@@ -537,8 +541,6 @@ class AnnotationNodeGenerator:
         for (row, col, data_type) in properties:
             property = sheet[row][col]
             node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
-
-
             node_dict=dict(data_type=data_type, 
                             label=property, 
                             description=property+" relation")
