@@ -421,8 +421,15 @@ class Annotation():
         instance = cls(annotations)
         return instance
 
-
-    def _get_properties(self, region, sheet):
+class AnnotationNodeGenerator:
+    def __init__(self, annotation, project):
+        self.annotation=annotation
+        self.project=project
+        if not os.path.isdir(self.autogen_dir):
+            os.mkdir(self.autogen_dir)
+    
+    
+    def _get_properties(self, region):
         #const_property=region.annotation.get("property")
         #if const_property:
         #    return [ (const_property, region.type)]
@@ -432,47 +439,37 @@ class Annotation():
                 range_properties=set()
                 for row in range(range_property.row_args[0], range_property.row_args[1]+1):
                     for col in range(range_property.col_args[0], range_property.col_args[1]+1):
-                        cell=sheet[row][col]
-                        range_properties.add((cell, region.type))
+                        range_properties.add((row, col, region.type))
                 return list(range_properties)
             else:
                 return []
 
-    def get_custom_properties_and_qnodes(self, sheet, item_table=None):
+    def get_custom_properties_and_qnodes(self):
         custom_properties=set()
         custom_items=set()
-        data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
+        data_region, subject_region, qualifier_regions=self.annotation.initialize()
 
         #check all properties
-        custom_properties.update(self._get_properties(data_region, sheet))
+        custom_properties.update(self._get_properties(data_region))
         for qualifier_region in qualifier_regions:
-            custom_properties.update(self._get_properties(qualifier_region, sheet))
+            custom_properties.update(self._get_properties(qualifier_region))
 
         #check all main subject
         for row in range(subject_region.row_args[0], subject_region.row_args[1]+1):
             for col in range(subject_region.col_args[0], subject_region.col_args[1]+1):
-                cell=sheet[row][col]
-                custom_items.add(cell)
+                custom_items.add((row, col))
         
         #check anything whose type is wikibaseitem
-        for block in self.annotation_block_array:
+        for block in self.annotation.annotation_block_array:
             type=block.get("type")
             if type in ["wikibaseitem", "WikibaseItem"]:
                 b=ValueArgs(block)
                 for row in range(b.row_args[0], b.row_args[1]+1):
                     for col in range(b.col_args[0], b.col_args[1]+1):
-                        cell=sheet[row][col]
-                        custom_items.add(cell)
+                        custom_items.add((row, col))
         
         return list(custom_properties), list(custom_items)
 
-class AnnotationNodeGenerator:
-    def __init__(self, annotation, project):
-        self.annotation=annotation
-        self.project=project
-        if not os.path.isdir(self.autogen_dir):
-            os.mkdir(self.autogen_dir)
-        
     
     @property
     def autogen_dir(self):
@@ -489,40 +486,61 @@ class AnnotationNodeGenerator:
         return f"P{self.project_id}-{clean_id(property)}"
 
     def preload(self, sheet, wikifier):
-        properties, items = self.annotation.get_custom_properties_and_qnodes(sheet)
-        items_to_add, properties_to_add=self._preload_wikifier(sheet, wikifier, items, properties)
-        self._preload_entities(sheet, properties_to_add, items_to_add)
-        self.project.save()
-
-    def _preload_wikifier(self, sheet, wikifier, items, properties):
         import pandas as pd
         from t2wml.utils.bindings import update_bindings
-        from t2wml.wikification.utility_functions import get_provider, dict_to_kgtk
-        prov=get_provider()
+        from t2wml.wikification.utility_functions import get_default_provider, get_provider, dict_to_kgtk, kgtk_to_dict
 
-
+        properties, items = self.get_custom_properties_and_qnodes()
+    
+       
         item_table=wikifier.item_table
         update_bindings(item_table=item_table, sheet=sheet)
 
         columns=['row', 'column', 'value', 'context', 'item']
         dataframe_rows=[]
-        items_to_add_ids=[]
-        properties_to_add=[]
-        for item in items:
-            try:
-                wikifier.item_table.get_item_by_string(item)
-            except:
-                dataframe_rows.append(['', '', item, '', self.get_Qnode(item)])
-                items_to_add_ids.append(item)
+        nodes_dict={}
+        item_entities=set()
+        property_entities=set()
 
-        for (property, data_type) in properties:
-            try: 
-                wp = prov.get_property_type(property)
-                if wp == "Property Not Found":
-                    raise ValueError
+        #part one: wikification
+        for (row, col) in items:
+            item_string=sheet[row][col]
+            try:
+                exists = wikifier.item_table.get_item(col, row, sheet=sheet)
             except:
-                dataframe_rows.append(['', '', property, '', self.get_Pnode(property)])
-                properties_to_add.append((property, data_type))
+                dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string)])
+                item_entities.add(item_string)
+        
+        prov=get_default_provider() #wikidata entities (temporary)
+        for (row, col, data_type) in properties:
+            property=sheet[row][col]
+            try:
+                exists = wikifier.item_table.get_item(col, row, sheet=sheet)
+            except:
+                try:
+                    wp = prov.get_property_type(property)
+                    if wp == "Property Not Found":
+                        raise ValueError
+                    pnode=property
+                except:
+                    pnode=self.get_Pnode(property)
+                    property_entities.add((property, data_type))
+
+                dataframe_rows.append([row, col, property, '', pnode])
+                
+        #part two: entity creation
+        prov=get_provider()
+        for item in item_entities:
+            node_id=self.get_Qnode(item)
+            label=item
+            description="A "+item
+            nodes_dict[node_id]=dict(label=label, description=description)
+        for property, data_type in property_entities:
+            node_id=self.get_Pnode(property)
+            label=property
+            description=property+" relation"
+            nodes_dict[node_id]=dict(data_type=data_type, label=label, description=description)
+            prov.save_entry(property, data_type)
         
         df=pd.DataFrame(dataframe_rows, columns=columns)
 
@@ -530,30 +548,20 @@ class AnnotationNodeGenerator:
         if os.path.isfile(filepath):
             org_df=pd.read_csv(filepath)
             df=pd.concat([org_df, df])
-        wikifier.add_dataframe(df)
-        #combined_df=pd.concat(wikifier._data_frames)
-        
         df.to_csv(filepath, index=False)
+        wikifier.add_dataframe(df)
         self.project.add_wikifier_file(filepath)
-        return items_to_add_ids, properties_to_add
-            
 
-    def _preload_entities(self, sheet, properties, items):
-        from t2wml.wikification.utility_functions import dict_to_kgtk
-
-        nodes_dict={}
-        for (property, data_type) in properties:
-            node_id=self.get_Pnode(property)
-            label=property
-            description=property+" relation"
-            nodes_dict[node_id]=dict(data_type=data_type, label=label, description=description)
-
-        for item in items:
-            node_id=self.get_Qnode(item)
-            label=item
-            description="A "+item
-            nodes_dict[node_id]=dict(label=label, description=description)
-        
         filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
+        if os.path.isfile(filepath):
+            nodes_dict_2=kgtk_to_dict(filepath)
+            nodes_dict_2.update(nodes_dict)
+            nodes_dict=nodes_dict_2
         dict_to_kgtk(nodes_dict, filepath)
-        self.project.add_entity_file(filepath)
+            
+        self.project.add_entity_file(filepath)    
+        self.project.save()
+    
+
+        
+

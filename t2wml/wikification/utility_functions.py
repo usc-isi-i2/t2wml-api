@@ -9,12 +9,15 @@ from t2wml.wikification.wikidata_provider import KGTKFileProvider
 from t2wml.settings import t2wml_settings
 
 
+def get_default_provider():
+    default_kgtk=Path(__file__).parent / "preloaded_properties.tsv"
+    wikidata_provider = KGTKFileProvider(default_kgtk)
+    return wikidata_provider
 
 def get_provider():
     wikidata_provider = t2wml_settings.wikidata_provider
     if wikidata_provider is None:
-        default_kgtk=Path(__file__).parent / "preloaded_properties.tsv"
-        wikidata_provider = KGTKFileProvider(default_kgtk)
+        wikidata_provider = get_default_provider()
         t2wml_settings.wikidata_provider = wikidata_provider
     return wikidata_provider
 
