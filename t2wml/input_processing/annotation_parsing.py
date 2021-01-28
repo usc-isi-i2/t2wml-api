@@ -504,30 +504,32 @@ class AnnotationNodeGenerator:
         #part one: wikification
         for (row, col) in items:
             item_string=sheet[row][col]
-            try:
-                exists = wikifier.item_table.get_item(col, row, sheet=sheet)                
-                if not exists:
-                    raise ValueError
-            except:
-                dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string)])
-                item_entities.add(item_string)
+            if item_string:
+                try:
+                    exists = wikifier.item_table.get_item(col, row, sheet=sheet)                
+                    if not exists:
+                        raise ValueError
+                except:
+                    dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string)])
+                    item_entities.add(item_string)
         
         for (row, col, data_type) in properties:
             property=sheet[row][col]
-            try:
-                exists = wikifier.item_table.get_item(col, row, sheet=sheet)
-                if not exists:
-                    raise ValueError
-            except:
-                pnode=self.get_Pnode(property)
-                dataframe_rows.append([row, col, property, '', pnode])
+            if property:
+                try:
+                    exists = wikifier.item_table.get_item(col, row, sheet=sheet)
+                    if not exists:
+                        raise ValueError
+                except:
+                    pnode=self.get_Pnode(property)
+                    dataframe_rows.append([row, col, property, '', pnode])
         
         df=pd.DataFrame(dataframe_rows, columns=columns)
         filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
         if os.path.isfile(filepath):
             org_df=pd.read_csv(filepath)
             df=pd.concat([org_df, df])
-        df.to_csv(filepath, index=False)
+        df.to_csv(filepath, index=False, escapechar="")
         wikifier.add_dataframe(df)
         self.project.add_wikifier_file(filepath)
                 
@@ -540,18 +542,19 @@ class AnnotationNodeGenerator:
             nodes_dict[node_id]=dict(label=label, description=description)
         for (row, col, data_type) in properties:
             property = sheet[row][col]
-            node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
-            node_dict=dict(data_type=data_type, 
-                            label=property, 
-                            description=property+" relation")
-            try: #check if entity definition already present
-                node_dict_2=prov.get_entity(node_id)
-                if not node_dict_2:
-                    raise ValueError
-            except:
-                nodes_dict[node_id]=dict(node_dict) 
-                node_dict.pop("data_type")
-                prov.save_entry(node_id, data_type, from_file=True, **node_dict)
+            if property:
+                node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
+                node_dict=dict(data_type=data_type, 
+                                label=property, 
+                                description=property+" relation")
+                try: #check if entity definition already present
+                    node_dict_2=prov.get_entity(node_id)
+                    if not node_dict_2:
+                        raise ValueError
+                except:
+                    nodes_dict[node_id]=dict(node_dict) 
+                    node_dict.pop("data_type")
+                    prov.save_entry(node_id, data_type, from_file=True, **node_dict)
         
         filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
         if os.path.isfile(filepath):
