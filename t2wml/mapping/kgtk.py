@@ -2,7 +2,7 @@
 import csv
 from io import StringIO
 from pathlib import Path
-from t2wml.mapping.datamart_edges import (create_metadata_for_project, create_metadata_for_variable, 
+from t2wml.mapping.datamart_edges import (clean_id, create_metadata_for_project, create_metadata_for_variable, 
                 create_metadata_for_qualifier_property, link_statement_to_dataset)
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
@@ -218,3 +218,24 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
     output = string_stream.getvalue()
     string_stream.close()
     return output
+
+def get_all_variables(project, statements):
+    tsv_data=[]
+    tsv_data+=create_metadata_for_project(project)
+    variable_set=set()
+    variable_ids=set()
+    entity_dict={}
+    for file in project.entity_files:
+        full_path=project.get_full_path(file)
+        entity_dict.update(kgtk_to_dict(full_path))
+
+    for cell, statement in statements.items():
+        variable=statement["property"]
+        if variable not in variable_set:
+            variable_set.add(variable)
+            variable_dict=entity_dict.get(variable, None)
+            if variable_dict is not None:
+                label=variable_dict.get("label", "A "+variable)
+                variable_id=clean_id(label)
+                variable_ids.add(variable_id)
+    return variable_ids
