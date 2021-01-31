@@ -1,4 +1,4 @@
-from hashlib import new
+from t2wml.mapping.datamart_edges import clean_id
 import yaml
 import os
 import warnings
@@ -44,6 +44,9 @@ class Project:
 
         self.cache_id=cache_id
 
+    @property
+    def dataset_id(self):
+        return clean_id(self.title)
     
     def _load_data_files_from_project(self, data_files):
         self.data_files=data_files or {}

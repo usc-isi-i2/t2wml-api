@@ -46,6 +46,7 @@ def clean_id(input):
     '''
     input = re.sub(r'[^A-Za-z0-9\s]+', '', input)
     input = re.sub("\s", "_", input)
+    input = input.lower()
     return input
 
 
