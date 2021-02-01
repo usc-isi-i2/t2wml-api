@@ -63,7 +63,7 @@ class ValueArgs:
         self.annotation = annotation
         self.role = annotation["role"]
         self.type = annotation.get("type", "")
-        self.selection = annotation["selections"][0]
+        self.selection = annotation["selection"]
         self.cell_args = self.get_cell_args(self.selection)
         self.matches = {}
         self.matched_to=None
@@ -228,11 +228,9 @@ class Annotation():
             except KeyError:
                 raise InvalidAnnotationException("Each annotation entry must contain a field 'role'")
             try:
-                test=block["selections"][0]
+                test=block["selection"]
             except KeyError:
-                raise InvalidAnnotationException("Each annotation entry must contain a field 'selections'")
-            except: 
-                raise InvalidAnnotationException("Each annotation entry must contain a field 'selections' with at least one entry")
+                raise InvalidAnnotationException("Each annotation entry must contain a field 'selection'")
 
         #if subject_count>1 or var_count>1: 
         #    raise InvalidAnnotationException("Each annotation can contain only one region for main subject and one region for dependent variable")
@@ -325,7 +323,7 @@ class Annotation():
             optionalsLines += YamlFormatter.get_optionals_string(
                 "unit: " + unit.get_expression(region, use_q)+"\n", use_q)
         for key in region.annotation:
-            if key not in ["role", "selections", "type", "property"]:
+            if key not in ["role", "selection", "type", "property"]:
                 optionalsLines += YamlFormatter.get_optionals_string(
                     key+": "+region.annotation[key]+"\n", use_q)
 
