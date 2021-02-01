@@ -326,8 +326,13 @@ class Annotation():
             if key == "changed": 
                 continue
             if key not in ["role", "selection", "type", "property"]:
-                optionalsLines += YamlFormatter.get_optionals_string(
-                    key+": "+region.annotation[key]+"\n", use_q)
+                try:
+                    optionalsLines += YamlFormatter.get_optionals_string(
+                        key+": "+region.annotation[key]+"\n", use_q)
+                except Exception as e:
+                    optionalsLines +=YamlFormatter.get_optionals_string(
+                        "# error parsing annotation for key: "+key+" : "+str(e), use_q)
+
 
         return propertyLine, optionalsLines
 
