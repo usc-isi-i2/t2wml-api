@@ -323,6 +323,8 @@ class Annotation():
             optionalsLines += YamlFormatter.get_optionals_string(
                 "unit: " + unit.get_expression(region, use_q)+"\n", use_q)
         for key in region.annotation:
+            if key == "changed": 
+                continue
             if key not in ["role", "selection", "type", "property"]:
                 optionalsLines += YamlFormatter.get_optionals_string(
                     key+": "+region.annotation[key]+"\n", use_q)
