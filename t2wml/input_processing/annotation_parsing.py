@@ -69,7 +69,12 @@ class ValueArgs:
         self.matched_to=None
 
     def get_cell_args(self, selection):
-        return (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
+        top=min(selection["y1"], selection["y2"])
+        bottom=max(selection["y1"], selection["y2"])
+        left=min(selection["x1"], selection["x2"])
+        right=max(selection["x1"], selection["x2"])
+        return (left-1, top-1), (right-1, bottom-1)
+        #return (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
 
     @property
     def use_item(self):
