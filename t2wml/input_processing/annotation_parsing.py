@@ -234,8 +234,8 @@ class Annotation():
             except: 
                 raise InvalidAnnotationException("Each annotation entry must contain a field 'selections' with at least one entry")
 
-        if subject_count>1 or var_count>1: 
-            raise InvalidAnnotationException("Each annotation can contain only one region for main subject and one region for dependent variable")
+        #if subject_count>1 or var_count>1: 
+        #    raise InvalidAnnotationException("Each annotation can contain only one region for main subject and one region for dependent variable")
 
     @property
     def potentially_enough_annotation_information(self):
@@ -473,7 +473,7 @@ class AnnotationNodeGenerator:
     
     @property
     def autogen_dir(self):
-        return os.path.join(self.project.directory, "annotations", "autogen-files")
+        return os.path.join(self.project.directory, "annotations", f"autogen-files-{self.project.dataset_id}")
     
     @property
     def project_id(self):
