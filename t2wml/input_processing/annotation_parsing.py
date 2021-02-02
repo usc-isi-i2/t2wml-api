@@ -242,7 +242,12 @@ class Annotation():
             try:
                 test=block["selection"]
             except KeyError:
-                raise InvalidAnnotationException("Each annotation entry must contain a field 'selection'")
+                if "selections" in block:
+                    block["selection"]=block["selections"][0]
+                    block.pop("selections")
+                    print("Deprecation warning: Switch from selections to selection")
+                else:
+                    raise InvalidAnnotationException("Each annotation entry must contain a field 'selection'")
 
         #if subject_count>1 or var_count>1: 
         #    raise InvalidAnnotationException("Each annotation can contain only one region for main subject and one region for dependent variable")
