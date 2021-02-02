@@ -49,8 +49,8 @@ class ErrorWhileApplyingYamlFileException(ErrorInYAMLFileException):
     message = "Errors occured while applying the t2wml-valid yaml file, possibly cell-specific"
 
 class TemplateDidNotApplyToInput(ErrorWhileApplyingYamlFileException):
-    def __init__(self, errors={}):
-        self.errors = errors
+    def __init__(self, errors=None):
+        self.errors = errors or []
 
 class CellOutsideofBoundsException(T2WMLException):
     message = "Attempted to access cell outside of spreadsheet bounds"
