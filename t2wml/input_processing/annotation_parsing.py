@@ -16,6 +16,17 @@ type_suggested_property_mapping={
     #"monolingualtext": "P2561",
 }
 
+
+def normalize_rectangle(annotation):
+    selection = annotation["selection"]
+    top=min(selection["y1"], selection["y2"])
+    bottom=max(selection["y1"], selection["y2"])
+    left=min(selection["x1"], selection["x2"])
+    right=max(selection["x1"], selection["x2"])
+    annotation["selection"]={"x1": left, "x2": right, "y1":top, "y2":bottom}
+
+
+
 class YamlFormatter:
     # all the formatting and indentation in one convenient location
     @staticmethod
@@ -69,12 +80,7 @@ class ValueArgs:
         self.matched_to=None
 
     def get_cell_args(self, selection):
-        top=min(selection["y1"], selection["y2"])
-        bottom=max(selection["y1"], selection["y2"])
-        left=min(selection["x1"], selection["x2"])
-        right=max(selection["x1"], selection["x2"])
-        return (left-1, top-1), (right-1, bottom-1)
-        #return (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
+        return (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
 
     @property
     def use_item(self):
@@ -96,11 +102,11 @@ class ValueArgs:
 
     @property
     def col_args(self):
-        return tuple(sorted([self.cell_args[0][0], self.cell_args[1][0]]))
+        return (self.cell_args[0][0], self.cell_args[1][0])
 
     @property
     def row_args(self):
-        return tuple(sorted([self.cell_args[0][1], self.cell_args[1][1]]))
+        return (self.cell_args[0][1], self.cell_args[1][1])
 
     @property
     def is_2D(self):
@@ -195,6 +201,7 @@ class Annotation():
         self.comment_messages = ""
         if annotation_blocks_array is not None:
             for block in annotation_blocks_array:
+                normalize_rectangle(block)
                 role = block["role"]
                 if role == "dependentVar":
                     self.data_annotations.append(block)
