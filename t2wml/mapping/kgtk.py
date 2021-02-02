@@ -2,7 +2,7 @@
 import csv
 from io import StringIO
 from pathlib import Path
-from t2wml.mapping.datamart_edges import (clean_id, create_metadata_for_project, create_metadata_for_variable, 
+from t2wml.mapping.datamart_edges import (clean_id, create_metadata_for_custom_qnode, create_metadata_for_project, create_metadata_for_variable, 
                 create_metadata_for_qualifier_property, link_statement_to_dataset)
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
@@ -113,6 +113,8 @@ def handle_additional_edges(project, statements):
                 label=variable_dict.get("label", "A "+variable)
                 description=variable_dict.get("description", variable+" relation")
                 data_type=variable_dict.get("data_type", "quantity")
+                if data_type.lower()=="wikibaseitem":
+                    qnode_ids.add(statement["value"])
                 tags=variable_dict.get("tags", [])
                 #TODO: P31?
                 tsv_data+=create_metadata_for_variable(project, variable, label, description, data_type, tags)
@@ -127,13 +129,22 @@ def handle_additional_edges(project, statements):
                     label=variable_dict.get("label", "A "+property)
                     #description=variable_dict.get("description", variable+" relation")
                     data_type=variable_dict.get("data_type", "string")
+                    if data_type.lower()=="wikibaseitem":
+                        qnode_ids.add(qualifier["value"])
                     tsv_data+=create_metadata_for_qualifier_property(project, variable, property, label, data_type)
         
         subject=statement["subject"]
         if subject not in qnode_ids:
             qnode_ids.add(subject)
             #TODO
-        #TODO: find any other nodes that are of type qNode
+    
+    for qnode_id in qnode_ids:
+        variable_dict=entity_dict.get(qnode_id, {})
+        label=variable_dict.get("label", "A "+property)
+        #description=variable_dict.get("description", "A "+variable)
+        if variable_dict is not None:
+            tsv_data+=create_metadata_for_custom_qnode(qnode_id, label)
+
     for result_dict in tsv_data:
         property_type=result_dict.pop("type")
         result_dict["node2;kgtk:data_type"]=property_type

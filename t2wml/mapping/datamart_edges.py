@@ -172,10 +172,10 @@ def create_metadata_for_custom_qnode(id, label, description="", **kwargs): #do w
     def get_edge(node1, label, node2, type):
         return dict(node1=node1, label=label, node2=node2, type=type, id=f'{node1}-{label}')
     edges = [
-            get_edge(node1=id, label="label", node2=label),
+            get_edge(node1=id, label="label", node2=label, type="string"),
         ]
     if description:
-        edges.append(get_edge(node1=id, label="description", node2=description))
+        edges.append(get_edge(node1=id, label="description", node2=description, type="string"))
     return edges
 
 
