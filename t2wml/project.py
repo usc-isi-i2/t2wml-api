@@ -229,6 +229,10 @@ class Project:
             return True
         if file_path in self.entity_files:
             return True
+        for key, data_file in self.annotations.items():
+            for s_key, sheet in data_file.items():
+                if file_path in sheet["val_arr"]:
+                    return True
         return False
     
     def delete_file_from_project(self, file_path, delete_from_fs=False):
