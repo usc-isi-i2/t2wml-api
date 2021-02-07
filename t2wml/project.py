@@ -328,6 +328,9 @@ class Project:
 
         
         if rename_in_fs:
+            new_path=Path(new_file_path)
+            full_folder_path=new_path.parent
+            os.makedirs(full_folder_path, exist_ok=True)
             old_file_path=self.get_full_path(old_name)
             os.rename(old_file_path, new_file_path)
         
