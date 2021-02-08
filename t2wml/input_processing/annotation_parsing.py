@@ -231,6 +231,14 @@ class Annotation():
                 raise InvalidAnnotationException("Each annotation entry must be a dict")
             try:
                 role = block["role"]
+                if role not in ["dependentVar", "mainSubject", "qualifier", "property", "unit", "metadata"]:
+                    raise InvalidAnnotationException('Unrecognized value for role, must be from: "dependentVar", "mainSubject", "qualifier", "property", "unit", "metadata"')
+                if role in ["dependentVar", "qualifier"]:
+                    try:
+                        block_type=block["type"]
+                    except KeyError:
+                        raise InvalidAnnotationException("dependentVar and qualifier blocks must specify type")
+                    
 
                 if role == "dependentVar":
                     var_count+=1 
@@ -239,6 +247,7 @@ class Annotation():
                 
             except KeyError:
                 raise InvalidAnnotationException("Each annotation entry must contain a field 'role'")
+            
             try:
                 test=block["selection"]
             except KeyError:
