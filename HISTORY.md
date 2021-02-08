@@ -1,5 +1,18 @@
 T2WML API History
 ===================================
+
+Changes in version 0.2.0:
+------------------------
+* overhaul of kgtk output to include custom edges for dataset, variable nodes, qualifier nodes, custom QNodes, and linking statement edges to dataset
+* add support for tags in entity upload
+* add all properties from wikidata to a kgtk file and change the default wikidataprovider for api script users to be the kgtkfileprovider 
+* change the format of errors to be a flat array of dictionaries instead of a layered dictionary
+* in annotations, selections -> selection (backwards comaptibility will select first in list + print warning) 
+* all rectangle orientations are normalized to top left corner to bottom right
+* bug fixes:
+    - handle $n cases in the annotations
+    - specify an escape char in to_csv
+
 Changes in version 0.1.0:
 ------------------------
 * remove imprecise alignment support in annotations until we have a better working version
