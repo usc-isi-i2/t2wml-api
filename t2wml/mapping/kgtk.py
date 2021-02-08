@@ -140,7 +140,7 @@ def handle_additional_edges(project, statements):
     
     for qnode_id in qnode_ids:
         variable_dict=entity_dict.get(qnode_id, {})
-        label=variable_dict.get("label", "A "+property)
+        label=variable_dict.get("label", "A "+qnode_id)
         #description=variable_dict.get("description", "A "+variable)
         if variable_dict is not None:
             tsv_data+=create_metadata_for_custom_qnode(qnode_id, label)
