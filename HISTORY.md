@@ -1,6 +1,10 @@
 T2WML API History
 ===================================
 
+Changes in version 0.2.1:
+------------------------
+* add some additional validation to annotation
+
 Changes in version 0.2.0:
 ------------------------
 * overhaul of kgtk output to include custom edges for dataset, variable nodes, qualifier nodes, custom QNodes, and linking statement edges to dataset
