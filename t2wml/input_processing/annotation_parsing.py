@@ -459,7 +459,17 @@ class AnnotationNodeGenerator:
         if not os.path.isdir(self.autogen_dir):
             os.mkdir(self.autogen_dir)
     
-    
+    def _get_units(self, region):
+        unit=region.matches.get("unit")
+        if unit:
+            units=set()
+            for row in range(unit.row_args[0], unit.row_args[1]+1):
+                    for col in range(unit.col_args[0], unit.col_args[1]+1):
+                        units.add((row, col))
+            return list(units)
+        return []
+
+
     def _get_properties(self, region):
         #const_property=region.annotation.get("property")
         #if const_property:
@@ -472,18 +482,23 @@ class AnnotationNodeGenerator:
                     for col in range(range_property.col_args[0], range_property.col_args[1]+1):
                         range_properties.add((row, col, region.type))
                 return list(range_properties)
-            else:
-                return []
+            return []
 
     def get_custom_properties_and_qnodes(self):
         custom_properties=set()
         custom_items=set()
+
         data_region, subject_region, qualifier_regions=self.annotation.initialize()
 
         #check all properties
         custom_properties.update(self._get_properties(data_region))
         for qualifier_region in qualifier_regions:
             custom_properties.update(self._get_properties(qualifier_region))
+        
+        #check all units
+        custom_items.update(self._get_units(data_region))
+        for qualifier_region in qualifier_regions:
+            custom_items.update(self._get_units(qualifier_region))
 
         #check all main subject
         for row in range(subject_region.row_args[0], subject_region.row_args[1]+1):
