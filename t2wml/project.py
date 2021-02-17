@@ -243,10 +243,9 @@ class Project:
         
 
         if del_val in self.data_files: #handle data files completely separately from everything else
-            for edit_dict in [self.annotations, self.data_files, self.yaml_sheet_associations]:
-                for key in edit_dict:
-                    if key==del_val:
-                        edit_dict.pop(del_val)
+            self.data_files.pop(del_val)
+            self.annotations.pop(del_val, None)
+            self.yaml_sheet_associations.pop(del_val, None)
         
         elif del_val in self.entity_files: 
             self.entity_files.remove(del_val)    
