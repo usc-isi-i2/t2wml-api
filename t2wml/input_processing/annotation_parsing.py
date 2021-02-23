@@ -550,7 +550,10 @@ class AnnotationNodeGenerator:
     
     @property
     def autogen_dir(self):
-        return os.path.join(self.project.directory, "annotations", f"autogen-files-{self.project.dataset_id}")
+        auto= os.path.join(self.project.directory, "annotations", f"autogen-files-{self.project.dataset_id}")
+        if not os.path.exists(auto):
+            os.makedirs(auto, exist_ok=True)
+        return auto
     
     @property
     def project_id(self):
