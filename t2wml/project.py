@@ -30,8 +30,8 @@ class Project:
         self.description=description
         self.url=url
 
-        self._load_data_files_from_project(data_files)
-        self._load_yaml_sheet_associations(yaml_sheet_associations)
+        self.data_files=data_files or {}
+        self.yaml_sheet_associations=yaml_sheet_associations or {}
         self.annotations=annotations or {}
 
         self.yaml_files=yaml_files or []
@@ -47,45 +47,7 @@ class Project:
     @property
     def dataset_id(self):
         return clean_id(self.title)
-    
-    def _load_data_files_from_project(self, data_files):
-        self.data_files=data_files or {}
 
-        if isinstance(data_files, list): #backwards compatibility version 0.0.13 and earlier
-            warnings.warn("Using a project file from version 0.0.13 or earlier, updating to match more recent formats. Support for version 0.0.13 and earlier files may be deprecated in the future", DeprecationWarning)
-            for file_path in data_files:
-                full_file_path=os.path.join(self.directory, file_path)
-                sf = SpreadsheetFile(full_file_path)
-                self.data_files[file_path]=dict(val_arr= sf.sheet_names,
-                                                selected=sf.sheet_names[0])
-        else: 
-            if data_files:
-                #backwards compatibility 0.0.16 and earlier
-                if isinstance(list(data_files.values())[0], list):
-                    #warnings.warn("Using a project file from version 0.0.16 or earlier, updating to match more recent formats", DeprecationWarning)
-                    for data_file_name, sheet_names in data_files.items():
-                        self.data_files[data_file_name]=dict(val_arr= sheet_names,
-                                                    selected= sheet_names[0])
- 
-    def _load_yaml_sheet_associations(self, yaml_sheet_associations):
-        self.yaml_sheet_associations=yaml_sheet_associations or {}
-        #backwards compatibility 0.0.16 and earlier
-        if yaml_sheet_associations:
-            #there must be some less horrifyingly ugly way of writing the next line, but it's one line...
-            is_version_16_or_lower = isinstance(list(list(yaml_sheet_associations.values())[0].values())[0], list)
-            if is_version_16_or_lower:
-                new_style_yaml_associations={}
-                #warnings.warn("Using a project file from version 0.0.16 or earlier, updating to match more recent formats", DeprecationWarning)
-                for file_key in yaml_sheet_associations:
-                    new_style_yaml_associations[file_key]={}
-                    for sheet_key in yaml_sheet_associations[file_key]:
-                        val_arr=yaml_sheet_associations[file_key][sheet_key]
-                        new_style_yaml_associations[file_key][sheet_key]=dict(
-                            val_arr=val_arr,
-                            selected=val_arr[-1]
-                        )
-                self.yaml_sheet_associations=new_style_yaml_associations
-    
     def _add_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         if os.path.isabs(file_path):
             root=Path(self.directory)
