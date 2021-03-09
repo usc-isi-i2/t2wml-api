@@ -55,7 +55,7 @@ class ItemTable:
             raise ItemNotFoundException(
                 "Search for cell item failed. (No values defined for context: {})".format(context))
 
-        item = lookup.get(str(('', '', value)))
+        item = lookup.get(str(('', '', '', '', value)))
         if item:
             return item
         raise ItemNotFoundException("Could not find item for value: "+value)
