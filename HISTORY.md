@@ -1,5 +1,12 @@
 T2WML API History
 ===================================
+Changes in version 0.2.2:
+------------------------
+* also generate entities and wikification for units
+* add id, userlink, and link fields to annotations
+* support specifying sheet name and data path in wikifier file
+* fix bug when autogen dir doesn't exist in filesystem
+* remove project.t2wml file compatibility for formats from version 0.0.16 and earlier (was deprecated from 0.0.17 onwards)
 
 Changes in version 0.2.1:
 ------------------------
