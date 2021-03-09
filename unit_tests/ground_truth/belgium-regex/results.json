@@ -6,6 +6,7 @@
         },
         "property": "P1082",
         "value": "41450",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -18,8 +19,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D7": {
         "cells": {
@@ -28,6 +28,7 @@
         },
         "property": "P1082",
         "value": "41868",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -40,8 +41,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D8": {
         "cells": {
@@ -50,6 +50,7 @@
         },
         "property": "P1082",
         "value": "-0.5",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -62,8 +63,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D10": {
         "cells": {
@@ -72,6 +72,7 @@
         },
         "property": "P1082",
         "value": "1.8",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -84,8 +85,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D11": {
         "cells": {
@@ -94,6 +94,7 @@
         },
         "property": "P1082",
         "value": "6.5",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -106,8 +107,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D12": {
         "cells": {
@@ -116,6 +116,7 @@
         },
         "property": "P1082",
         "value": "4.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -128,8 +129,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D14": {
         "cells": {
@@ -138,6 +138,7 @@
         },
         "property": "P1082",
         "value": "0.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -150,8 +151,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D15": {
         "cells": {
@@ -160,6 +160,7 @@
         },
         "property": "P1082",
         "value": "17.3",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -172,8 +173,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D16": {
         "cells": {
@@ -182,6 +182,7 @@
         },
         "property": "P1082",
         "value": "5.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -194,8 +195,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D17": {
         "cells": {
@@ -204,6 +204,7 @@
         },
         "property": "P1082",
         "value": "20.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -216,8 +217,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D18": {
         "cells": {
@@ -226,6 +226,7 @@
         },
         "property": "P1082",
         "value": "4.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -238,8 +239,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D19": {
         "cells": {
@@ -248,6 +248,7 @@
         },
         "property": "P1082",
         "value": "6.3",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -260,8 +261,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "D20": {
         "cells": {
@@ -270,6 +270,7 @@
         },
         "property": "P1082",
         "value": "8.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -282,8 +283,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E6": {
         "cells": {
@@ -292,6 +292,7 @@
         },
         "property": "P1082",
         "value": "42585",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -304,8 +305,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E7": {
         "cells": {
@@ -314,6 +314,7 @@
         },
         "property": "P1082",
         "value": "43627",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -326,8 +327,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E8": {
         "cells": {
@@ -336,6 +336,7 @@
         },
         "property": "P1082",
         "value": "0.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -348,8 +349,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E10": {
         "cells": {
@@ -358,6 +358,7 @@
         },
         "property": "P1082",
         "value": "0.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -370,8 +371,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E11": {
         "cells": {
@@ -380,6 +380,7 @@
         },
         "property": "P1082",
         "value": "5.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -392,8 +393,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E12": {
         "cells": {
@@ -402,6 +402,7 @@
         },
         "property": "P1082",
         "value": "0.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -414,8 +415,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E14": {
         "cells": {
@@ -424,6 +424,7 @@
         },
         "property": "P1082",
         "value": "0.9",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -436,8 +437,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E15": {
         "cells": {
@@ -446,6 +446,7 @@
         },
         "property": "P1082",
         "value": "16.8",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -458,8 +459,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E16": {
         "cells": {
@@ -468,6 +468,7 @@
         },
         "property": "P1082",
         "value": "5.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -480,8 +481,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E17": {
         "cells": {
@@ -490,6 +490,7 @@
         },
         "property": "P1082",
         "value": "20.0",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -502,8 +503,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E18": {
         "cells": {
@@ -512,6 +512,7 @@
         },
         "property": "P1082",
         "value": "4.3",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -524,8 +525,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E19": {
         "cells": {
@@ -534,6 +534,7 @@
         },
         "property": "P1082",
         "value": "6.3",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -546,8 +547,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "E20": {
         "cells": {
@@ -556,6 +556,7 @@
         },
         "property": "P1082",
         "value": "8.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -568,8 +569,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F6": {
         "cells": {
@@ -578,6 +578,7 @@
         },
         "property": "P1082",
         "value": "43746",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -590,8 +591,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F7": {
         "cells": {
@@ -600,6 +600,7 @@
         },
         "property": "P1082",
         "value": "44467",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -612,8 +613,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F8": {
         "cells": {
@@ -622,6 +622,7 @@
         },
         "property": "P1082",
         "value": "0.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -634,8 +635,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F10": {
         "cells": {
@@ -644,6 +644,7 @@
         },
         "property": "P1082",
         "value": "0.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -656,8 +657,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F11": {
         "cells": {
@@ -666,6 +666,7 @@
         },
         "property": "P1082",
         "value": "5.1",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -678,8 +679,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F12": {
         "cells": {
@@ -688,6 +688,7 @@
         },
         "property": "P1082",
         "value": "-1.5",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -700,8 +701,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F14": {
         "cells": {
@@ -710,6 +710,7 @@
         },
         "property": "P1082",
         "value": "0.8",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -722,8 +723,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F15": {
         "cells": {
@@ -732,6 +732,7 @@
         },
         "property": "P1082",
         "value": "16.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -744,8 +745,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F16": {
         "cells": {
@@ -754,6 +754,7 @@
         },
         "property": "P1082",
         "value": "5.6",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -766,8 +767,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F17": {
         "cells": {
@@ -776,6 +776,7 @@
         },
         "property": "P1082",
         "value": "19.8",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -788,8 +789,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F18": {
         "cells": {
@@ -798,6 +798,7 @@
         },
         "property": "P1082",
         "value": "4.1",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -810,8 +811,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F19": {
         "cells": {
@@ -820,6 +820,7 @@
         },
         "property": "P1082",
         "value": "6.1",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -832,8 +833,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "F20": {
         "cells": {
@@ -842,6 +842,7 @@
         },
         "property": "P1082",
         "value": "8.6",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -854,8 +855,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G6": {
         "cells": {
@@ -864,6 +864,7 @@
         },
         "property": "P1082",
         "value": "44720",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -876,8 +877,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G7": {
         "cells": {
@@ -886,6 +886,7 @@
         },
         "property": "P1082",
         "value": "45029",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -898,8 +899,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G8": {
         "cells": {
@@ -908,6 +908,7 @@
         },
         "property": "P1082",
         "value": "1.1",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -920,8 +921,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G10": {
         "cells": {
@@ -930,6 +930,7 @@
         },
         "property": "P1082",
         "value": "1.3",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -942,8 +943,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G11": {
         "cells": {
@@ -952,6 +952,7 @@
         },
         "property": "P1082",
         "value": "5.1",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -964,8 +965,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G12": {
         "cells": {
@@ -974,6 +974,7 @@
         },
         "property": "P1082",
         "value": "5.8",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -986,8 +987,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G14": {
         "cells": {
@@ -996,6 +996,7 @@
         },
         "property": "P1082",
         "value": "0.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1008,8 +1009,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G15": {
         "cells": {
@@ -1018,6 +1018,7 @@
         },
         "property": "P1082",
         "value": "16.5",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1030,8 +1031,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G16": {
         "cells": {
@@ -1040,6 +1040,7 @@
         },
         "property": "P1082",
         "value": "5.5",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1052,8 +1053,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G17": {
         "cells": {
@@ -1062,6 +1062,7 @@
         },
         "property": "P1082",
         "value": "19.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1074,8 +1075,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G18": {
         "cells": {
@@ -1084,6 +1084,7 @@
         },
         "property": "P1082",
         "value": "4.1",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1096,8 +1097,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G19": {
         "cells": {
@@ -1106,6 +1106,7 @@
         },
         "property": "P1082",
         "value": "6.0",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1118,8 +1119,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "G20": {
         "cells": {
@@ -1128,6 +1128,7 @@
         },
         "property": "P1082",
         "value": "8.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1140,8 +1141,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H6": {
         "cells": {
@@ -1150,6 +1150,7 @@
         },
         "property": "P1082",
         "value": "45739",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1162,8 +1163,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H7": {
         "cells": {
@@ -1172,6 +1172,7 @@
         },
         "property": "P1082",
         "value": "45480",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1184,8 +1185,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H8": {
         "cells": {
@@ -1194,6 +1194,7 @@
         },
         "property": "P1082",
         "value": "0.4",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1206,8 +1207,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H10": {
         "cells": {
@@ -1216,6 +1216,7 @@
         },
         "property": "P1082",
         "value": "1.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1228,8 +1229,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H11": {
         "cells": {
@@ -1238,6 +1238,7 @@
         },
         "property": "P1082",
         "value": "4.3",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1250,8 +1251,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H12": {
         "cells": {
@@ -1260,6 +1260,7 @@
         },
         "property": "P1082",
         "value": "2.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1272,8 +1273,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H14": {
         "cells": {
@@ -1282,6 +1282,7 @@
         },
         "property": "P1082",
         "value": "0.8",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1294,8 +1295,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H15": {
         "cells": {
@@ -1304,6 +1304,7 @@
         },
         "property": "P1082",
         "value": "16.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1316,8 +1317,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H16": {
         "cells": {
@@ -1326,6 +1326,7 @@
         },
         "property": "P1082",
         "value": "5.3",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1338,8 +1339,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H17": {
         "cells": {
@@ -1348,6 +1348,7 @@
         },
         "property": "P1082",
         "value": "19.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1360,8 +1361,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H18": {
         "cells": {
@@ -1370,6 +1370,7 @@
         },
         "property": "P1082",
         "value": "4.1",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1382,8 +1383,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H19": {
         "cells": {
@@ -1392,6 +1392,7 @@
         },
         "property": "P1082",
         "value": "6.0",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1404,8 +1405,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "H20": {
         "cells": {
@@ -1414,6 +1414,7 @@
         },
         "property": "P1082",
         "value": "8.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1426,8 +1427,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I6": {
         "cells": {
@@ -1436,6 +1436,7 @@
         },
         "property": "P1082",
         "value": "47366",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1448,8 +1449,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I7": {
         "cells": {
@@ -1458,6 +1458,7 @@
         },
         "property": "P1082",
         "value": "47420",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1470,8 +1471,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I8": {
         "cells": {
@@ -1480,6 +1480,7 @@
         },
         "property": "P1082",
         "value": "1.3",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1492,8 +1493,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I10": {
         "cells": {
@@ -1502,6 +1502,7 @@
         },
         "property": "P1082",
         "value": "1.5",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1514,8 +1515,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I11": {
         "cells": {
@@ -1524,6 +1524,7 @@
         },
         "property": "P1082",
         "value": "3.9",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1536,8 +1537,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I12": {
         "cells": {
@@ -1546,6 +1546,7 @@
         },
         "property": "P1082",
         "value": "3.8",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1558,8 +1559,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I14": {
         "cells": {
@@ -1568,6 +1568,7 @@
         },
         "property": "P1082",
         "value": "0.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1580,8 +1581,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I15": {
         "cells": {
@@ -1590,6 +1590,7 @@
         },
         "property": "P1082",
         "value": "16.6",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1602,8 +1603,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I16": {
         "cells": {
@@ -1612,6 +1612,7 @@
         },
         "property": "P1082",
         "value": "5.3",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1624,8 +1625,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I17": {
         "cells": {
@@ -1634,6 +1634,7 @@
         },
         "property": "P1082",
         "value": "19.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1646,8 +1647,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I18": {
         "cells": {
@@ -1656,6 +1656,7 @@
         },
         "property": "P1082",
         "value": "4.1",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1668,8 +1669,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I19": {
         "cells": {
@@ -1678,6 +1678,7 @@
         },
         "property": "P1082",
         "value": "6.4",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1690,8 +1691,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "I20": {
         "cells": {
@@ -1700,6 +1700,7 @@
         },
         "property": "P1082",
         "value": "8.6",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1712,8 +1713,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J6": {
         "cells": {
@@ -1722,6 +1722,7 @@
         },
         "property": "P1082",
         "value": "49526",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1734,8 +1735,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J7": {
         "cells": {
@@ -1744,6 +1744,7 @@
         },
         "property": "P1082",
         "value": "50109",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1756,8 +1757,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J8": {
         "cells": {
@@ -1766,6 +1766,7 @@
         },
         "property": "P1082",
         "value": "1.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1778,8 +1779,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J10": {
         "cells": {
@@ -1788,6 +1788,7 @@
         },
         "property": "P1082",
         "value": "1.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1800,8 +1801,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J11": {
         "cells": {
@@ -1810,6 +1810,7 @@
         },
         "property": "P1082",
         "value": "4.0",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1822,8 +1823,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J12": {
         "cells": {
@@ -1832,6 +1832,7 @@
         },
         "property": "P1082",
         "value": "1.8",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1844,8 +1845,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J14": {
         "cells": {
@@ -1854,6 +1854,7 @@
         },
         "property": "P1082",
         "value": "0.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1866,8 +1867,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J15": {
         "cells": {
@@ -1876,6 +1876,7 @@
         },
         "property": "P1082",
         "value": "16.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1888,8 +1889,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J16": {
         "cells": {
@@ -1898,6 +1898,7 @@
         },
         "property": "P1082",
         "value": "5.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1910,8 +1911,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J17": {
         "cells": {
@@ -1920,6 +1920,7 @@
         },
         "property": "P1082",
         "value": "19.5",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1932,8 +1933,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J18": {
         "cells": {
@@ -1942,6 +1942,7 @@
         },
         "property": "P1082",
         "value": "4.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1954,8 +1955,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J19": {
         "cells": {
@@ -1964,6 +1964,7 @@
         },
         "property": "P1082",
         "value": "6.2",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1976,8 +1977,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "J20": {
         "cells": {
@@ -1986,6 +1986,7 @@
         },
         "property": "P1082",
         "value": "8.6",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -1998,8 +1999,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "K6": {
         "cells": {
@@ -2008,6 +2008,7 @@
         },
         "property": "P1082",
         "value": "50442",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -2020,8 +2021,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "K10": {
         "cells": {
@@ -2030,6 +2030,7 @@
         },
         "property": "P1082",
         "value": "1.4",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -2042,8 +2043,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "K12": {
         "cells": {
@@ -2052,6 +2052,7 @@
         },
         "property": "P1082",
         "value": "2.9",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -2064,8 +2065,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "K14": {
         "cells": {
@@ -2074,6 +2074,7 @@
         },
         "property": "P1082",
         "value": "0.8",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -2086,8 +2087,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "K15": {
         "cells": {
@@ -2096,6 +2096,7 @@
         },
         "property": "P1082",
         "value": "16.7",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -2108,8 +2109,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "K16": {
         "cells": {
@@ -2118,6 +2118,7 @@
         },
         "property": "P1082",
         "value": "5.3",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -2130,8 +2131,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "K17": {
         "cells": {
@@ -2140,6 +2140,7 @@
         },
         "property": "P1082",
         "value": "19.4",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -2152,8 +2153,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "K18": {
         "cells": {
@@ -2162,6 +2162,7 @@
         },
         "property": "P1082",
         "value": "4.3",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -2174,8 +2175,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "K19": {
         "cells": {
@@ -2184,6 +2184,7 @@
         },
         "property": "P1082",
         "value": "6.0",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -2196,8 +2197,7 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     },
     "K20": {
         "cells": {
@@ -2206,6 +2206,7 @@
         },
         "property": "P1082",
         "value": "8.6",
+        "subject": "Q31",
         "qualifier": [
             {
                 "cells": {
@@ -2218,7 +2219,6 @@
                 "time_zone": 0,
                 "format": "%Y"
             }
-        ],
-        "subject": "Q31"
+        ]
     }
 }

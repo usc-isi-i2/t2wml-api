@@ -2,9 +2,12 @@
 import csv
 from io import StringIO
 from pathlib import Path
+from t2wml.mapping.datamart_edges import (clean_id, create_metadata_for_custom_qnode, create_metadata_for_project, create_metadata_for_variable, 
+                create_metadata_for_qualifier_property, link_statement_to_dataset)
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.wikification.utility_functions import get_property_type
+from t2wml.wikification.utility_functions import kgtk_to_dict
 
 class EmptyValueException(Exception):
     pass
@@ -39,6 +42,7 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
     else:
         try:
             value = property_dict["value"]
+            result_dict["node2"] = value
         except:
             raise EmptyValueException(f'Cell {property_dict["cell"]} has no value')
 
@@ -89,8 +93,78 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
             result_dict["node2;kgtk:symbol"] = value
 
 
+def handle_additional_edges(project, statements):
+    tsv_data=[]
+    tsv_data+=create_metadata_for_project(project)
+    variable_ids=set()
+    qualifier_ids=set(["P585", "P248"])
+    qnode_ids=set()
+    entity_dict={}
+    for file in project.entity_files:
+        full_path=project.get_full_path(file)
+        entity_dict.update(kgtk_to_dict(full_path))
 
-def create_kgtk(statements, file_path, sheet_name):
+    for cell, statement in statements.items():
+        variable=statement["property"]
+        if variable not in variable_ids:
+            variable_ids.add(variable)
+            variable_dict=entity_dict.get(variable, None)
+            if variable_dict is not None:
+                label=variable_dict.get("label", "A "+variable)
+                description=variable_dict.get("description", variable+" relation")
+                data_type=variable_dict.get("data_type", "quantity")
+                if data_type.lower()=="wikibaseitem":
+                    qnode_ids.add(statement["value"])
+                tags=variable_dict.get("tags", [])
+                #TODO: P31?
+                tsv_data+=create_metadata_for_variable(project, variable, label, description, data_type, tags)
+
+        qualifiers=statement.get("qualifier", [])
+        for qualifier in qualifiers:
+            property=qualifier["property"]
+            if property not in qualifier_ids:
+                qualifier_ids.add(property)
+                variable_dict=entity_dict.get(property, {})
+                if True:# variable_dict is not None:
+                    label=variable_dict.get("label", "A "+property)
+                    #description=variable_dict.get("description", variable+" relation")
+                    data_type=variable_dict.get("data_type", "string")
+                    if data_type.lower()=="wikibaseitem":
+                        qnode_ids.add(qualifier["value"])
+                    tsv_data+=create_metadata_for_qualifier_property(project, variable, property, label, data_type)
+        
+        subject=statement["subject"]
+        if subject not in qnode_ids:
+            qnode_ids.add(subject)
+            #TODO
+    
+    for qnode_id in qnode_ids:
+        variable_dict=entity_dict.get(qnode_id, {})
+        label=variable_dict.get("label", "A "+qnode_id)
+        #description=variable_dict.get("description", "A "+variable)
+        if variable_dict is not None:
+            tsv_data+=create_metadata_for_custom_qnode(qnode_id, label)
+
+    for result_dict in tsv_data:
+        property_type=result_dict.pop("type")
+        result_dict["node2;kgtk:data_type"]=property_type
+        value=result_dict["node2"]
+
+        if property_type == "quantity":
+            result_dict["node2;kgtk:number"] = value
+
+        elif property_type == "date_and_times":
+            result_dict["node2;kgtk:date_and_time"] = enclose_in_quotes(value)
+
+        elif property_type == "string":
+            result_dict["node2;kgtk:text"] = enclose_in_quotes(value)
+
+        elif property_type == "symbol":
+            result_dict["node2;kgtk:symbol"] = value
+    return tsv_data
+
+
+def create_kgtk(statements, file_path, sheet_name, project=None):
     file_name = Path(file_path).name
 
     file_extension = Path(file_path).suffix
@@ -100,9 +174,17 @@ def create_kgtk(statements, file_path, sheet_name):
         sheet_name = "."+sheet_name
 
     tsv_data = []
+
+    if project:
+        tsv_data+=handle_additional_edges(project, statements)
+
     for cell, statement in statements.items():
         try:
             id = file_name + sheet_name + ";" + cell
+
+            if project:
+                tsv_data.append(link_statement_to_dataset(project, id))
+
             cell_result_dict = dict(
                 id=id, node1=statement["subject"], label=statement["property"])
             kgtk_add_property_type_specific_fields(statement, cell_result_dict)
@@ -110,10 +192,7 @@ def create_kgtk(statements, file_path, sheet_name):
 
             qualifiers = statement.get("qualifier", [])
             for qualifier in qualifiers:
-                # commented out. for now, do not generate an id at all for qualifier edges.
-                #second_cell=qualifier.get("cell", "")
-                #q_id = file_name + "." + sheet_name + ";" + cell +";"+second_cell
-                qualifier_result_dict = dict(
+                qualifier_result_dict = dict(id=id+"-"+qualifier["property"],
                     node1=id, label=qualifier["property"])
 
                 try:
@@ -150,3 +229,24 @@ def create_kgtk(statements, file_path, sheet_name):
     output = string_stream.getvalue()
     string_stream.close()
     return output
+
+def get_all_variables(project, statements):
+    tsv_data=[]
+    tsv_data+=create_metadata_for_project(project)
+    variable_set=set()
+    variable_ids=set()
+    entity_dict={}
+    for file in project.entity_files:
+        full_path=project.get_full_path(file)
+        entity_dict.update(kgtk_to_dict(full_path))
+
+    for cell, statement in statements.items():
+        variable=statement["property"]
+        if variable not in variable_set:
+            variable_set.add(variable)
+            variable_dict=entity_dict.get(variable, None)
+            if variable_dict is not None:
+                label=variable_dict.get("label", "A "+variable)
+                variable_id=clean_id(label)
+                variable_ids.add(variable_id)
+    return variable_ids

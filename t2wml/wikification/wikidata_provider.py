@@ -8,6 +8,11 @@ class WikidataProvider(ABC):
     def get_property_type(self, wikidata_property, *args, **kwargs):
         raise NotImplementedError
 
+    def get_entity(self, id, *args, **kwargs):
+        #default to returning a dict with the data_type
+        property_type=self.get_property_type(id)
+        return {"data_type":property_type}
+
     def save_entry(self, property, data_type, *args, **kwargs):
         pass
 
@@ -61,18 +66,26 @@ class SparqlProvider(WikidataProvider):
         return dict(data_type=data_type, label=label, description=description)
 
     def get_property_type(self, wikidata_property: str):
-        data_type = self.cache.get(wikidata_property, False)
-        if not data_type:
-            property_args = self.query_wikidata_for_property_type(
-                wikidata_property)
-            data_type=property_args["data_type"]
+        property_args = self.cache.get(wikidata_property, False)
+        if not property_args:
+            property_args = self.query_wikidata_for_property_type(wikidata_property)
             self.save_entry(wikidata_property, **property_args)
-            if data_type == "Property Not Found":
-                raise ValueError("Property "+wikidata_property+" not found")
+        data_type=property_args["data_type"]    
+        if data_type == "Property Not Found":
+            raise ValueError("Property "+wikidata_property+" not found")
         return data_type
+    
+    def get_entity(self, id, *args, **kwargs):
+        property_type=self.get_property_type(id) #trigger caching so we can just check cache
+        return self.cache[id]
 
-    def save_entry(self, property, data_type, *args, **kwargs):
-        self.cache[property] = data_type
+    def save_entry(self, property, data_type="Property Not Found", label=None, description=None, *args, **kwargs):
+        self.cache[property] = {"data_type":data_type}
+        if label:
+            self.cache[property]["label"]=label
+        if description:
+            self.cache[property]["description"]=label
+        
 
 
 class FallbackSparql(SparqlProvider):
@@ -97,3 +110,32 @@ class DictionaryProvider(SparqlProvider):
     def __init__(self, ref_dict, sparql_endpoint=None, *args, **kwargs):
         super().__init__(sparql_endpoint)
         self.cache = ref_dict
+
+class KGTKFileProvider():
+    def __init__(self, file_path):
+        from t2wml.wikification.utility_functions import kgtk_to_dict
+        self.properties=kgtk_to_dict(file_path)
+
+    def get_property_type(self, wikidata_property, *args, **kwargs):
+        try:
+            property_dict=self.properties[wikidata_property]
+            return property_dict["data_type"]
+        except KeyError:
+            raise ValueError("Property "+wikidata_property+" not found")
+
+    def get_entity(self, wikidata_property, *args, **kwargs):
+        try:
+            property_dict=self.properties[wikidata_property]
+            return property_dict
+        except KeyError:
+            raise ValueError("Property "+wikidata_property+" not found")
+
+    def save_entry(self, property, data_type, *args, **kwargs):
+        self.properties[property]=dict(kwargs)
+        self.properties[property]["data_type"]=data_type
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        pass

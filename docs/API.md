@@ -303,10 +303,11 @@ class SimpleSheetMapper(StatementMapper):
 <span id="wikiprovider"></span>
 The WikidataProvider class is responsible for providing property types for property IDs and for providing labels and descriptions for item IDs. 
 
-Two already-implemented WikidataProvider classes are provided in t2wml.api:
+Three already-implemented WikidataProvider classes are provided in t2wml.api:
 
 1. SparqlProvider- send a sparql query to sparql endpoint. save results in local cache in memory for faster future queries
-2. DictionaryProvider- same as SparqlProvider but initialized with a dictionary loaded into cache
+2. DictionaryProvider- same as SparqlProvider but initialized with a dictionary loaded into cache. the dictionary's keys must be IDs, the values must be dictionaries (and one key in the dictionary should be data_type)
+3. KGTKFileProvider- init expects a file path, will use the entries in the kgtk file for responding to queries.
 
 All providers inherit from WikidataProvider, which is a template base class.
 
@@ -315,7 +316,10 @@ It has one required function which *must* be implemented (or an error will be ra
  `get_property_type(self, property_id, *args, **kwargs):`
 receives a single wikidata property id and returns the property's type
 
-As well as 3 optional functions:
+As well as 4 optional functions:
+ `get_entity(self, property_id, *args, **kwargs):`
+return any fields (not just data_type) saved under the entity ID as a dictionary. It has a default implementation which just returns {"data_type":data_type} for providers where no other fields are saved
+
 `save_entry(self, entry_id, data_type, **kwargs)` : save property-type pair to whatever source is being used, if relevant. is called by add_entities_from_file, so an error will be raised there if it is not implemented. can also be used in `get_property_type` is the user so desires (for example, SparqlFallback will call this function whenever it had to make a sparql query). Must include **kwargs, user can store whatever additional fields they'd like there, or simply ignore.
 
 `def __enter__(self)` : used exclusively with the utility function add_entities_from_file, if there is some setup work that should be done before bulk-adding properties

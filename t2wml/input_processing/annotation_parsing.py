@@ -1,19 +1,32 @@
+import os
 import json
+from uuid import uuid4
 from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
 import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
-from t2wml.utils.bindings import bindings
 from t2wml.settings import t2wml_settings
+from t2wml.mapping.datamart_edges import clean_id
 
 COST_MATRIX_DEFAULT = 10
 
 
 type_suggested_property_mapping={
-    "quantity": "P1114",
+    #"quantity": "P1114",
     "time": "P585",
-    "monolingualString": "P2561",
+    #"monolingualtext": "P2561",
 }
+
+
+def normalize_rectangle(annotation):
+    selection = annotation["selection"]
+    top=min(selection["y1"], selection["y2"])
+    bottom=max(selection["y1"], selection["y2"])
+    left=min(selection["x1"], selection["x2"])
+    right=max(selection["x1"], selection["x2"])
+    annotation["selection"]={"x1": left, "x2": right, "y1":top, "y2":bottom}
+
+
 
 class YamlFormatter:
     # all the formatting and indentation in one convenient location
@@ -57,22 +70,31 @@ class YamlFormatter:
         return """{indentation}{optional_line}""".format(indentation=" "*indent, optional_line=optional_line)
 
 
-class ValueArgs:
+class Block:
     def __init__(self, annotation):
-        self.annotation = annotation
+        self.annotation=annotation
         self.role = annotation["role"]
+        self.selection = annotation["selection"]
         self.type = annotation.get("type", "")
-        self.selection = annotation["selections"][0]
+        self.id=annotation["id"]
+        self.userlink=annotation.get("userlink", None)
         self.cell_args = self.get_cell_args(self.selection)
-        self.matches = {}
-        self.match_found = False
+        self.matches = {} #a dictionary of "unit", "property", etc which links to other blocks
+    
+    def create_link(self, linked_block):
+        linked_block.matches[self.role] = self
+        self.annotation["link"] = linked_block.id
 
     def get_cell_args(self, selection):
         return (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
 
     @property
     def use_item(self):
-        return self.type == "qNode" #for now
+        if self.type in ["wikibaseitem", "WikibaseItem"]:
+            return True
+        if self.role in ["property", "mainSubject"]:
+            return True
+        return False
 
 
     @property
@@ -86,11 +108,11 @@ class ValueArgs:
 
     @property
     def col_args(self):
-        return tuple(sorted([self.cell_args[0][0], self.cell_args[1][0]]))
+        return (self.cell_args[0][0], self.cell_args[1][0])
 
     @property
     def row_args(self):
-        return tuple(sorted([self.cell_args[0][1], self.cell_args[1][1]]))
+        return (self.cell_args[0][1], self.cell_args[1][1])
 
     @property
     def is_2D(self):
@@ -126,8 +148,10 @@ class ValueArgs:
 
 
     def get_alignment_value(self, relative_args):
-        if self.get_alignment_orientation(relative_args):
+        if self.get_alignment_orientation(relative_args)=="col":
             return 1
+        if self.get_alignment_orientation(relative_args)=="row":
+            return 2
         return COST_MATRIX_DEFAULT
         # TODO: add costs for imperfect alignments
         if self.get_alignment_orientation(relative_args)=="row":
@@ -168,20 +192,20 @@ class ValueArgs:
             return "#TODO: ????? -Don't know how to match with imperfect alignment yet"
 
 
-class Annotation():
 
+
+
+class Annotation():
     def __init__(self, annotation_blocks_array=None):
-        self.annotation_block_array = annotation_blocks_array or []
-        self._validate_annotation(self.annotation_block_array)
+        self.annotations_array = self._preprocess_annotation(annotation_blocks_array or [])        
         self.data_annotations = []
         self.subject_annotations = []
         self.qualifier_annotations = []
         self.property_annotations = []
         self.unit_annotations = []
         self.comment_messages = ""
-        if annotation_blocks_array is not None:
-            for block in annotation_blocks_array:
-                role = block["role"]
+        for block in self.annotations_array:
+                role = block.role
                 if role == "dependentVar":
                     self.data_annotations.append(block)
                 elif role == "mainSubject":
@@ -197,25 +221,68 @@ class Annotation():
                 else:
                     raise ValueError("unrecognized role type for annotation")
     
+    @property
+    def annotation_block_array(self):
+        return [block.annotation for block in self.annotations_array]
     
-    def _validate_annotation(self, annotations):
+    def _preprocess_annotation(self, annotations):
         if not isinstance(annotations, list):
             raise InvalidAnnotationException("Annotations must be a list")
+
+        ids=set()
         
         for block in annotations:
             if not isinstance(block, dict):
                 raise InvalidAnnotationException("Each annotation entry must be a dict")
+            
+            try:
+                id=block["id"]
+            except KeyError:
+                id=block["id"]=str(uuid4())
+            ids.add(id)
+
+
+        for block in annotations:
+            userlink=block.get("userlink")
+            if userlink:
+                if userlink not in ids: #remove links to deleted blocks
+                    block.pop("userlink")
+                else:
+                    block["link"]=userlink
+
             try:
                 role = block["role"]
+                if role not in ["dependentVar", "mainSubject", "qualifier", "property", "unit", "metadata"]:
+                    raise InvalidAnnotationException('Unrecognized value for role, must be from: "dependentVar", "mainSubject", "qualifier", "property", "unit", "metadata"')
+                if role in ["dependentVar", "qualifier"]:
+                    try:
+                        block_type=block["type"]
+                    except KeyError:
+                        raise InvalidAnnotationException("dependentVar and qualifier blocks must specify type")
+                    
             except KeyError:
                 raise InvalidAnnotationException("Each annotation entry must contain a field 'role'")
+            
             try:
-                test=block["selections"][0]
+                test=block["selection"]
             except KeyError:
-                raise InvalidAnnotationException("Each annotation entry must contain a field 'selections'")
-            except: 
-                raise InvalidAnnotationException("Each annotation entry must contain a field 'selections' with at least one entry")
-                
+                if "selections" in block:
+                    block["selection"]=block["selections"][0]
+                    block.pop("selections")
+                    print("Deprecation warning: Switch from selections to selection")
+                else:
+                    raise InvalidAnnotationException("Each annotation entry must contain a field 'selection'")
+            normalize_rectangle(block)
+
+        annotations_arr = [Block(block) for block in annotations]
+
+        #initialize userlinks
+        self.annotations_dict={block.id: block for block in annotations_arr}
+        for block in annotations_arr:
+            if block.userlink:
+                block.create_link(self.annotations_dict[block.userlink])
+
+        return annotations_arr
 
     @property
     def potentially_enough_annotation_information(self):
@@ -225,10 +292,14 @@ class Annotation():
 
     def _create_targets(self, role, targets_collection):
         match_targets = []
-        for arr in targets_collection:
+        for arr in targets_collection: #combine the arrays
             match_targets += arr
 
         for target in list(match_targets):
+            #if we already linked them via userlink, no overriding
+            if role in target.matches:
+                match_targets.remove(target)
+
             # no assigning dynamic to what already has const
             if role in target.annotation:
                 match_targets.remove(target)
@@ -238,8 +309,21 @@ class Annotation():
                 match_targets.remove(target)
 
         return match_targets
+    
+    def _winnow_match_candidates(self, match_candidates):
+        new_match_candidates=[]
+        for cand in match_candidates:
+            if not cand.userlink:
+                new_match_candidates.append(cand)
+        return new_match_candidates
 
     def _run_cost_matrix(self, match_candidates, targets_collection):
+        '''
+        match_candidates: eg property, unit
+        targets_collection: array of arrays of qualifiers, dependent variables
+        '''
+
+        match_candidates=self._winnow_match_candidates(match_candidates)
         if not len(match_candidates):
             return
         match_targets = self._create_targets(
@@ -249,7 +333,7 @@ class Annotation():
             self.comment_messages += "# Too many matching candidates for " + \
                 match_candidates[0].role+"\n"
 
-        if len(match_targets)<1:
+        if not len(match_targets):
             return
 
         cost_matrix = np.empty(
@@ -279,9 +363,16 @@ class Annotation():
                     indexes.append((c_i, t_i))
 
         for (c_i, t_i) in indexes:
-            match_vector = match_candidates[c_i].role
-            match_targets[t_i].matches[match_vector] = match_candidates[c_i]
-            match_candidates[c_i].match_found = True
+            match_can = match_candidates[c_i]
+            match_targ = match_targets[t_i]
+            match_can.create_link(match_targ)
+
+    
+    def initialize(self, sheet=None, item_table=None):
+        self._run_cost_matrix(
+            self.property_annotations, [self.data_annotations, self.qualifier_annotations])
+        self._run_cost_matrix(self.unit_annotations, [self.data_annotations, self.qualifier_annotations])
+        return self.data_annotations[0], self.subject_annotations[0], self.qualifier_annotations
 
     def get_optionals_and_property(self, region, use_q):
         const_property=region.annotation.get("property", None)
@@ -305,9 +396,16 @@ class Annotation():
             optionalsLines += YamlFormatter.get_optionals_string(
                 "unit: " + unit.get_expression(region, use_q)+"\n", use_q)
         for key in region.annotation:
-            if key not in ["role", "selections", "type", "property"]:
-                optionalsLines += YamlFormatter.get_optionals_string(
-                    key+": "+region.annotation[key]+"\n", use_q)
+            if key in ["changed", "id"]: 
+                continue
+            if key not in ["role", "selection", "type", "property"]:
+                try:
+                    optionalsLines += YamlFormatter.get_optionals_string(
+                        key+": "+region.annotation[key]+"\n", use_q)
+                except Exception as e:
+                    optionalsLines +=YamlFormatter.get_optionals_string(
+                        "# error parsing annotation for key: "+key+" : "+str(e), use_q)
+
 
         return propertyLine, optionalsLines
 
@@ -348,7 +446,11 @@ class Annotation():
 
         return qualifier_string
 
-    def _generate_yaml(self, data_region, subject_region, qualifier_regions):
+    def generate_yaml(self, sheet=None, item_table=None):
+        if not self.data_annotations:
+            return ["# cannot create yaml without a dependent variable\n"]
+        data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
+
         region = "range: {range_str}".format(range_str=data_region.range_str)
         if subject_region is not None:
             mainSubjectLine = subject_region.get_expression(data_region)
@@ -368,34 +470,9 @@ class Annotation():
 
         yaml = YamlFormatter.get_yaml_string(
             region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines)
-        return self.comment_messages + yaml
-
-    def generate_yaml(self, sheet=None, item_table=None):
-        # check if no point in generating yet.
-        if not self.data_annotations:
-            return ["# cannot create yaml without a dependent variable\n"]
-
-        data_regions = [ValueArgs(d) for d in self.data_annotations]
-        if not self.subject_annotations:
-            subject_regions=[None]
-        else:
-            subject_regions = [ValueArgs(s) for s in self.subject_annotations]
-        qualifier_regions = [ValueArgs(q) for q in self.qualifier_annotations]
-
-        property_regions = [ValueArgs(p) for p in self.property_annotations]
-        unit_regions = [ValueArgs(m) for m in self.unit_annotations]
-        self._run_cost_matrix(
-            property_regions, [data_regions, qualifier_regions])
-        self._run_cost_matrix(unit_regions, [data_regions, qualifier_regions])
-
-        return_arr = []
-        for data_region in data_regions:
-            for subject_region in subject_regions:
-                yaml = self._generate_yaml(
-                    data_region, subject_region, qualifier_regions)
-                return_arr.append(yaml)
-        return return_arr
-
+        yaml = self.comment_messages + yaml
+        return [yaml] #array for now... 
+    
     def save(self, filepath):
         with open(filepath, 'w', encoding="utf-8") as f:
             f.write(json.dumps(self.annotation_block_array))
@@ -406,3 +483,169 @@ class Annotation():
             annotations = json.load(f)
         instance = cls(annotations)
         return instance
+
+class AnnotationNodeGenerator:
+    def __init__(self, annotation, project):
+        self.annotation=annotation
+        self.project=project
+        if not os.path.isdir(self.autogen_dir):
+            os.mkdir(self.autogen_dir)
+    
+    def _get_units(self, region):
+        unit=region.matches.get("unit")
+        if unit:
+            units=set()
+            for row in range(unit.row_args[0], unit.row_args[1]+1):
+                    for col in range(unit.col_args[0], unit.col_args[1]+1):
+                        units.add((row, col))
+            return list(units)
+        return []
+
+
+    def _get_properties(self, region):
+        #const_property=region.annotation.get("property")
+        #if const_property:
+        #    return [ (const_property, region.type)]
+        #else:
+            range_property = region.matches.get("property")
+            if range_property:
+                range_properties=set()
+                for row in range(range_property.row_args[0], range_property.row_args[1]+1):
+                    for col in range(range_property.col_args[0], range_property.col_args[1]+1):
+                        range_properties.add((row, col, region.type))
+                return list(range_properties)
+            return []
+
+    def get_custom_properties_and_qnodes(self):
+        custom_properties=set()
+        custom_items=set()
+
+        data_region, subject_region, qualifier_regions=self.annotation.initialize()
+
+        #check all properties
+        custom_properties.update(self._get_properties(data_region))
+        for qualifier_region in qualifier_regions:
+            custom_properties.update(self._get_properties(qualifier_region))
+        
+        #check all units
+        custom_items.update(self._get_units(data_region))
+        for qualifier_region in qualifier_regions:
+            custom_items.update(self._get_units(qualifier_region))
+
+        #check all main subject
+        for row in range(subject_region.row_args[0], subject_region.row_args[1]+1):
+            for col in range(subject_region.col_args[0], subject_region.col_args[1]+1):
+                custom_items.add((row, col))
+        
+        #check anything whose type is wikibaseitem
+        for block in self.annotation.annotations_array:
+            type=block.type
+            if type in ["wikibaseitem", "WikibaseItem"]:
+                for row in range(block.row_args[0], block.row_args[1]+1):
+                    for col in range(block.col_args[0], block.col_args[1]+1):
+                        custom_items.add((row, col))
+        
+        return list(custom_properties), list(custom_items)
+
+    
+    @property
+    def autogen_dir(self):
+        auto= os.path.join(self.project.directory, "annotations", f"autogen-files-{self.project.dataset_id}")
+        if not os.path.exists(auto):
+            os.makedirs(auto, exist_ok=True)
+        return auto
+    
+    @property
+    def project_id(self):
+        return clean_id(self.project.title)
+    
+    def get_Qnode(self, item):
+        return f"Q{self.project_id}-{clean_id(item)}"
+    
+    def get_Pnode(self, property):
+        return f"P{self.project_id}-{clean_id(property)}"
+
+    def preload(self, sheet, wikifier):
+        import pandas as pd
+        from t2wml.utils.bindings import update_bindings
+        from t2wml.wikification.utility_functions import get_default_provider, get_provider, dict_to_kgtk, kgtk_to_dict
+
+        properties, items = self.get_custom_properties_and_qnodes()
+    
+       
+        item_table=wikifier.item_table
+        update_bindings(item_table=item_table, sheet=sheet)
+
+        columns=['row', 'column', 'value', 'context', 'item']
+        dataframe_rows=[]
+        nodes_dict={}
+        item_entities=set()
+
+        #part one: wikification
+        for (row, col) in items:
+            item_string=sheet[row][col]
+            if item_string:
+                try:
+                    exists = wikifier.item_table.get_item(col, row, sheet=sheet)                
+                    if not exists:
+                        raise ValueError
+                except:
+                    dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string)])
+                    item_entities.add(item_string)
+        
+        for (row, col, data_type) in properties:
+            property=sheet[row][col]
+            if property:
+                try:
+                    exists = wikifier.item_table.get_item(col, row, sheet=sheet)
+                    if not exists:
+                        raise ValueError
+                except:
+                    pnode=self.get_Pnode(property)
+                    dataframe_rows.append([row, col, property, '', pnode])
+        
+        df=pd.DataFrame(dataframe_rows, columns=columns)
+        filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
+        if os.path.isfile(filepath):
+            org_df=pd.read_csv(filepath)
+            df=pd.concat([org_df, df])
+        df.to_csv(filepath, index=False, escapechar="")
+        wikifier.add_dataframe(df)
+        self.project.add_wikifier_file(filepath)
+                
+        #part two: entity creation
+        prov=get_provider()
+        for item in item_entities:
+            node_id=self.get_Qnode(item)
+            label=item
+            description="A "+item
+            nodes_dict[node_id]=dict(label=label, description=description)
+        for (row, col, data_type) in properties:
+            property = sheet[row][col]
+            if property:
+                node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
+                node_dict=dict(data_type=data_type, 
+                                label=property, 
+                                description=property+" relation")
+                try: #check if entity definition already present
+                    node_dict_2=prov.get_entity(node_id)
+                    if not node_dict_2:
+                        raise ValueError
+                except:
+                    nodes_dict[node_id]=dict(node_dict) 
+                    node_dict.pop("data_type")
+                    prov.save_entry(node_id, data_type, from_file=True, **node_dict)
+        
+        filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
+        if os.path.isfile(filepath):
+            nodes_dict_2=kgtk_to_dict(filepath)
+            nodes_dict_2.update(nodes_dict)
+            nodes_dict=nodes_dict_2
+        dict_to_kgtk(nodes_dict, filepath)
+            
+        self.project.add_entity_file(filepath)    
+        self.project.save()
+    
+
+        
+

@@ -10,18 +10,19 @@ class ItemTable:
     def __init__(self, lookup_table={}):
         self.lookup_table = defaultdict(dict, lookup_table)
 
-    def lookup_func(self, lookup, column, row, value):
+    def lookup_func(self, lookup, file, sheet, column, row, value):
         # order of priority: cell+value> cell> col+value> col> row+value> row> value
         column = int(column)
         row = int(row)
         tuples = [
-            (column, row, value),
-            (column, row, ''),
-            (column, '', value),
-            (column, '', ''),
-            ('', row, value),
-            ('', row, ''),
-            ('', '', value)
+            (file, sheet, column, row, value),
+            ('', '', column, row, value),
+            ('', '', column, row, ''),
+            ('', '', column, '', value),
+            ('', '', column, '', ''),
+            ('', '', '', row, value),
+            ('', '', '', row, ''),
+            ('', '', '', '', value)
         ]
 
         for tup in tuples:
@@ -35,12 +36,14 @@ class ItemTable:
         lookup = self.lookup_table.get(context)
         if not lookup:
             raise ItemNotFoundException(
-                "No values defined for context: {}".format(context))
+                "Search for cell item failed. (No values defined for context: {})".format(context))
         if not sheet:
             sheet = bindings.excel_sheet
+        file=sheet.data_file_name
+        sheet_name=sheet.name
         value = str(sheet[row, column])
         try:
-            item = self.lookup_func(lookup, column, row, value)
+            item = self.lookup_func(lookup, file, sheet_name, column, row, value)
             return item
         except ValueError:
             return None  # currently this is what the rest of the API expects. could change later
@@ -50,9 +53,9 @@ class ItemTable:
         lookup = self.lookup_table.get(context)
         if not lookup:
             raise ItemNotFoundException(
-                "No values defined for context: {}".format(context))
+                "Search for cell item failed. (No values defined for context: {})".format(context))
 
-        item = lookup.get(str(('', '', value)))
+        item = lookup.get(str(('', '', '', '', value)))
         if item:
             return item
         raise ItemNotFoundException("Could not find item for value: "+value)
@@ -61,41 +64,50 @@ class ItemTable:
         # used to serialize table
         bindings.excel_sheet = sheet
         for context in self.lookup_table:
-            item = self.get_item(column, row, context)
+            item = self.get_item(column, row, context, sheet=sheet)
             if item:
                 return item, context, bindings.excel_sheet[row, column]
         return None, None, None
 
     def update_table_from_dataframe(self, df: DataFrame):
-        df = df.fillna('')
-        df = df.replace(r'^\s+$', '', regex=True)
-        overwritten = {}
-        for entry in df.itertuples():
-            column = entry.column
-            row = entry.row
-            value = str(entry.value)
-            context = entry.context
-            item = entry.item
+        try:
+            df = df.fillna('')
+            df = df.replace(r'^\s+$', '', regex=True)
+            overwritten = {}
+            for entry in df.itertuples():
+                column = entry.column
+                row = entry.row
+                value = str(entry.value)
+                context = entry.context
+                item = entry.item
+                try:
+                    file = entry.file
+                    sheet= entry.sheet
+                except:
+                    file=sheet="" #backwards compatible for now
 
-            if not item:
-                raise ValueError("Item definition missing")
+                if not item:
+                    raise ValueError("Item definition missing")
 
-            if column=="" and row=="" and value=="":
-                raise ValueError(
-                    "at least one of column, row, or value must be defined")
+                if column=="" and row=="" and value=="":
+                    raise ValueError(
+                        "at least one of column, row, or value must be defined")
 
-            if column != "":
-                column = int(column)
-            if row != "":
-                row = int(row)
-            key = str((column, row, value))
-            if self.lookup_table[context].get(key):
-                overwritten[key] = self.lookup_table[context][key]
-            self.lookup_table[context][key] = item
+                if column != "":
+                    column = int(column)
+                if row != "":
+                    row = int(row)
+                key = str((file, sheet, column, row, value))
+                if self.lookup_table[context].get(key):
+                    overwritten[key] = self.lookup_table[context][key]
+                self.lookup_table[context][key] = item
 
-        if len(overwritten):
-            print("Wikifier update overwrote existing values: "+str(overwritten))
-        return overwritten
+            if len(overwritten):
+                print("Wikifier update overwrote existing values: "+str(overwritten))
+            return overwritten
+        except Exception as e:
+            print(e)
+            raise e
 
 
 class Wikifier:

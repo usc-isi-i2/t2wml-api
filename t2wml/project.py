@@ -1,14 +1,10 @@
-from hashlib import new
+from t2wml.mapping.datamart_edges import clean_id
 import yaml
 import os
 import warnings
 from pathlib import Path
 from shutil import copyfile
-from t2wml.wikification.utility_functions import add_entities_from_file
-from t2wml.wikification.item_table import Wikifier
-from t2wml.spreadsheets.sheet import Sheet, SpreadsheetFile
-from t2wml.mapping.statement_mapper import YamlMapper
-from t2wml.knowledge_graph import KnowledgeGraph
+from t2wml.spreadsheets.sheet import SpreadsheetFile
 from t2wml.utils.t2wml_exceptions import FileWithThatNameInProject, FileNotPresentInProject, InvalidProjectDirectory
 from t2wml.settings import DEFAULT_SPARQL_ENDPOINT
 
@@ -34,8 +30,8 @@ class Project:
         self.description=description
         self.url=url
 
-        self._load_data_files_from_project(data_files)
-        self._load_yaml_sheet_associations(yaml_sheet_associations)
+        self.data_files=data_files or {}
+        self.yaml_sheet_associations=yaml_sheet_associations or {}
         self.annotations=annotations or {}
 
         self.yaml_files=yaml_files or []
@@ -48,45 +44,10 @@ class Project:
 
         self.cache_id=cache_id
 
-    
-    def _load_data_files_from_project(self, data_files):
-        self.data_files=data_files or {}
+    @property
+    def dataset_id(self):
+        return clean_id(self.title)
 
-        if isinstance(data_files, list): #backwards compatibility version 0.0.13 and earlier
-            warnings.warn("Using a project file from version 0.0.13 or earlier, updating to match more recent formats. Support for version 0.0.13 and earlier files may be deprecated in the future", DeprecationWarning)
-            for file_path in data_files:
-                full_file_path=os.path.join(self.directory, file_path)
-                sf = SpreadsheetFile(full_file_path)
-                self.data_files[file_path]=dict(val_arr= sf.sheet_names,
-                                                selected=sf.sheet_names[0])
-        else: 
-            if data_files:
-                #backwards compatibility 0.0.16 and earlier
-                if isinstance(list(data_files.values())[0], list):
-                    #warnings.warn("Using a project file from version 0.0.16 or earlier, updating to match more recent formats", DeprecationWarning)
-                    for data_file_name, sheet_names in data_files.items():
-                        self.data_files[data_file_name]=dict(val_arr= sheet_names,
-                                                    selected= sheet_names[0])
- 
-    def _load_yaml_sheet_associations(self, yaml_sheet_associations):
-        self.yaml_sheet_associations=yaml_sheet_associations or {}
-        #backwards compatibility 0.0.16 and earlier
-        if yaml_sheet_associations:
-            #there must be some less horrifyingly ugly way of writing the next line, but it's one line...
-            is_version_16_or_lower = isinstance(list(list(yaml_sheet_associations.values())[0].values())[0], list)
-            if is_version_16_or_lower:
-                new_style_yaml_associations={}
-                #warnings.warn("Using a project file from version 0.0.16 or earlier, updating to match more recent formats", DeprecationWarning)
-                for file_key in yaml_sheet_associations:
-                    new_style_yaml_associations[file_key]={}
-                    for sheet_key in yaml_sheet_associations[file_key]:
-                        val_arr=yaml_sheet_associations[file_key][sheet_key]
-                        new_style_yaml_associations[file_key][sheet_key]=dict(
-                            val_arr=val_arr,
-                            selected=val_arr[-1]
-                        )
-                self.yaml_sheet_associations=new_style_yaml_associations
-    
     def _add_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         if os.path.isabs(file_path):
             root=Path(self.directory)
@@ -216,7 +177,7 @@ class Project:
             file_path=full_path.relative_to(root)
         return Path(file_path).as_posix()
     
-    def _get_full_path(self, file_path):
+    def get_full_path(self, file_path):
         normalized_path=self._normalize_path(file_path)
         return os.path.join(self.directory, normalized_path)
     
@@ -230,6 +191,10 @@ class Project:
             return True
         if file_path in self.entity_files:
             return True
+        for key, data_file in self.annotations.items():
+            for s_key, sheet in data_file.items():
+                if file_path in sheet["val_arr"]:
+                    return True
         return False
     
     def delete_file_from_project(self, file_path, delete_from_fs=False):
@@ -240,10 +205,9 @@ class Project:
         
 
         if del_val in self.data_files: #handle data files completely separately from everything else
-            for edit_dict in [self.annotations, self.data_files, self.yaml_sheet_associations]:
-                for key in edit_dict:
-                    if key==del_val:
-                        edit_dict.pop(del_val)
+            self.data_files.pop(del_val)
+            self.annotations.pop(del_val, None)
+            self.yaml_sheet_associations.pop(del_val, None)
         
         elif del_val in self.entity_files: 
             self.entity_files.remove(del_val)    
@@ -272,7 +236,7 @@ class Project:
 
         if delete_from_fs:
             try:
-                del_path=self._get_full_path(del_val)
+                del_path=self.get_full_path(del_val)
                 os.remove(del_path)
             except Exception as e:
                 print(e)
@@ -288,7 +252,7 @@ class Project:
 
         if not self.path_in_files(old_name):
             raise ValueError("The file you are trying to rename does not exist in project")
-        new_file_path=self._get_full_path(new_name)
+        new_file_path=self.get_full_path(new_name)
         if os.path.isfile(new_file_path):
             raise ValueError("The new name you have provided already exists in the project directory")
             
@@ -325,7 +289,10 @@ class Project:
 
         
         if rename_in_fs:
-            old_file_path=self._get_full_path(old_name)
+            new_path=Path(new_file_path)
+            full_folder_path=new_path.parent
+            os.makedirs(full_folder_path, exist_ok=True)
+            old_file_path=self.get_full_path(old_name)
             os.rename(old_file_path, new_file_path)
         
 

@@ -53,7 +53,7 @@ class WikifierService:
         empty_vals, problems = self._get_errors(output, data, row_offset)
 
         output = self._normalize_dataframe(
-            output, row_offset, context, flattened_sheet_data, empty_vals)
+            output, row_offset, context, sheet, flattened_sheet_data, empty_vals)
 
         return output, problems
 
@@ -77,7 +77,7 @@ class WikifierService:
             raise requests.HTTPError(
                 "Failed to wikify: Received an error from the wikifier endpoint. Error code {code}, reason: {reason}".format(code=response.status_code, reason=response.reason))
 
-    def _normalize_dataframe(self, output, row_offset, context, flattened_sheet_data, empty_vals):
+    def _normalize_dataframe(self, output, row_offset, context, sheet, flattened_sheet_data, empty_vals):
         output.row = output.row.astype('int32')
         output.row = output.row+row_offset
         output.column = output.column.astype('int32')
@@ -85,6 +85,8 @@ class WikifierService:
         if not context:
             context = ''
         output['context'] = context
+        output['file'] = sheet.data_file_name
+        output['sheet'] = sheet.name
         if len(empty_vals):
             output = output.drop(empty_vals)
         return output

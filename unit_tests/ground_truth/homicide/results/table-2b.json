@@ -6,6 +6,7 @@
         },
         "property": "P100024",
         "value": "1",
+        "subject": "Q967",
         "unit": "D1002",
         "qualifier": [
             {
@@ -33,8 +34,7 @@
                 "property": "P123",
                 "value": "Q7649586"
             }
-        ],
-        "subject": "Q967"
+        ]
     },
     "E6": {
         "cells": {
@@ -43,6 +43,7 @@
         },
         "property": "P100024",
         "value": "2",
+        "subject": "Q967",
         "unit": "D1002",
         "qualifier": [
             {
@@ -70,8 +71,7 @@
                 "property": "P123",
                 "value": "Q7649586"
             }
-        ],
-        "subject": "Q967"
+        ]
     },
     "E7": {
         "cells": {
@@ -80,6 +80,7 @@
         },
         "property": "P100024",
         "value": "2",
+        "subject": "Q967",
         "unit": "D1002",
         "qualifier": [
             {
@@ -107,8 +108,7 @@
                 "property": "P123",
                 "value": "Q7649586"
             }
-        ],
-        "subject": "Q967"
+        ]
     },
     "E8": {
         "cells": {
@@ -117,6 +117,7 @@
         },
         "property": "P100024",
         "value": "3",
+        "subject": "Q967",
         "unit": "D1002",
         "qualifier": [
             {
@@ -144,8 +145,7 @@
                 "property": "P123",
                 "value": "Q7649586"
             }
-        ],
-        "subject": "Q967"
+        ]
     },
     "E9": {
         "cells": {
@@ -154,6 +154,7 @@
         },
         "property": "P100024",
         "value": "4",
+        "subject": "Q967",
         "unit": "D1002",
         "qualifier": [
             {
@@ -181,8 +182,7 @@
                 "property": "P123",
                 "value": "Q7649586"
             }
-        ],
-        "subject": "Q967"
+        ]
     },
     "E10": {
         "cells": {
@@ -191,6 +191,7 @@
         },
         "property": "P100024",
         "value": "6",
+        "subject": "Q967",
         "unit": "D1002",
         "qualifier": [
             {
@@ -218,8 +219,7 @@
                 "property": "P123",
                 "value": "Q7649586"
             }
-        ],
-        "subject": "Q967"
+        ]
     },
     "E11": {
         "cells": {
@@ -228,6 +228,7 @@
         },
         "property": "P100024",
         "value": "2",
+        "subject": "Q970",
         "unit": "D1002",
         "qualifier": [
             {
@@ -255,8 +256,7 @@
                 "property": "P123",
                 "value": "Q6039400"
             }
-        ],
-        "subject": "Q970"
+        ]
     },
     "E12": {
         "cells": {
@@ -265,6 +265,7 @@
         },
         "property": "P100024",
         "value": "1",
+        "subject": "Q970",
         "unit": "D1002",
         "qualifier": [
             {
@@ -292,8 +293,7 @@
                 "property": "P123",
                 "value": "Q6039400"
             }
-        ],
-        "subject": "Q970"
+        ]
     },
     "E14": {
         "cells": {
@@ -302,6 +302,7 @@
         },
         "property": "P100024",
         "value": "4",
+        "subject": "Q970",
         "unit": "D1002",
         "qualifier": [
             {
@@ -329,8 +330,7 @@
                 "property": "P123",
                 "value": "Q6039400"
             }
-        ],
-        "subject": "Q970"
+        ]
     },
     "E16": {
         "cells": {
@@ -339,6 +339,7 @@
         },
         "property": "P100024",
         "value": "8",
+        "subject": "Q970",
         "unit": "D1002",
         "qualifier": [
             {
@@ -366,8 +367,7 @@
                 "property": "P123",
                 "value": "Q6039400"
             }
-        ],
-        "subject": "Q970"
+        ]
     },
     "E17": {
         "cells": {
@@ -376,6 +376,7 @@
         },
         "property": "P100024",
         "value": "2",
+        "subject": "Q977",
         "unit": "D1002",
         "qualifier": [
             {
@@ -403,8 +404,7 @@
                 "property": "P123",
                 "value": "Q6039400"
             }
-        ],
-        "subject": "Q977"
+        ]
     },
     "E18": {
         "cells": {
@@ -413,6 +413,7 @@
         },
         "property": "P100024",
         "value": "1",
+        "subject": "Q977",
         "unit": "D1002",
         "qualifier": [
             {
@@ -440,8 +441,7 @@
                 "property": "P123",
                 "value": "Q6039400"
             }
-        ],
-        "subject": "Q977"
+        ]
     },
     "E19": {
         "cells": {
@@ -450,6 +450,7 @@
         },
         "property": "P100024",
         "value": "3",
+        "subject": "Q977",
         "unit": "D1002",
         "qualifier": [
             {
@@ -477,8 +478,7 @@
                 "property": "P123",
                 "value": "Q6039400"
             }
-        ],
-        "subject": "Q977"
+        ]
     },
     "E20": {
         "cells": {
@@ -487,6 +487,7 @@
         },
         "property": "P100024",
         "value": "1",
+        "subject": "Q977",
         "unit": "D1002",
         "qualifier": [
             {
@@ -514,8 +515,7 @@
                 "property": "P123",
                 "value": "Q6039400"
             }
-        ],
-        "subject": "Q977"
+        ]
     },
     "E21": {
         "cells": {
@@ -524,6 +524,7 @@
         },
         "property": "P100024",
         "value": "1",
+        "subject": "Q977",
         "unit": "D1002",
         "qualifier": [
             {
@@ -551,7 +552,6 @@
                 "property": "P123",
                 "value": "Q6039400"
             }
-        ],
-        "subject": "Q977"
+        ]
     }
 }
