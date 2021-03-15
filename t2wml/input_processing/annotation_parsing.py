@@ -454,7 +454,7 @@ class Annotation():
         data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
 
         region = "range: {range_str}".format(range_str=data_region.range_str)
-        if subject_region is not None:
+        if subject_region:
             mainSubjectLine = subject_region.get_expression(data_region)
         else: 
             mainSubjectLine = "# subject region not specified"
