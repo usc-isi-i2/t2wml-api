@@ -372,7 +372,9 @@ class Annotation():
         self._run_cost_matrix(
             self.property_annotations, [self.data_annotations, self.qualifier_annotations])
         self._run_cost_matrix(self.unit_annotations, [self.data_annotations, self.qualifier_annotations])
-        return self.data_annotations[0], self.subject_annotations[0], self.qualifier_annotations
+        data_annotations=self.data_annotations[0] if self.data_annotations else []
+        subject_annotations=self.subject_annotations[0] if self.subject_annotations else []
+        return data_annotations, subject_annotations, self.qualifier_annotations
 
     def get_optionals_and_property(self, region, use_q):
         const_property=region.annotation.get("property", None)
