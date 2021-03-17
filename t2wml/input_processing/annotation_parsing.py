@@ -301,7 +301,8 @@ class Annotation():
                 match_targets.remove(target)
 
             # no assigning dynamic to what already has const
-            if role in target.annotation:
+            const_role=target.annotation.get(role, False)
+            if const_role:
                 match_targets.remove(target)
 
             # no assigning unit to something not of type quantity
