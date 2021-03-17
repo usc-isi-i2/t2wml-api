@@ -1,10 +1,11 @@
 T2WML API History
 ===================================
-Changes in version 0.2.3:
+Changes in version 0.2.4:
 ------------------------
 * bug fixes in error reporting during annotation generation (caused by index errors)
 * add support for specifying precedence (True=overwrites others, False=all others overwrite) when adding entity and wikifier files
 * during auto-creation of entities/wikication in annotations, precedence is lowest, and don't create empty files
+* if a field is filled with an empty string in annotation, treat it as empty when assigning blocks
 
 Changes in version 0.2.2:
 ------------------------
