@@ -605,47 +605,48 @@ class AnnotationNodeGenerator:
                 except:
                     pnode=self.get_Pnode(property)
                     dataframe_rows.append([row, col, property, '', pnode])
-        
-        df=pd.DataFrame(dataframe_rows, columns=columns)
-        filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
-        if os.path.isfile(filepath):
-            org_df=pd.read_csv(filepath)
-            df=pd.concat([org_df, df])
-        df.to_csv(filepath, index=False, escapechar="")
-        wikifier.add_dataframe(df)
-        self.project.add_wikifier_file(filepath)
+
+        if dataframe_rows:
+            df=pd.DataFrame(dataframe_rows, columns=columns)
+            filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
+            if os.path.isfile(filepath):
+                org_df=pd.read_csv(filepath)
+                df=pd.concat([org_df, df])
+            df.to_csv(filepath, index=False, escapechar="")
+            wikifier.add_dataframe(df)
+            self.project.add_wikifier_file(filepath, precedence=False)
                 
         #part two: entity creation
-        prov=get_provider()
-        for item in item_entities:
-            node_id=self.get_Qnode(item)
-            label=item
-            description="A "+item
-            nodes_dict[node_id]=dict(label=label, description=description)
-        for (row, col, data_type) in properties:
-            property = sheet[row][col]
-            if property:
-                node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
-                node_dict=dict(data_type=data_type, 
-                                label=property, 
-                                description=property+" relation")
-                try: #check if entity definition already present
-                    node_dict_2=prov.get_entity(node_id)
-                    if not node_dict_2:
-                        raise ValueError
-                except:
-                    nodes_dict[node_id]=dict(node_dict) 
-                    node_dict.pop("data_type")
-                    prov.save_entry(node_id, data_type, from_file=True, **node_dict)
-        
-        filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
-        if os.path.isfile(filepath):
-            nodes_dict_2=kgtk_to_dict(filepath)
-            nodes_dict_2.update(nodes_dict)
-            nodes_dict=nodes_dict_2
-        dict_to_kgtk(nodes_dict, filepath)
+        if item_entities:
+            prov=get_provider()
+            for item in item_entities:
+                node_id=self.get_Qnode(item)
+                label=item
+                description="A "+item
+                nodes_dict[node_id]=dict(label=label, description=description)
+            for (row, col, data_type) in properties:
+                property = sheet[row][col]
+                if property:
+                    node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
+                    node_dict=dict(data_type=data_type, 
+                                    label=property, 
+                                    description=property+" relation")
+                    try: #check if entity definition already present
+                        node_dict_2=prov.get_entity(node_id)
+                        if not node_dict_2:
+                            raise ValueError
+                    except:
+                        nodes_dict[node_id]=dict(node_dict) 
+                        node_dict.pop("data_type")
+                        prov.save_entry(node_id, data_type, from_file=True, **node_dict)
             
-        self.project.add_entity_file(filepath)    
+            filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
+            if os.path.isfile(filepath):
+                nodes_dict_2=kgtk_to_dict(filepath)
+                nodes_dict_2.update(nodes_dict)
+                nodes_dict=nodes_dict_2
+            dict_to_kgtk(nodes_dict, filepath)
+            self.project.add_entity_file(filepath, precedence=False)    
         self.project.save()
     
 
