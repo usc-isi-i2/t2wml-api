@@ -612,7 +612,7 @@ class AnnotationNodeGenerator:
             filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
             if os.path.isfile(filepath):
                 org_df=pd.read_csv(filepath)
-                df=pd.concat([org_df, df])
+                df=pd.concat([org_df, df]).drop_duplicates().reset_index(drop=True)
             df.to_csv(filepath, index=False, escapechar="")
             wikifier.add_dataframe(df)
             self.project.add_wikifier_file(filepath, precedence=False)
