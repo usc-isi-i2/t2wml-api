@@ -14,31 +14,36 @@ class PandasLoader:
     # a wrapper to centralize and make uniform any loading of data files/sheets from pandas
     def __init__(self, file_path):
         self.file_path = file_path
-        file_extension = Path(file_path).suffix
-        self.is_csv = True if file_extension.lower() == ".csv" else False
+        self.file_extension = Path(file_path).suffix.lower()
+        self.is_excel = True if self.file_extension in [".xlsx", ".xls"] else False
         self.pd_args = dict(dtype=str, header=None)
 
     def load_sheet(self, sheet_name):
         """
         returns a single sheet's data frame
         """
-        if self.is_csv:
-            data = pd.read_csv(self.file_path, **self.pd_args)
-        else:
+        if self.is_excel:
             data = pd.read_excel(
-                self.file_path, sheet_name=sheet_name, **self.pd_args)
+                self.file_path, sheet_name=sheet_name, **self.pd_args)     
+        else:
+            if self.file_extension == ".csv":
+                data = pd.read_csv(self.file_path, **self.pd_args)
+            elif self.file_extension == ".tsv":
+                data = pd.read_csv(self.file_path, sep="\t", **self.pd_args)
+            else: #attempt to parse type using csv sniffer
+                data = pd.read_table(self.file_path, sep=None, **self.pd_args)
         return post_process_data(data)
+    
+    @property
+    def non_excel_sheet_name(self):
+        return Path(self.file_path).name
+
 
     def load_file(self):
         """
         returns a dictionary of sheet_names and their data frames
         """
-        if self.is_csv:
-            data = pd.read_csv(self.file_path, **self.pd_args)
-            data = post_process_data(data)
-            sheet_name = Path(self.file_path).name
-            return {sheet_name: data}
-        else:
+        if self.is_excel:
             return_dict = {}
             loaded_file = pd.read_excel(
                 self.file_path, sheet_name=None, **self.pd_args)
@@ -47,13 +52,18 @@ class PandasLoader:
                 data = post_process_data(data)
                 return_dict[sheet_name] = data
             return return_dict
+        else:
+            data = self.load_sheet(None)
+            sheet_name = self.non_excel_sheet_name
+            return {sheet_name: data}
+
 
     def get_sheet_names(self):
-        if self.is_csv:
-            return [Path(self.file_path).name]
-        else:
+        if self.is_excel:
             xl = pd.ExcelFile(self.file_path)
             return xl.sheet_names
+        else:
+            return [self.non_excel_sheet_name]
     
 
 
