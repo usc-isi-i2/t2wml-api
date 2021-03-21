@@ -8,7 +8,46 @@ from t2wml.spreadsheets.sheet import SpreadsheetFile
 from t2wml.utils.t2wml_exceptions import FileWithThatNameInProject, FileNotPresentInProject, InvalidProjectDirectory
 from t2wml.settings import DEFAULT_SPARQL_ENDPOINT
 
+CURRENT_PROJECT_VERSION=1
 
+class ProjectCompatibilityManager:
+    #a separate class to silo compatibility code
+    def __init__(self, project):
+        self.project=project
+    
+    def update_to_latest_version(self):
+        if self.project.project_format_version<1:
+            self._backwards_compatible_file_copy()
+        self.project.project_format_version=CURRENT_PROJECT_VERSION
+        self.project.save()
+
+    def _backwards_compatible_file_copy(self):
+        os.makedirs(os.path.join(self.project.directory, "df"), exist_ok=True)
+        os.makedirs(os.path.join(self.project.directory, "yf"), exist_ok=True)
+        os.makedirs(os.path.join(self.project.directory, "wf"), exist_ok=True)
+        os.makedirs(os.path.join(self.project.directory, "ef"), exist_ok=True)
+        os.makedirs(os.path.join(self.project.directory, "af"), exist_ok=True)
+
+        for file in self.project.data_files:
+            new_name = Path("df") / Path(file).name
+            self.project.rename_file_in_project(file, new_name, True, True)
+        for file in self.project.yaml_files:
+            new_name = Path("yf") / Path(file).name
+            self.project.rename_file_in_project(file, new_name, True, True)
+        for file in self.project.wikifier_files:
+            new_name = Path("wf") / Path(file).name
+            self.project.rename_file_in_project(file, new_name, True, True)
+        for file in self.project.entity_files:
+            new_name = Path("ef") / Path(file).name
+            self.project.rename_file_in_project(file, new_name, True, True)
+
+        
+        for df in self.project.annotations:
+            for sh in self.project.annotations[df]:
+                for file in self.project.annotations[df][sh]["val_arr"]:
+                    new_name = Path("af") / Path(file).name
+                    self.project.rename_file_in_project(file, new_name, True, True)
+        
 
 class Project:
     def __init__(self, directory, title=None, description="", url="",
@@ -16,7 +55,8 @@ class Project:
                     yaml_sheet_associations=None, annotations=None,
                     sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False, handle_calendar="leave",
                     cache_id=None, 
-                    _saved_state=None, #deprecated but i don't want a trillion warnings
+                    project_format_version=CURRENT_PROJECT_VERSION, 
+                    _saved_state=None, #deprecated but I don't want a trillion warnings
                     **kwargs    
                 ):
         if kwargs:
@@ -43,28 +83,36 @@ class Project:
         self.handle_calendar=handle_calendar
 
         self.cache_id=cache_id
+        self.project_format_version=project_format_version
+
+        if self.project_format_version != CURRENT_PROJECT_VERSION:
+            print("Project format out of date, running backwards compatibility fixer to bring it up to date")
+            pcm = ProjectCompatibilityManager(self)
+            pcm.update_to_latest_version()
+
+        
 
     @property
     def dataset_id(self):
         return clean_id(self.title)
 
-    def _add_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
+    def _add_file(self, file_path, subdir, overwrite=False, rename=False):
         if os.path.isabs(file_path):
-            root=Path(self.directory)
+            root=Path(self.directory) / subdir
             full_path=Path(file_path)
             in_proj_dir=root in full_path.parents
             if in_proj_dir:
-                file_path=full_path.relative_to(root)
+                file_path=full_path.relative_to(Path(self.directory)) #rel path for returning
         else:
-            full_path=os.path.join(self.directory, file_path)
+            subdir_path= Path(subdir) / Path(file_path).name
+            full_path=os.path.join(self.directory, subdir_path)
             in_proj_dir=os.path.isfile(full_path)
+
         if not in_proj_dir:
             if not os.path.isfile(file_path):
                 raise FileNotPresentInProject("Could not find file:"+file_path)
-            if not copy_from_elsewhere:
-                raise InvalidProjectDirectory("project files must be located in the project directory. did you mean to copy from elsewhere?")
             file_name=Path(file_path).name
-            dst=os.path.join(self.directory, file_name)
+            dst=Path(self.directory) / subdir / file_name
             if os.path.isfile(dst):
                 if overwrite:
                     pass
@@ -73,20 +121,20 @@ class Project:
                     while os.path.isfile(dst):
                         index+=1
                         file_name=Path(file_path).stem+"_"+str(index)+Path(file_path).suffix
-                        dst=os.path.join(self.directory, file_name)
+                        dst=Path(self.directory) / subdir / file_name
                     print("renamed to: ", file_name)
                 else:
                     raise FileWithThatNameInProject(str(dst))
             try:
                 copyfile(file_path, dst)
-                file_path=file_name
+                file_path= Path(subdir) / file_name
             except Exception as e:
                 raise ValueError("Failed to copy provided file to project directory: "+str(e))
             
         return Path(file_path).as_posix() #save forward slash strings, windows anyway knows how to handle them 
     
-    def add_data_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
-        file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
+    def add_data_file(self, file_path,  overwrite=False, rename=False):
+        file_path=self._add_file(file_path, "df", overwrite, rename)
         if file_path in self.data_files:
             print("This file is already present in the project's data files")
         else:
@@ -96,8 +144,8 @@ class Project:
         return file_path
     
     def add_yaml_file(self, file_path, data_file=None, sheet_name=None, 
-                        copy_from_elsewhere=False, overwrite=False, rename=False):
-        file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
+                         overwrite=False, rename=False):
+        file_path=self._add_file(file_path, "yf", overwrite, rename)
         if file_path in self.yaml_files:
             print("This file is already present in the project's yaml files")
         else:
@@ -131,8 +179,8 @@ class Project:
         else:
             self.yaml_sheet_associations[data_path]={sheet_name:dict(val_arr=[yaml_path], selected=yaml_path)}
     
-    def add_wikifier_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False, precedence=True):
-        file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
+    def add_wikifier_file(self, file_path,  overwrite=False, rename=False, precedence=True):
+        file_path=self._add_file(file_path, "wf", overwrite, rename)
         if file_path in self.wikifier_files:
             print("This file is already present in the project's wikifier files")
             self.wikifier_files.remove(file_path)
@@ -144,11 +192,11 @@ class Project:
         return file_path
     
     def add_specific_wikifier_file(self, wiki_path, data_path, sheet_name="NO_SHEET", 
-                                   copy_from_elsewhere=False, overwrite=False, rename=False):
+                                    overwrite=False, rename=False):
         raise NotImplementedError("Specific wikifiers are not currently supported")
 
-    def add_entity_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False, precedence=True):
-        file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
+    def add_entity_file(self, file_path,  overwrite=False, rename=False, precedence=True):
+        file_path=self._add_file(file_path, "ef", overwrite, rename)
         if file_path in self.entity_files:
             print("This file is already present in the project's entity files")
             self.entity_files.remove(file_path)
@@ -158,8 +206,8 @@ class Project:
             self.entity_files= [file_path]+self.entity_files
         return file_path
     
-    def add_annotation_file(self, annotation_path, data_path, sheet_name, copy_from_elsewhere=False, overwrite=False, rename=False):
-        annotation_path=self._add_file(annotation_path, copy_from_elsewhere, overwrite, rename)
+    def add_annotation_file(self, annotation_path, data_path, sheet_name,  overwrite=False, rename=False):
+        annotation_path=self._add_file(annotation_path, "af", overwrite, rename)
         data_path=self._normalize_path(data_path)
         self.validate_data_file_and_sheet_name(data_path, sheet_name)
         if data_path in self.annotations:
@@ -246,12 +294,7 @@ class Project:
             except Exception as e:
                 print(e)
                 
-
-
-
-        
-
-    def rename_file_in_project(self, old_name, new_name, rename_in_fs=False):
+    def rename_file_in_project(self, old_name, new_name, rename_in_fs=False, overwrite=False):
         old_name=self._normalize_path(old_name)
         new_name=self._normalize_path(new_name)
 
@@ -259,7 +302,10 @@ class Project:
             raise ValueError("The file you are trying to rename does not exist in project")
         new_file_path=self.get_full_path(new_name)
         if os.path.isfile(new_file_path):
-            raise ValueError("The new name you have provided already exists in the project directory")
+            if overwrite:
+                os.remove(new_file_path)
+            else:
+                raise ValueError("The new name you have provided already exists in the project directory")
             
         if old_name in self.data_files: #handle data files completely separately from everything else
             old_csv_name=Path(old_name).stem
@@ -325,6 +371,7 @@ class Project:
         except Exception as e:
             raise ValueError("Failed to read the project yaml file: "+str(e))
         proj_input["directory"]=str(Path(filepath).parent)
+        proj_input["project_format_version"] = proj_input.get("project_format_version", 0) #0 = before started versioning
         try:
             proj= cls(**proj_input)
         except Exception as e:
@@ -461,5 +508,3 @@ class ProjectWithSavedState(Project):
             current_annotation=self.current_annotation,
             current_wikifiers=self.current_wikifiers
         )
-
-
