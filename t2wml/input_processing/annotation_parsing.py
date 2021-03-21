@@ -31,37 +31,37 @@ def normalize_rectangle(annotation):
 class YamlFormatter:
     # all the formatting and indentation in one convenient location
     @staticmethod
-    def get_yaml_string(region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines):
-        yaml = """#AUTO-GENERATED YAML\nstatementMapping:
+    def get_yaml_string(region, mainSubjectLine, propertyLine, dataLine, optionalsLines, qualifierLines):
+        yaml = f"""#AUTO-GENERATED YAML\nstatementMapping:
     region:
         {region}
     template:
         subject: {mainSubjectLine}
         property: {propertyLine}
-        value: =value[$col, $row]\n{optionalsLines}
-        {qualifierLines}""".format(region=region, mainSubjectLine=mainSubjectLine, propertyLine=propertyLine, optionalsLines=optionalsLines, qualifierLines=qualifierLines)
+        value: {dataLine}\n{optionalsLines}
+        {qualifierLines}"""
         return yaml
 
     @staticmethod
     def get_qualifier_region_string(left, right, top, bottom):
-        region = """left: {left}
+        region = f"""left: {left}
                 right: {right}
                 top: {top}
-                bottom: {bottom}""".format(left=left, right=right, top=top, bottom=bottom)
+                bottom: {bottom}"""
         return region
 
     @staticmethod
     def get_qualifier_string(propertyLine, optionalsLines, valueLine, region=None):
         if region is not None:
-            qualifier_string = """
+            qualifier_string = f"""
             - region: 
                 {region}
               property: {propertyLine}
-              value: {valueLine}\n{optionalsLines}""".format(region=region, propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+              value: {valueLine}\n{optionalsLines}"""
         else:
-            qualifier_string = """
+            qualifier_string = f"""
             - property: {propertyLine}
-              value: {valueLine}\n{optionalsLines}""".format(propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+              value: {valueLine}\n{optionalsLines}"""
         return qualifier_string
 
     @staticmethod
@@ -90,7 +90,7 @@ class Block:
 
     @property
     def use_item(self):
-        if self.type in ["wikibaseitem", "WikibaseItem"]:
+        if self.type in ["wikibaseitem", "WikibaseItem", "qNode"]:
             return True
         if self.role in ["property", "mainSubject"]:
             return True
@@ -454,6 +454,11 @@ class Annotation():
             return ["# cannot create yaml without a dependent variable\n"]
         data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
 
+        if data_region.use_item:
+            dataLine= "=item[$col, $row]"
+        else:
+            dataLine= "=value[$col, $row]"
+
         region = "range: {range_str}".format(range_str=data_region.range_str)
         if subject_region:
             mainSubjectLine = subject_region.get_expression(data_region)
@@ -472,7 +477,7 @@ class Annotation():
             qualifierLines = ""
 
         yaml = YamlFormatter.get_yaml_string(
-            region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines)
+            region, mainSubjectLine, propertyLine, dataLine, optionalsLines, qualifierLines)
         yaml = self.comment_messages + yaml
         return [yaml] #array for now... 
     
