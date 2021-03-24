@@ -1,3 +1,4 @@
+from collections import defaultdict
 import os
 import json
 from uuid import uuid4
@@ -586,7 +587,6 @@ class AnnotationNodeGenerator:
 
         columns=['row', 'column', 'value', 'context', 'item', 'file', 'sheet']
         dataframe_rows=[]
-        nodes_dict={}
         item_entities=set()
 
         #part one: wikification
@@ -612,6 +612,7 @@ class AnnotationNodeGenerator:
                     pnode=self.get_Pnode(property)
                     dataframe_rows.append([row, col, property, '', pnode, sheet.data_file_name, sheet.name])
 
+
         if dataframe_rows:
             df=pd.DataFrame(dataframe_rows, columns=columns)
             filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
@@ -632,39 +633,30 @@ class AnnotationNodeGenerator:
         #part two: entity creation
         filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
         if os.path.isfile(filepath):
-            current_custom_entities=kgtk_to_dict(filepath)
+            custom_nodes=kgtk_to_dict(filepath)
         else:
-            current_custom_entities={}
+            custom_nodes=defaultdict(dict)
 
         
         prov=get_provider()
         for item in item_entities:
             node_id=self.get_Qnode(item)
-            label=item
-            nodes_dict[node_id]=dict(label=label, description="")
+            custom_nodes[node_id]["label"]=item
         for (row, col, data_type) in properties:
             property = sheet[row][col]
             if property:
                 node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
-                node_dict=dict(data_type=data_type, 
-                                label=property, 
-                                description="")
-                try: #check if entity definition already present
-                    node_dict_2=prov.get_entity(node_id)
-                    if not node_dict_2:
-                        raise ValueError
-                    if node_dict_2.data_type=="Property Not Found":
-                        raise ValueError
-                    if node_id in current_custom_entities:
-                        raise ValueError #to change data_type if there have been any changes
-                except:
-                    nodes_dict[node_id]=dict(node_dict) 
-                    node_dict.pop("data_type")
-                    prov.save_entry(node_id, data_type, from_file=True, **node_dict)
-        
+                if node_id==self.get_Pnode(property): #it's a custom property
+                    if node_id in custom_nodes: #just update data type
+                        custom_nodes[node_id]["data_type"]=data_type
+                    else:
+                        custom_nodes[node_id]=dict(data_type=data_type, 
+                                    label=property, 
+                                    description="")
 
-        current_custom_entities.update(nodes_dict)
-        dict_to_kgtk(current_custom_entities, filepath)
+                    prov.save_entry(node_id, from_file=True, **custom_nodes[node_id])
+                
+        dict_to_kgtk(custom_nodes, filepath)
         self.project.add_entity_file(filepath, precedence=False)    
         self.project.save()
     
