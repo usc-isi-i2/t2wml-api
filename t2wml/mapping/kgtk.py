@@ -110,8 +110,8 @@ def handle_additional_edges(project, statements):
             variable_ids.add(variable)
             variable_dict=entity_dict.get(variable, None)
             if variable_dict is not None:
-                label=variable_dict.get("label", "A "+variable)
-                description=variable_dict.get("description", variable+" relation")
+                label=variable_dict.get("label", variable)
+                description=variable_dict.get("description", "")
                 data_type=variable_dict.get("data_type", "quantity")
                 if data_type.lower()=="wikibaseitem":
                     qnode_ids.add(statement["value"])
