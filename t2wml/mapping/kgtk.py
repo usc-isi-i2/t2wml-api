@@ -230,7 +230,7 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
     string_stream.close()
     return output
 
-def get_all_variables(project, statements):
+def get_all_variables(project, statements, validate_for_datamart=False):
     tsv_data=[]
     tsv_data+=create_metadata_for_project(project)
     variable_set=set()
@@ -242,11 +242,15 @@ def get_all_variables(project, statements):
 
     for cell, statement in statements.items():
         variable=statement["property"]
+        property_type = get_property_type(variable)
+        if validate_for_datamart:
+            if property_type!="quantity":
+                raise T2WMLExceptions.InvalidDatamartVariables("A valid datamart variable must be of type quantity")
         if variable not in variable_set:
             variable_set.add(variable)
             variable_dict=entity_dict.get(variable, None)
             if variable_dict is not None:
-                label=variable_dict.get("label", "A "+variable)
+                label=variable_dict.get("label", variable)
                 variable_id=clean_id(label)
                 variable_ids.add(variable_id)
     return variable_ids
