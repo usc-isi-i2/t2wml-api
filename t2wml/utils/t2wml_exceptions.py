@@ -68,3 +68,7 @@ class InvalidAnnotationException(T2WMLException):
     message="Invalid annotation"
 
 
+class InvalidDatamartVariables(T2WMLException):
+    message="Invalid datamart variables"
+
+

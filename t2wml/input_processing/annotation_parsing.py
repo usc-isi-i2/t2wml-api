@@ -1,3 +1,4 @@
+from collections import defaultdict
 import os
 import json
 from uuid import uuid4
@@ -31,37 +32,37 @@ def normalize_rectangle(annotation):
 class YamlFormatter:
     # all the formatting and indentation in one convenient location
     @staticmethod
-    def get_yaml_string(region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines):
-        yaml = """#AUTO-GENERATED YAML\nstatementMapping:
+    def get_yaml_string(region, mainSubjectLine, propertyLine, dataLine, optionalsLines, qualifierLines):
+        yaml = f"""#AUTO-GENERATED YAML\nstatementMapping:
     region:
         {region}
     template:
         subject: {mainSubjectLine}
         property: {propertyLine}
-        value: =value[$col, $row]\n{optionalsLines}
-        {qualifierLines}""".format(region=region, mainSubjectLine=mainSubjectLine, propertyLine=propertyLine, optionalsLines=optionalsLines, qualifierLines=qualifierLines)
+        value: {dataLine}\n{optionalsLines}
+        {qualifierLines}"""
         return yaml
 
     @staticmethod
     def get_qualifier_region_string(left, right, top, bottom):
-        region = """left: {left}
+        region = f"""left: {left}
                 right: {right}
                 top: {top}
-                bottom: {bottom}""".format(left=left, right=right, top=top, bottom=bottom)
+                bottom: {bottom}"""
         return region
 
     @staticmethod
     def get_qualifier_string(propertyLine, optionalsLines, valueLine, region=None):
         if region is not None:
-            qualifier_string = """
+            qualifier_string = f"""
             - region: 
                 {region}
               property: {propertyLine}
-              value: {valueLine}\n{optionalsLines}""".format(region=region, propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+              value: {valueLine}\n{optionalsLines}"""
         else:
-            qualifier_string = """
+            qualifier_string = f"""
             - property: {propertyLine}
-              value: {valueLine}\n{optionalsLines}""".format(propertyLine=propertyLine, valueLine=valueLine, optionalsLines=optionalsLines)
+              value: {valueLine}\n{optionalsLines}"""
         return qualifier_string
 
     @staticmethod
@@ -90,7 +91,7 @@ class Block:
 
     @property
     def use_item(self):
-        if self.type in ["wikibaseitem", "WikibaseItem"]:
+        if self.type in ["wikibaseitem", "WikibaseItem", "qNode"]:
             return True
         if self.role in ["property", "mainSubject"]:
             return True
@@ -301,7 +302,8 @@ class Annotation():
                 match_targets.remove(target)
 
             # no assigning dynamic to what already has const
-            if role in target.annotation:
+            const_role=target.annotation.get(role, False)
+            if const_role:
                 match_targets.remove(target)
 
             # no assigning unit to something not of type quantity
@@ -372,7 +374,9 @@ class Annotation():
         self._run_cost_matrix(
             self.property_annotations, [self.data_annotations, self.qualifier_annotations])
         self._run_cost_matrix(self.unit_annotations, [self.data_annotations, self.qualifier_annotations])
-        return self.data_annotations[0], self.subject_annotations[0], self.qualifier_annotations
+        data_annotations=self.data_annotations[0] if self.data_annotations else []
+        subject_annotations=self.subject_annotations[0] if self.subject_annotations else []
+        return data_annotations, subject_annotations, self.qualifier_annotations
 
     def get_optionals_and_property(self, region, use_q):
         const_property=region.annotation.get("property", None)
@@ -451,8 +455,13 @@ class Annotation():
             return ["# cannot create yaml without a dependent variable\n"]
         data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
 
+        if data_region.use_item:
+            dataLine= "=item[$col, $row]"
+        else:
+            dataLine= "=value[$col, $row]"
+
         region = "range: {range_str}".format(range_str=data_region.range_str)
-        if subject_region is not None:
+        if subject_region:
             mainSubjectLine = subject_region.get_expression(data_region)
         else: 
             mainSubjectLine = "# subject region not specified"
@@ -469,7 +478,7 @@ class Annotation():
             qualifierLines = ""
 
         yaml = YamlFormatter.get_yaml_string(
-            region, mainSubjectLine, propertyLine, optionalsLines, qualifierLines)
+            region, mainSubjectLine, propertyLine, dataLine, optionalsLines, qualifierLines)
         yaml = self.comment_messages + yaml
         return [yaml] #array for now... 
     
@@ -576,9 +585,8 @@ class AnnotationNodeGenerator:
         item_table=wikifier.item_table
         update_bindings(item_table=item_table, sheet=sheet)
 
-        columns=['row', 'column', 'value', 'context', 'item']
+        columns=['row', 'column', 'value', 'context', 'item', 'file', 'sheet']
         dataframe_rows=[]
-        nodes_dict={}
         item_entities=set()
 
         #part one: wikification
@@ -590,7 +598,7 @@ class AnnotationNodeGenerator:
                     if not exists:
                         raise ValueError
                 except:
-                    dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string)])
+                    dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string), sheet.data_file_name, sheet.name])
                     item_entities.add(item_string)
         
         for (row, col, data_type) in properties:
@@ -602,48 +610,55 @@ class AnnotationNodeGenerator:
                         raise ValueError
                 except:
                     pnode=self.get_Pnode(property)
-                    dataframe_rows.append([row, col, property, '', pnode])
-        
-        df=pd.DataFrame(dataframe_rows, columns=columns)
-        filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
-        if os.path.isfile(filepath):
-            org_df=pd.read_csv(filepath)
-            df=pd.concat([org_df, df])
-        df.to_csv(filepath, index=False, escapechar="")
-        wikifier.add_dataframe(df)
-        self.project.add_wikifier_file(filepath)
+                    dataframe_rows.append([row, col, property, '', pnode, sheet.data_file_name, sheet.name])
+
+
+        if dataframe_rows:
+            df=pd.DataFrame(dataframe_rows, columns=columns)
+            filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
+            if os.path.isfile(filepath):
+                #clear any clashes/duplicates
+                org_df=pd.read_csv(filepath)
+                if 'file' not in org_df:
+                    org_df['file']=''
+                if 'sheet' not in org_df:
+                    org_df['sheet']=''
+
+                df=pd.concat([org_df, df]).drop_duplicates(subset=['row', 'column', 'value', 'file', 'sheet'], keep='last').reset_index(drop=True)
+
+            df.to_csv(filepath, index=False, escapechar="")
+            wikifier.add_dataframe(df)
+            self.project.add_wikifier_file(filepath, precedence=False)
                 
         #part two: entity creation
+        filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
+        if os.path.isfile(filepath):
+            custom_nodes=kgtk_to_dict(filepath)
+        else:
+            custom_nodes=defaultdict(dict)
+
+        
         prov=get_provider()
         for item in item_entities:
             node_id=self.get_Qnode(item)
-            label=item
-            description="A "+item
-            nodes_dict[node_id]=dict(label=label, description=description)
+            if node_id not in custom_nodes: #only set to auto if creating fresh
+                custom_nodes[node_id]["label"]=item
         for (row, col, data_type) in properties:
             property = sheet[row][col]
             if property:
                 node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
-                node_dict=dict(data_type=data_type, 
-                                label=property, 
-                                description=property+" relation")
-                try: #check if entity definition already present
-                    node_dict_2=prov.get_entity(node_id)
-                    if not node_dict_2:
-                        raise ValueError
-                except:
-                    nodes_dict[node_id]=dict(node_dict) 
-                    node_dict.pop("data_type")
-                    prov.save_entry(node_id, data_type, from_file=True, **node_dict)
-        
-        filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
-        if os.path.isfile(filepath):
-            nodes_dict_2=kgtk_to_dict(filepath)
-            nodes_dict_2.update(nodes_dict)
-            nodes_dict=nodes_dict_2
-        dict_to_kgtk(nodes_dict, filepath)
-            
-        self.project.add_entity_file(filepath)    
+                if node_id==self.get_Pnode(property): #it's a custom property
+                    if node_id in custom_nodes: #just update data type
+                        custom_nodes[node_id]["data_type"]=data_type
+                    else:
+                        custom_nodes[node_id]=dict(data_type=data_type, 
+                                    label=property, 
+                                    description="")
+
+                    prov.save_entry(node_id, from_file=True, **custom_nodes[node_id])
+                
+        dict_to_kgtk(custom_nodes, filepath)
+        self.project.add_entity_file(filepath, precedence=False)    
         self.project.save()
     
 

@@ -131,26 +131,31 @@ class Project:
         else:
             self.yaml_sheet_associations[data_path]={sheet_name:dict(val_arr=[yaml_path], selected=yaml_path)}
     
-    def add_wikifier_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
+    def add_wikifier_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False, precedence=True):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
         if file_path in self.wikifier_files:
             print("This file is already present in the project's wikifier files")
             self.wikifier_files.remove(file_path)
+        
+        if precedence:
             self.wikifier_files.append(file_path)
         else:
-            self.wikifier_files.append(file_path)
+            self.wikifier_files= [file_path]+self.wikifier_files
         return file_path
     
     def add_specific_wikifier_file(self, wiki_path, data_path, sheet_name="NO_SHEET", 
                                    copy_from_elsewhere=False, overwrite=False, rename=False):
         raise NotImplementedError("Specific wikifiers are not currently supported")
 
-    def add_entity_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
+    def add_entity_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False, precedence=True):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
         if file_path in self.entity_files:
             print("This file is already present in the project's entity files")
-        else:
+            self.entity_files.remove(file_path)
+        if precedence:
             self.entity_files.append(file_path)
+        else:
+            self.entity_files= [file_path]+self.entity_files
         return file_path
     
     def add_annotation_file(self, annotation_path, data_path, sheet_name, copy_from_elsewhere=False, overwrite=False, rename=False):
@@ -257,16 +262,16 @@ class Project:
             raise ValueError("The new name you have provided already exists in the project directory")
             
         if old_name in self.data_files: #handle data files completely separately from everything else
-            is_csv=False
             old_csv_name=Path(old_name).stem
             new_csv_name=Path(new_name).stem
+            uses_csv_sheet_name=False
             if len(self.data_files[old_name]["val_arr"])==1 and self.data_files[old_name]["selected"]==old_csv_name: #it's a csv
-                is_csv=True
+                uses_csv_sheet_name=True
             for edit_dict in [self.annotations, self.data_files, self.yaml_sheet_associations]:
                 for key in edit_dict:
                     if key==old_name:
                         edit_dict[new_name]=edit_dict.pop(old_name)
-                        if is_csv:
+                        if uses_csv_sheet_name:
                             try:
                                 edit_dict[new_name][new_csv_name]=edit_dict[new_name].pop(old_csv_name)
                             except KeyError: #.data_files

@@ -1,5 +1,32 @@
 T2WML API History
 ===================================
+
+Changes in version 0.2.5:
+------------------------
+* support additional data file formats (primarily tsv, but anything pandas' parser can detect should work in the api)
+* added another 520 preloaded properties to the default provider
+* in annotations:
+    - only create custom properties for custom-node-id properties
+    - drop duplicates from auto-gen wikifier
+    - add file/sheet to autogen wikifier
+    - don't overwrite user changes to auto-gen properties/items
+    - make sure to update property types if linked annotation block type changes
+    - allow value to be a wikidata item
+    - major bug fix: non-existent properties were marked as existing and not generated properly
+    - changed default descriptions to be empty strings (instead of "a item", "property relation")
+* datamart mapping:
+    - sanitize leading/trailing whitespace and trailing colon of names
+    - add flag to validate variables as quantity
+
+
+
+Changes in version 0.2.4:
+------------------------
+* bug fixes in error reporting during annotation generation (caused by index errors)
+* add support for specifying precedence (True=overwrites others, False=all others overwrite) when adding entity and wikifier files
+* during auto-creation of entities/wikication in annotations, precedence is lowest, and don't create empty files
+* if a field is filled with an empty string in annotation, treat it as empty when assigning blocks
+
 Changes in version 0.2.2:
 ------------------------
 * also generate entities and wikification for units
