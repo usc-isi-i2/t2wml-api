@@ -623,6 +623,12 @@ class AnnotationNodeGenerator:
             self.project.add_wikifier_file(filepath, precedence=False)
                 
         #part two: entity creation
+        filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
+        if os.path.isfile(filepath):
+            current_custom_entities=kgtk_to_dict(filepath)
+        else:
+            current_custom_entities={}
+
         
         prov=get_provider()
         for item in item_entities:
@@ -642,17 +648,16 @@ class AnnotationNodeGenerator:
                         raise ValueError
                     if node_dict_2.data_type=="Property Not Found":
                         raise ValueError
+                    if node_id in current_custom_entities:
+                        raise ValueError #to change data_type if there have been any changes
                 except:
                     nodes_dict[node_id]=dict(node_dict) 
                     node_dict.pop("data_type")
                     prov.save_entry(node_id, data_type, from_file=True, **node_dict)
         
-        filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
-        if os.path.isfile(filepath):
-            nodes_dict_2=kgtk_to_dict(filepath)
-            nodes_dict_2.update(nodes_dict)
-            nodes_dict=nodes_dict_2
-        dict_to_kgtk(nodes_dict, filepath)
+
+        current_custom_entities.update(nodes_dict)
+        dict_to_kgtk(current_custom_entities, filepath)
         self.project.add_entity_file(filepath, precedence=False)    
         self.project.save()
     
