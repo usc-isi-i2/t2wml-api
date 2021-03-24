@@ -628,15 +628,14 @@ class AnnotationNodeGenerator:
         for item in item_entities:
             node_id=self.get_Qnode(item)
             label=item
-            description="A "+item
-            nodes_dict[node_id]=dict(label=label, description=description)
+            nodes_dict[node_id]=dict(label=label, description="")
         for (row, col, data_type) in properties:
             property = sheet[row][col]
             if property:
                 node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
                 node_dict=dict(data_type=data_type, 
                                 label=property, 
-                                description=property+" relation")
+                                description="")
                 try: #check if entity definition already present
                     node_dict_2=prov.get_entity(node_id)
                     if not node_dict_2:
