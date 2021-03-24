@@ -50,6 +50,8 @@ def clean_id(input):
     return input
 
 def clean_name(input):
+    input = input.strip()
+    input=input.rstrip(":")
     return input.strip()
 
 
