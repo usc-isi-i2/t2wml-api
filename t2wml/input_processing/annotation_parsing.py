@@ -584,7 +584,7 @@ class AnnotationNodeGenerator:
         item_table=wikifier.item_table
         update_bindings(item_table=item_table, sheet=sheet)
 
-        columns=['row', 'column', 'value', 'context', 'item']
+        columns=['row', 'column', 'value', 'context', 'item', 'file', 'sheet']
         dataframe_rows=[]
         nodes_dict={}
         item_entities=set()
@@ -598,7 +598,7 @@ class AnnotationNodeGenerator:
                     if not exists:
                         raise ValueError
                 except:
-                    dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string)])
+                    dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string), sheet.data_file_name, sheet.name])
                     item_entities.add(item_string)
         
         for (row, col, data_type) in properties:
@@ -610,14 +610,21 @@ class AnnotationNodeGenerator:
                         raise ValueError
                 except:
                     pnode=self.get_Pnode(property)
-                    dataframe_rows.append([row, col, property, '', pnode])
+                    dataframe_rows.append([row, col, property, '', pnode, sheet.data_file_name, sheet.name])
 
         if dataframe_rows:
             df=pd.DataFrame(dataframe_rows, columns=columns)
             filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
             if os.path.isfile(filepath):
+                #clear any clashes/duplicates
                 org_df=pd.read_csv(filepath)
-                df=pd.concat([org_df, df]).drop_duplicates().reset_index(drop=True)
+                if 'file' not in org_df:
+                    org_df['file']=''
+                if 'sheet' not in org_df:
+                    org_df['sheet']=''
+
+                df=pd.concat([org_df, df]).drop_duplicates(subset=['row', 'column', 'value', 'file', 'sheet'], keep='last').reset_index(drop=True)
+
             df.to_csv(filepath, index=False, escapechar="")
             wikifier.add_dataframe(df)
             self.project.add_wikifier_file(filepath, precedence=False)
