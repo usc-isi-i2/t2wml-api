@@ -641,7 +641,8 @@ class AnnotationNodeGenerator:
         prov=get_provider()
         for item in item_entities:
             node_id=self.get_Qnode(item)
-            custom_nodes[node_id]["label"]=item
+            if node_id not in custom_nodes: #only set to auto if creating fresh
+                custom_nodes[node_id]["label"]=item
         for (row, col, data_type) in properties:
             property = sheet[row][col]
             if property:
