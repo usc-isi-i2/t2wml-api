@@ -1,6 +1,10 @@
 T2WML API History
 ===================================
 
+Changes in version 0.2.6:
+------------------------
+* bug fix to creation of additional kgtk edges
+
 Changes in version 0.2.5:
 ------------------------
 * support additional data file formats (primarily tsv, but anything pandas' parser can detect should work in the api)
