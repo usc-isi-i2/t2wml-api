@@ -49,7 +49,8 @@ def clean_id(input):
     input = input.lower()
     return input
 
-
+def clean_name(input):
+    return input.strip()
 
 
 def create_metadata_for_project(project):
@@ -65,7 +66,7 @@ def create_metadata_for_project(project):
         #no needs for serial number as there's only one edge each
         get_edge(node1=dataset_qnode, label="P31", node2="Q1172284", type="symbol"), # this is a dataset
         get_edge(node1=dataset_qnode, label="P1813", node2=clean_id(project.title), type="string"), # this is its name that we expose
-        get_edge(node1=dataset_qnode, label="label", node2=project.title, type="string"), # an informative label
+        get_edge(node1=dataset_qnode, label="label", node2=clean_name(project.title), type="string"), # an informative label
         get_edge(node1=dataset_qnode, label="P1476", node2=project.title, type="string"), # a title, same as label
         get_edge(node1=dataset_qnode, label="description", node2=project.description, type="string"), # a description
         get_edge(node1=dataset_qnode, label="P2699", node2=project.url, type="string"), #source url for dataset
@@ -128,7 +129,7 @@ def create_metadata_for_variable(project, variable_id, label, description, data_
         get_Q_edge(node1=Qnode, label="P2006020004", node2=dataset_Qnode, type="symbol"), # the dataset of <Qnode> variable is <dataset_id> dataset
         get_Q_edge(node1=Qnode, label="P31", node2="Q50701", type="symbol"), #<Qnode> is a variable
         get_Q_edge(node1=Qnode, label="P1813", node2=clean_id(label), type="string"), #name of variable (?)
-        get_Q_edge(node1=Qnode, label="label", node2=label, type="string"), #label of variable
+        get_Q_edge(node1=Qnode, label="label", node2=clean_name(label), type="string"), #label of variable
         get_Q_edge(node1=Qnode, label="P1476", node2=label, type="string"), #title of variable, same as label
         get_Q_edge(node1=Qnode, label="description", node2=description, type="string"), #description
         get_Q_edge(node1=Qnode, label="P1687", node2=Pnode, type="symbol"), #<Qnode> corresponds to property <Pnode>
@@ -140,7 +141,7 @@ def create_metadata_for_variable(project, variable_id, label, description, data_
         # We also need to define the corresponding property Phomicides, with the following edges:
         get_P_edge(node1=Pnode, label="data_type", node2=wikidata_to_datamart[wikidata_sparql_to_wikidata[data_type]], type="string"), #datatype for variable
         get_P_edge(node1=Pnode, label="P31", node2="Q18616576", type="symbol"), #this is a property
-        get_P_edge(node1=Pnode, label="label", node2=label, type="string"), #label (can allow user to edit?)
+        get_P_edge(node1=Pnode, label="label", node2=clean_name(label), type="string"), #label (can allow user to edit?)
         get_P_edge(node1=Pnode, label="wikidata_data_type", node2= wikidata_sparql_to_wikidata[data_type], type="string"), #do we still need this?
 
     ]
@@ -158,7 +159,7 @@ def create_metadata_for_qualifier_property(project, variable_id, qualifier_prope
 
     edges = [
             add_qualifier_property_to_variable(project, variable_id[1:], qualifier_property_id),
-            get_edge(node1=qualifier_property_id, label="label", node2=label, type="string"),
+            get_edge(node1=qualifier_property_id, label="label", node2=clean_name(label), type="string"),
             get_edge(node1=qualifier_property_id, label="P31", node2="Q18616576", type="symbol"), #do we need this?
             get_edge(node1=qualifier_property_id, label="data_type", node2=wikidata_to_datamart[wikidata_sparql_to_wikidata[data_type]], type="string"), #do we need this?
             get_edge(node1=qualifier_property_id, label="wikidata_data_type", node2= wikidata_sparql_to_wikidata[data_type], type="string")
@@ -172,7 +173,7 @@ def create_metadata_for_custom_qnode(id, label, description="", **kwargs): #do w
     def get_edge(node1, label, node2, type):
         return dict(node1=node1, label=label, node2=node2, type=type, id=f'{node1}-{label}')
     edges = [
-            get_edge(node1=id, label="label", node2=label, type="string"),
+            get_edge(node1=id, label="label", node2=clean_name(label), type="string"),
         ]
     if description:
         edges.append(get_edge(node1=id, label="description", node2=description, type="string"))
