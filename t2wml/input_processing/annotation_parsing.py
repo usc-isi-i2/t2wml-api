@@ -664,3 +664,76 @@ class AnnotationNodeGenerator:
 
         
 
+def annotation_suggester(sheet, selection, annotation_blocks_array):
+    from t2wml.wikification.country_wikifier_cache import countries
+    from t2wml.utils.utilities import parse_datetime
+
+    already_has_subject=False
+    already_has_var=False
+    for block in annotation_blocks_array:
+        if block["role"]=="mainSubject":
+            already_has_subject=True
+        if block["role"]=="dependentVar":
+            already_has_var=True
+
+
+    (x1, y1), (x2, y2) = (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
+    first_cell=sheet[y1, x1]
+    is_country = first_cell in countries or first_cell.lower() in countries
+
+    try:
+        float(first_cell)
+        is_numeric=True
+    except:
+        is_numeric=False
+    
+    try:
+        parse_datetime(first_cell)
+        is_date=True
+    except:
+        is_date=False
+    
+    
+    if is_country:
+        roles=[]
+        if not already_has_subject:
+            roles.append("mainSubject")
+        roles.append("qualifier")
+        if not already_has_var:
+            roles.append("dependentVar")
+        
+        types=["string", "wikibaseitem"]
+        if is_numeric:
+            types.append("quantity")
+    
+    elif is_date:
+        roles=["qualifier"]
+        if not already_has_var:
+            roles.append("dependentVar")
+        types=["time"]
+        if is_numeric:
+            types.append("quantity")
+        types.append("string")
+    
+    elif is_numeric:
+        roles=["qualifier"]
+        if not already_has_var:
+            roles.insert(0, "dependentVar")
+        types=["quantity", "string"]
+
+    else:
+        roles= ["qualifier", "property", "dependentVar", "mainSubject", "unit"]
+        if already_has_var:
+            roles.remove("dependentVar")
+        if already_has_subject:
+            roles.remove("mainSubject")
+        types= ["string", "wikibaseitem"]
+
+    
+    response= { 
+        "role": roles,
+        "type": types
+    }
+
+    return response
+
