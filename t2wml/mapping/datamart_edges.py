@@ -140,19 +140,20 @@ def create_metadata_for_variable(project, variable_id, label, description, data_
         add_qualifier_property_to_variable(project, variable_id, "P585"),
         add_qualifier_property_to_variable(project, variable_id, "P248"),
         
-        # We also need to define the corresponding property Phomicides, with the following edges:
+    ]
+
+    # We also need to define the corresponding property Phomicides, with the following edges:
+    property_edges=[
         get_P_edge(node1=Pnode, label="data_type", node2=wikidata_to_datamart[wikidata_sparql_to_wikidata[data_type]], type="string"), #datatype for variable
         get_P_edge(node1=Pnode, label="P31", node2="Q18616576", type="symbol"), #this is a property
         get_P_edge(node1=Pnode, label="label", node2=clean_name(label), type="string"), #label (can allow user to edit?)
-        get_P_edge(node1=Pnode, label="wikidata_data_type", node2= wikidata_sparql_to_wikidata[data_type], type="string"), #do we still need this?
-
     ]
 
     #handle any tags:
     for index, tag in enumerate(tags):
         edges.append(dict(node1=Qnode, label="P2010050001", node2=tag, type="string", id=f'{dataset_Qnode}-{Qnode}-P2010050001-{index}'))
 
-    return edges
+    return edges, property_edges
 
 def create_metadata_for_qualifier_property(project, variable_id, qualifier_property_id, label, data_type):
     dataset_Qnode=f'Q{clean_id(project.title)}'
@@ -164,7 +165,6 @@ def create_metadata_for_qualifier_property(project, variable_id, qualifier_prope
             get_edge(node1=qualifier_property_id, label="label", node2=clean_name(label), type="string"),
             get_edge(node1=qualifier_property_id, label="P31", node2="Q18616576", type="symbol"), #do we need this?
             get_edge(node1=qualifier_property_id, label="data_type", node2=wikidata_to_datamart[wikidata_sparql_to_wikidata[data_type]], type="string"), #do we need this?
-            get_edge(node1=qualifier_property_id, label="wikidata_data_type", node2= wikidata_sparql_to_wikidata[data_type], type="string")
         ]
     return edges
 

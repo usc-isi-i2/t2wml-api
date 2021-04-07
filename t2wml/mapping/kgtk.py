@@ -13,7 +13,7 @@ class EmptyValueException(Exception):
     pass
 
 def enclose_in_quotes(value):
-    if value != "" and value is not None:
+    if value is not None:
         return "\""+str(value.replace('"','\\"'))+"\""
     return ""
 
@@ -93,9 +93,12 @@ def kgtk_add_property_type_specific_fields(property_dict, result_dict):
             result_dict["node2;kgtk:symbol"] = value
 
 
-def handle_additional_edges(project, statements):
-    tsv_data=[]
-    tsv_data+=create_metadata_for_project(project)
+def get_non_statement_edges(project, statements):
+    
+    project_edges=create_metadata_for_project(project)
+    variable_edges=[]
+    qualifier_edges=[]
+    qnode_edges=[]
     variable_ids=set()
     qualifier_ids=set(["P585", "P248"])
     qnode_ids=set()
@@ -117,7 +120,9 @@ def handle_additional_edges(project, statements):
                     qnode_ids.add(statement["value"])
                 tags=variable_dict.get("tags", [])
                 #TODO: P31?
-                tsv_data+=create_metadata_for_variable(project, variable, label, description, data_type, tags)
+                var_edges, prop_edges = create_metadata_for_variable(project, variable, label, description, data_type, tags)
+                variable_edges+=var_edges
+                qualifier_edges+=prop_edges
 
         qualifiers=statement.get("qualifier", [])
         for qualifier in qualifiers:
@@ -131,7 +136,7 @@ def handle_additional_edges(project, statements):
                     data_type=variable_dict.get("data_type", "string")
                     if data_type.lower()=="wikibaseitem":
                         qnode_ids.add(qualifier["value"])
-                    tsv_data+=create_metadata_for_qualifier_property(project, variable, property, label, data_type)
+                    qualifier_edges+=create_metadata_for_qualifier_property(project, variable, property, label, data_type)
         
         subject=statement["subject"]
         if subject not in qnode_ids:
@@ -142,25 +147,29 @@ def handle_additional_edges(project, statements):
         variable_dict=entity_dict.get(qnode_id, {})
         if variable_dict:
             label=variable_dict.get("label", qnode_id)
-            tsv_data+=create_metadata_for_custom_qnode(qnode_id, label)
+            qnode_edges+=create_metadata_for_custom_qnode(qnode_id, label)
 
-    for result_dict in tsv_data:
-        property_type=result_dict.pop("type")
-        result_dict["node2;kgtk:data_type"]=property_type
-        value=result_dict["node2"]
+    for tsv_data in [project_edges, variable_edges, qualifier_edges, qnode_edges]:
+        for result_dict in tsv_data:
+            property_type=result_dict.pop("type")
+            result_dict["node2;kgtk:data_type"]=property_type
+            value=result_dict["node2"]
 
-        if property_type == "quantity":
-            result_dict["node2;kgtk:number"] = value
+            if property_type == "quantity":
+                result_dict["node2;kgtk:number"] = value
 
-        elif property_type == "date_and_times":
-            result_dict["node2;kgtk:date_and_time"] = enclose_in_quotes(value)
+            if property_type == "date_and_times":
+                result_dict["node2"] = "^"+value
+                result_dict["node2;kgtk:date_and_time"] = enclose_in_quotes(value)
 
-        elif property_type == "string":
-            result_dict["node2;kgtk:text"] = enclose_in_quotes(value)
+            if property_type == "string":
+                result_dict["node2"] = enclose_in_quotes(value)
+                result_dict["node2;kgtk:text"] = enclose_in_quotes(value)
 
-        elif property_type == "symbol":
-            result_dict["node2;kgtk:symbol"] = value
-    return tsv_data
+            #if property_type == "symbol":
+            #    result_dict["node2;kgtk:symbol"] = value
+
+    return project_edges, variable_edges, qualifier_edges, qnode_edges
 
 
 def create_kgtk(statements, file_path, sheet_name, project=None):
@@ -173,9 +182,6 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
         sheet_name = "."+sheet_name
 
     tsv_data = []
-
-    if project:
-        tsv_data+=handle_additional_edges(project, statements)
 
     for cell, statement in statements.items():
         try:
@@ -208,7 +214,7 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
         except Exception as e:
             raise(e)
 
-    string_stream = StringIO("", newline="")
+    
     fieldnames = ["id", "node1", "label", "node2", "node2;kgtk:data_type",
                   "node2;kgtk:number", "node2;kgtk:low_tolerance", "node2;kgtk:high_tolerance", "node2;kgtk:units_node",
                   "node2;kgtk:date_and_time", "node2;kgtk:precision", "node2;kgtk:calendar",
@@ -216,8 +222,13 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
                   "node2;kgtk:symbol",
                   "node2;kgtk:latitude", "node2;kgtk:longitude", "node2;kgtk:globe",
                   "node2;kgtk:text", "node2;kgtk:language", ]
+    return string_stream_write(tsv_data, fieldnames)
+    
 
+def string_stream_write(tsv_data, fieldnames, extrasaction='raise'):
+    string_stream = StringIO("", newline="")
     writer = csv.DictWriter(string_stream, fieldnames,
+                            extrasaction=extrasaction,
                             restval="", delimiter="\t", lineterminator="\n",
                             escapechar='', quotechar='',
                             dialect=csv.unix_dialect, quoting=csv.QUOTE_NONE)
