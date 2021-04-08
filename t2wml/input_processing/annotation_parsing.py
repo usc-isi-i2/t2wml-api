@@ -722,7 +722,10 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
         types=["quantity", "string"]
 
     else:
-        roles= ["qualifier", "property", "dependentVar", "mainSubject", "unit"]
+        if x1==x2 and y1==y2: #single cell selection, default to property
+            roles= ["property", "qualifier", "dependentVar", "mainSubject", "unit"]
+        else: #all else, default to qualifier
+            roles= ["qualifier", "property", "dependentVar", "mainSubject", "unit"]
         if already_has_var:
             roles.remove("dependentVar")
         if already_has_subject:
