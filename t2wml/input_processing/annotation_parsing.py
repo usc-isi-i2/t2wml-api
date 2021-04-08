@@ -693,6 +693,8 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
     except:
         is_date=False
     
+    children={}
+    
     
     if is_country:
         roles=[]
@@ -714,6 +716,7 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
         if is_numeric:
             types.append("quantity")
         types.append("string")
+        children["property"]="P585"
     
     elif is_numeric:
         roles=["qualifier"]
@@ -734,8 +737,9 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
 
     
     response= { 
-        "role": roles,
-        "type": types
+        "roles": roles,
+        "types": types,
+        "children": children
     }
 
     return response
