@@ -577,7 +577,7 @@ class AnnotationNodeGenerator:
     def preload(self, sheet, wikifier):
         import pandas as pd
         from t2wml.utils.bindings import update_bindings
-        from t2wml.wikification.utility_functions import get_default_provider, get_provider, dict_to_kgtk, kgtk_to_dict
+        from t2wml.wikification.utility_functions import get_provider, dict_to_kgtk, kgtk_to_dict
 
         properties, items = self.get_custom_properties_and_qnodes()
     

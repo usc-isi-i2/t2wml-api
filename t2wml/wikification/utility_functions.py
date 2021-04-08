@@ -5,13 +5,13 @@ from pathlib import Path
 from t2wml.utils.utilities import VALID_PROPERTY_TYPES
 from SPARQLWrapper.SPARQLExceptions import QueryBadFormed
 from t2wml.utils import t2wml_exceptions as T2WMLExceptions
-from t2wml.wikification.wikidata_provider import KGTKFileProvider
+from t2wml.wikification.wikidata_provider import DictionaryProvider
 from t2wml.settings import t2wml_settings
 
 
 def get_default_provider():
-    default_kgtk=Path(__file__).parent / "preloaded_properties.tsv"
-    wikidata_provider = KGTKFileProvider(default_kgtk)
+    from t2wml.wikification.preloaded_properties import preloaded_properties
+    wikidata_provider = DictionaryProvider(preloaded_properties)
     return wikidata_provider
 
 def get_provider():
