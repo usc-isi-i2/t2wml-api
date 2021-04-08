@@ -676,7 +676,6 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
         if block["role"]=="dependentVar":
             already_has_var=True
 
-
     (x1, y1), (x2, y2) = (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
     first_cell=sheet[y1, x1]
     is_country = first_cell in countries or first_cell.lower() in countries
