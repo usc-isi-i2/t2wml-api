@@ -1,6 +1,12 @@
 T2WML API History
 ===================================
 
+Changes in version 0.2.7:
+------------------------
+* canonical spreadsheet returns labels not qnodes
+* added a function to suggest possible annotation choices for annotation blocks
+* bug fix: added preloaded_properties.tsv to manifest.in when building package
+
 Changes in version 0.2.6:
 ------------------------
 * bug fix to creation of additional kgtk edges
