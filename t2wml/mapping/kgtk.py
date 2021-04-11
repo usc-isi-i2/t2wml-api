@@ -4,7 +4,7 @@ from io import StringIO
 from pathlib import Path
 from t2wml.mapping.datamart_edges import (clean_id, create_metadata_for_custom_qnode, create_metadata_for_project, create_metadata_for_variable, 
                 create_metadata_for_qualifier_property, link_statement_to_dataset)
-from t2wml.utils.utilities import VALID_PROPERTY_TYPES
+from t2wml.utils.date_utils import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.wikification.utility_functions import get_property_type
 from t2wml.wikification.utility_functions import kgtk_to_dict

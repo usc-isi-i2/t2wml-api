@@ -666,7 +666,7 @@ class AnnotationNodeGenerator:
 
 def annotation_suggester(sheet, selection, annotation_blocks_array):
     from t2wml.wikification.country_wikifier_cache import countries
-    from t2wml.utils.utilities import parse_datetime
+    from t2wml.utils.date_utils import parse_datetime
 
     already_has_subject=False
     already_has_var=False
