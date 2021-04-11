@@ -8,6 +8,9 @@ from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
 from t2wml.settings import t2wml_settings
 from t2wml.mapping.datamart_edges import clean_id
+from t2wml.wikification.country_wikifier_cache import countries
+from t2wml.utils.date_utils import parse_datetime
+from t2wml.parsing.cleaning_functions import make_numeric
 
 COST_MATRIX_DEFAULT = 10
 
@@ -170,7 +173,10 @@ class Block:
         if self.use_item:
             return_string = "=item[{indexer}]"
         else:
-            return_string = "=value[{indexer}]"
+            if self.type=="quantity":
+                return_string="=make_numeric(value[{indexer}])"
+            else:
+                return_string = "=value[{indexer}]"
 
         if self.cell_args[0] == self.cell_args[1]:  # single cell
             cell_str = column_index_to_letter(
@@ -422,6 +428,8 @@ class Annotation():
             if qualifier_region.use_item:
                 valueLine = "=item[$qcol, $qrow]"
             else:
+                if qualifier_region.type=="quantity":
+                    valueLine="=make_numeric(value[$qcol, $qrow])"
                 valueLine = "=value[$qcol, $qrow]"
 
             alignment = qualifier_region.get_alignment_orientation(data_region, require_precise=True)
@@ -458,7 +466,10 @@ class Annotation():
         if data_region.use_item:
             dataLine= "=item[$col, $row]"
         else:
-            dataLine= "=value[$col, $row]"
+            if data_region.type=="quantity":
+                dataLine= "=make_numeric(value[$col, $row])"
+            else:
+                dataLine= "=value[$col, $row]"
 
         region = "range: {range_str}".format(range_str=data_region.range_str)
         if subject_region:
@@ -665,9 +676,6 @@ class AnnotationNodeGenerator:
         
 
 def annotation_suggester(sheet, selection, annotation_blocks_array):
-    from t2wml.wikification.country_wikifier_cache import countries
-    from t2wml.utils.date_utils import parse_datetime
-
     already_has_subject=False
     already_has_var=False
     for block in annotation_blocks_array:
@@ -680,10 +688,9 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
     first_cell=sheet[y1, x1]
     is_country = first_cell in countries or first_cell.lower() in countries
 
-    try:
-        float(first_cell)
+    if make_numeric(first_cell) != "":
         is_numeric=True
-    except:
+    else:
         is_numeric=False
     
     try:
