@@ -1,7 +1,12 @@
 T2WML API History
 ===================================
+Changes in version 0.2.9:
+------------------------
+* default to using make_numeric for anything of type quantity when creating yaml
+* use make_numeric when checking suggestion for quantityness
+* don't send "title" in yaml
 
-Changes in version 0.2.7:
+Changes in version 0.2.8:
 ------------------------
 * canonical spreadsheet returns labels not qnodes
 * added a function to suggest possible annotation choices for annotation blocks
