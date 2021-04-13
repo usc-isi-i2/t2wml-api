@@ -1,9 +1,16 @@
 T2WML API History
 ===================================
+
+Changes in version 0.2.10:
+------------------------
+1. if value resolves to empty string, raise error (don't create statement for blank)
+2. refine make_numeric to only replace in beginning and end and to do a better job stripping whitespace and commas
+
 Changes in version 0.2.9:
 ------------------------
-* default to using make_numeric for anything of type quantity when creating yaml
-* use make_numeric when checking suggestion for quantityness
+* smoother handling of irregular numbers in annotations:
+    * default to using make_numeric for anything of type quantity when creating yaml
+    * use make_numeric when checking suggestion for quantityness
 * don't send "title" in yaml
 
 Changes in version 0.2.8:
