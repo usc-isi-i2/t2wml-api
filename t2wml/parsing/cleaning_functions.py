@@ -170,16 +170,22 @@ def pad(input, length, pad_text, where=start):
 def make_numeric(input, decimal=".", latex=False):
     '''make-numeric:
     auto: smart function to make the values of a cell numeric
-    remove leading and trailing non-numeric characters
+    remove leading and trailing non-numeric characters. 
+        * leaves - in front and . in front and end
+        * non-numeric characters in the middle are not removed, so 10e5 still works, 
+        and something like 1dsjf3d4 wouldn't parse
     interprets commas and dots smartly
     removes whitespace inside the number
-    interprets exponential notation
+
     ''' 
     original_input=str(input)
+    input=strip_whitespace(str(input), where="everywhere")
     if decimal!=".":
         input=input.replace(".", "")
         input=input.replace(decimal, ".")
-    input= re.sub("[^\d.|^\deE\d|-]", "", input)
+    input=input.replace(",", "")
+    input= re.sub("^[^\d.-]*", "", input) #begining
+    input= re.sub("[^\d.]*$", "", input) #end
     try:
         float(input)
     except:
@@ -221,5 +227,4 @@ cleaning_functions_dict=dict(
     make_ascii=make_ascii, #v confirm definition
     fill_empty=fill_empty, #v
 )
-
 
