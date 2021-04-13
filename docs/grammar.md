@@ -397,7 +397,7 @@ example: `normalize_whitespace("Hello  you   hi\t this")` becomes "Hello you hi 
 examples:
 
 * `replace_regex("cats and dogs and cats", "cats", "turtles")` returns "turtles and dogs and turtles"
-* `replace_regex(" 30 456 e", "[^\d.-]", "")` returns "30456"
+* `replace_regex(" 30 456 e", r"[^\d.-]", "")` returns "30456"
 * `replace_regex("123456790 ABC#%? .(朱惠英)", r'[^\x00-\x7f]', "")` returns "123456790 ABC#%? .()"
 * `replace_regex("dan dan dan", "dan", "bob", 1)` returns "bob dan dan"
 

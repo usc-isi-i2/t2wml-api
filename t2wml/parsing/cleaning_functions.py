@@ -70,7 +70,7 @@ def replace_regex(input, to_replace, replacement="", count=0):
 
 @string_modifier
 def remove_numbers(input, where=everywhere):
-    regex="\d*"
+    regex=r"\d*"
     if where==everywhere:
         input= re.sub(str(regex), "", input)
     if where==start or where==start_and_end:
@@ -83,7 +83,7 @@ def remove_numbers(input, where=everywhere):
 
 @string_modifier
 def remove_letters(input, where=everywhere):
-    regex="\D*"
+    regex=r"\D*"
     if where==everywhere:
         input= re.sub(str(regex), "", input)
     if where==start or where==start_and_end:
