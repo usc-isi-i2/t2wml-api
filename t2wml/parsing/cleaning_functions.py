@@ -70,7 +70,7 @@ def replace_regex(input, to_replace, replacement="", count=0):
 
 @string_modifier
 def remove_numbers(input, where=everywhere):
-    regex="\d*"
+    regex=r"\d*"
     if where==everywhere:
         input= re.sub(str(regex), "", input)
     if where==start or where==start_and_end:
@@ -83,7 +83,7 @@ def remove_numbers(input, where=everywhere):
 
 @string_modifier
 def remove_letters(input, where=everywhere):
-    regex="\D*"
+    regex=r"\D*"
     if where==everywhere:
         input= re.sub(str(regex), "", input)
     if where==start or where==start_and_end:
@@ -112,7 +112,7 @@ def normalize_whitespace(input, tab=False):
     replacement=" "
     if tab:
         replacement="\t"
-    return re.sub("\s{1,}", replacement, input)
+    return re.sub(r"\s{1,}", replacement, input)
 
 @string_modifier
 def change_case(input, case="sentence"):
@@ -184,8 +184,8 @@ def make_numeric(input, decimal=".", latex=False):
         input=input.replace(".", "")
         input=input.replace(decimal, ".")
     input=input.replace(",", "")
-    input= re.sub("^[^\d.-]*", "", input) #begining
-    input= re.sub("[^\d.]*$", "", input) #end
+    input= re.sub(r"^[^\d.-]*", "", input) #begining
+    input= re.sub(r"[^\d.]*$", "", input) #end
     try:
         float(input)
     except:
