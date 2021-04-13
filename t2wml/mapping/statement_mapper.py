@@ -52,7 +52,8 @@ class StatementMapper(ABC):
                 try:
                     statement, inner_errors = self.get_cell_statement(
                         sheet, wikifier, col, row, do_init=False)
-                    statements[cell] = statement
+                    if "value" in statement: #exclude empty statements
+                        statements[cell] = statement
                     if inner_errors:
                         errors = inner_errors
                 except T2WMLExceptions.TemplateDidNotApplyToInput as e:

@@ -215,7 +215,7 @@ class NodeForEval(Node):
                         value = str(entry_parsed)
                     else:
                         value = None
-                if value is None or value == "":
+                if value is None:
                     self._errors.append(StatementError(field=key,
                                                        message=f"Failed to resolve for {key} ({self.__dict__[key].unmodified_str})",
                                                        qualifier=self.qualifier_index))
@@ -225,7 +225,7 @@ class NodeForEval(Node):
                         self._errors.append(StatementError(field=key,
                                                            message="Empty cell",
                                                            qualifier=self.qualifier_index,
-                                                           type="Minor"))
+                                                           level="Minor"))
                     self.__dict__.pop(key)
                 else:
                     self.__dict__[key] = value
@@ -305,6 +305,7 @@ class EvaluatedStatement(Statement, NodeForEval):
                             if t2wml_settings.warn_for_empty_cells:
                                 self._errors.append((StatementError(field="value",
                                                                     message="Empty cell",
+                                                                    level="Minor",
                                                                     qualifier=i)))
                             continue  # either way, discard qualifier
 
