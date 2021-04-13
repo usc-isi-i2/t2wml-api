@@ -112,7 +112,7 @@ def normalize_whitespace(input, tab=False):
     replacement=" "
     if tab:
         replacement="\t"
-    return re.sub("\s{1,}", replacement, input)
+    return re.sub(r"\s{1,}", replacement, input)
 
 @string_modifier
 def change_case(input, case="sentence"):
@@ -184,8 +184,8 @@ def make_numeric(input, decimal=".", latex=False):
         input=input.replace(".", "")
         input=input.replace(decimal, ".")
     input=input.replace(",", "")
-    input= re.sub("^[^\d.-]*", "", input) #begining
-    input= re.sub("[^\d.]*$", "", input) #end
+    input= re.sub(r"^[^\d.-]*", "", input) #begining
+    input= re.sub(r"[^\d.]*$", "", input) #end
     try:
         float(input)
     except:
