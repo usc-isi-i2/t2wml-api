@@ -1,10 +1,11 @@
 T2WML API History
 ===================================
 
-Changes in version 0.2.10:
+Changes in version 0.2.11:
 ------------------------
-1. if value resolves to empty string, raise error (don't create statement for blank)
-2. refine make_numeric to only replace in beginning and end and to do a better job stripping whitespace and commas
+* if value resolves to empty string don't create statement
+* fix bug in warn_for_empty_cells
+* refine make_numeric to only replace in beginning and end and to do a better job stripping whitespace and commas
 
 Changes in version 0.2.9:
 ------------------------
