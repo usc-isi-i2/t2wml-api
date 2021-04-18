@@ -267,7 +267,7 @@ class EvaluatedStatement(Statement, NodeForEval):
     def node_class(self):
         return NodeForEval
 
-    def validate(self):
+    def _validate(self):
         try:
             subject = self.subject
         except AttributeError:
@@ -338,8 +338,20 @@ class EvaluatedStatement(Statement, NodeForEval):
                                                         message=str(e),
                                                         qualifier=False)))
 
+
+    def validate(self):
+        self._validate()
+
         # check if statement is discarded from statement collection for major errors
         for error in self._errors:
             if error.level == "Major":
                 raise T2WMLExceptions.TemplateDidNotApplyToInput(
                     errors=self._errors)
+
+
+
+class PartialStatement(EvaluatedStatement):
+    def validate(self):
+        self._validate()
+    
+    #def serialize

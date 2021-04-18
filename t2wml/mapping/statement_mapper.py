@@ -3,7 +3,7 @@ from string import punctuation
 import json
 import yaml
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
-from t2wml.mapping.statements import EvaluatedStatement, StatementError
+from t2wml.mapping.statements import EvaluatedStatement, PartialStatement, StatementError
 from t2wml.utils.bindings import update_bindings, bindings
 from t2wml.input_processing.yaml_parsing import validate_yaml, Template
 from t2wml.input_processing.region import YamlRegion
@@ -130,3 +130,52 @@ class AnnotationMapper(YamlMapper):
             "sheet_name": sheet.name,
         }
         return statements, cell_errors, metadata
+
+class PartialAnnotationMapper(AnnotationMapper):
+    def __init__(self, file_path):
+        self.file_path = file_path
+        with open(file_path, 'r') as f:
+            annotation_blocks_arr=json.load(f)
+        self.annotation=Annotation(annotation_blocks_arr)
+        if not self.annotation.data_annotations:
+            self.get_all_statements=self.empty_get_all_statements
+
+    def get_all_statements(self, sheet, wikifier):
+        self.do_init(sheet, wikifier)
+        statements = {}
+        cell_errors = {}
+        metadata = {
+            "data_file": sheet.data_file_name,
+            "sheet_name": sheet.name,
+        }
+
+        for col, row in self.iterator():
+            errors=[]
+            if string_is_valid(str(bindings.excel_sheet[row-1][col-1])):
+                cell = to_excel(col-1, row-1)
+                try:
+                    statement, inner_errors = self.get_cell_statement(
+                        sheet, wikifier, col, row, do_init=False)
+                    statements[cell] = statement
+                    if inner_errors:
+                        errors = inner_errors
+                except T2WMLExceptions.TemplateDidNotApplyToInput as e:
+                    errors = e.errors
+                except Exception as e:
+                    errors = [StatementError(message=str(e),
+                                                       field="fatal",
+                                                       level="Major")]
+                if errors:
+                    cell_errors[cell] = [error.__dict__ if isinstance(error, StatementError) else error for error in errors ]
+
+        return statements, cell_errors, metadata
+
+    def get_cell_statement(self, sheet, wikifier, col, row, do_init=True):
+        if do_init:
+            self.do_init(sheet, wikifier)
+        context = {"t_var_row": row, "t_var_col": col}
+        statement = PartialStatement(
+            context=context, **self.template.eval_template)
+        return statement.serialize(), statement.errors
+    
+
