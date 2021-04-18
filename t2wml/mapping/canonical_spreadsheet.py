@@ -5,6 +5,8 @@ from t2wml.wikification.utility_functions import get_provider
 provider = get_provider()
 
 def try_get_label(input):
+    if input is None:
+        return None
     if input[0] in ["P", "Q"]:
         try:
             entry = provider.get_entity(input)
@@ -14,9 +16,7 @@ def try_get_label(input):
             pass
     return input
 
-
-
-def create_canonical_spreadsheet(statements):
+def get_cells_and_columns(statements):
     column_titles=["subject", "property", "value"]
 
     dict_values=[]
@@ -42,9 +42,14 @@ def create_canonical_spreadsheet(statements):
                     column_titles.append(key)
                 statement_dict[key]=try_get_label(statement[key])
         dict_values.append(statement_dict)
+    return column_titles, dict_values
+
+
+
+def create_canonical_spreadsheet(statements):
+    column_titles, dict_values = get_cells_and_columns(statements)
     
     string_stream = StringIO("", newline="")
-
     writer = csv.DictWriter(string_stream, column_titles,
                              restval="", 
                              lineterminator="\n",
