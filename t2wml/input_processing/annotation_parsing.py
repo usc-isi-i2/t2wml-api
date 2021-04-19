@@ -392,11 +392,6 @@ class Annotation():
             property = region.matches.get("property", None)
             if property is None:
                 propertyLine = "#TODO-- no property alignment found"
-                if not t2wml_settings.no_wikification:
-                    suggested_property=type_suggested_property_mapping.get(region.type, "")
-                    if suggested_property:
-                        propertyLine = suggested_property + " #(auto-suggestion) " + propertyLine
-                
             else:
                 propertyLine = property.get_expression(region, use_q)
 
