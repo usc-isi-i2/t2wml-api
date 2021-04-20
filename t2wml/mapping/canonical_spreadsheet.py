@@ -2,9 +2,8 @@ import csv
 from io import StringIO
 from t2wml.wikification.utility_functions import get_provider
 
-provider = get_provider()
-
 def try_get_label(input):
+    provider = get_provider()
     if input is None:
         return None
     if input[0] in ["P", "Q"]:
@@ -12,7 +11,7 @@ def try_get_label(input):
             entry = provider.get_entity(input)
             if entry and 'label' in entry:
                 return entry['label']
-        except:
+        except Exception as e:
             pass
     return input
 
