@@ -15,7 +15,7 @@ def try_get_label(input):
             pass
     return input
 
-def get_cells_and_columns(statements):
+def get_cells_and_columns(statements, project=None):
     column_titles=["subject", "property", "value"]
 
     dict_values=[]
@@ -41,12 +41,16 @@ def get_cells_and_columns(statements):
                     column_titles.append(key)
                 statement_dict[key]=try_get_label(statement[key])
         dict_values.append(statement_dict)
+    if project:
+        column_titles.append("dataset")
+        for dict in dict_values:
+            dict["dataset"]=project.dataset_id
     return column_titles, dict_values
 
 
 
-def create_canonical_spreadsheet(statements):
-    column_titles, dict_values = get_cells_and_columns(statements)
+def create_canonical_spreadsheet(statements, project=None):
+    column_titles, dict_values = get_cells_and_columns(statements, project)
     
     string_stream = StringIO("", newline="")
     writer = csv.DictWriter(string_stream, column_titles,

@@ -101,7 +101,7 @@ class KnowledgeGraph:
         elif filetype in ["kgtk", "tsv"]:
             output = create_kgtk(self.statements, file_path, sheet_name, project=project)
         elif filetype == "csv":
-            output = create_canonical_spreadsheet(self.statements)
+            output = create_canonical_spreadsheet(self.statements, project=project)
         else:
             raise T2WMLExceptions.FileTypeNotSupportedException(
                 "No support for "+filetype+" format")
