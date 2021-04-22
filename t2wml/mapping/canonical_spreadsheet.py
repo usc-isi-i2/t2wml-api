@@ -4,8 +4,8 @@ from t2wml.wikification.utility_functions import get_provider
 
 def try_get_label(input):
     provider = get_provider()
-    if input is None:
-        return None
+    if not input:
+        return input
     if input[0] in ["P", "Q"]:
         try:
             entry = provider.get_entity(input)

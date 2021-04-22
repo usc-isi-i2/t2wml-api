@@ -69,7 +69,6 @@ class StatementMapper(ABC):
                                                        level="Major")]
                 if errors:
                     cell_errors[cell] = [error.__dict__ if isinstance(error, StatementError) else error for error in errors ]
-            i+=1
             if i == end:
                 break
         return statements, cell_errors, metadata

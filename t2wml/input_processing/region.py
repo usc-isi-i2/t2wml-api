@@ -206,8 +206,8 @@ class YamlRegion(CodeParser, Region):
                 self.rows.remove(row)
 
             skip_cells=set(self.skip_cells)
-            for column in self.columns:
-                for row in self.rows:
+            for row in self.rows:
+                for column in self.columns:
                     if (column, row) not in skip_cells:
                             index_pairs.append((column, row))
             
