@@ -48,6 +48,7 @@ class StatementMapper(ABC):
         i=0
 
         for col, row in self.iterator():
+            i+=1
             if i<start:
                 continue
             errors=[]
