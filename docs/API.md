@@ -199,8 +199,8 @@ All StatementMappers should implement the base template StatementMapper, which d
 
 * `get_cell_statement(self, sheet, wikifier, col, row, do_init=True)` : returns statement, errors. Must be defined by inheriting classes.
 * `iterator(self)` : yields col, row pairs. Must be defined by inheriting classes.
-* `get_all_statements(self, sheet, wikifier)` : returns statements, cell_errors, metadata. By default calls `get_cell_statement` in a loop using `iterator` . Does not need to be redefined unless user wants to customize something specific.
-* `do_init(self, sheet, wikifier)` : optional. used for any initalization needed before running get_cell_statement or get_all_statements. the argument `do_init=True` in get_cell_statement allows skipping the init function if calling from get_all_statements (it is set to false in get_all_statements). Other than passing sheet and wikifier, any other arguments needed for do_init would need to be set as properties of self and then accessed.
+* `get_statements(self, sheet, wikifier, start=0, end=None)` : returns statements, cell_errors, metadata. By default calls `get_cell_statement` in a loop using `iterator`. Does not need to be redefined unless user wants to customize something specific. The optional arguments start and end can be used the fetch the Nth through Mths statements instead of all the statements.
+* `do_init(self, sheet, wikifier)` : optional. used for any initalization needed before running get_cell_statement or get_statements. the argument `do_init=True` in get_cell_statement allows skipping the init function if calling from get_statements (it is set to false in get_statements). Other than passing sheet and wikifier, any other arguments needed for do_init would need to be set as properties of self and then accessed.
 
 a `statement` is a dictionary representation of the statement for a cell. It must define `subject` , `property` , and `value` , and can also define a list of qualifiers ( `qualifier` ) and a list of references ( `reference` ), as well as any additional optional keys such as `unit` . 
 

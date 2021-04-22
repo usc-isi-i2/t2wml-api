@@ -36,7 +36,7 @@ class StatementMapper(ABC):
     def do_init(self, sheet, wikifier):
         pass
 
-    def get_all_statements(self, sheet, wikifier):
+    def get_statements(self, sheet, wikifier, start=0, end=None):
         self.do_init(sheet, wikifier)
         statements = {}
         cell_errors = {}
@@ -45,7 +45,11 @@ class StatementMapper(ABC):
             "sheet_name": sheet.name,
         }
 
+        i=0
+
         for col, row in self.iterator():
+            if i<start:
+                continue
             errors=[]
             if string_is_valid(str(bindings.excel_sheet[row-1][col-1])):
                 cell = to_excel(col-1, row-1)
@@ -64,7 +68,9 @@ class StatementMapper(ABC):
                                                        level="Major")]
                 if errors:
                     cell_errors[cell] = [error.__dict__ if isinstance(error, StatementError) else error for error in errors ]
-
+            i+=1
+            if i == end:
+                break
         return statements, cell_errors, metadata
 
 
@@ -108,12 +114,16 @@ class AnnotationMapper(YamlMapper):
     """A StatementMapper class that uses an annotation file to create a yaml text 
     """
     def __init__(self, file_path):
+        self.init_annotation(file_path)
+        if not self.annotation.potentially_enough_annotation_information:
+            self.get_statements=self.empty_get_statements #override get_statements to not return anything
+    
+    def init_annotation(self, file_path):
         self.file_path = file_path
         with open(file_path, 'r') as f:
             annotation_blocks_arr=json.load(f)
         self.annotation=Annotation(annotation_blocks_arr)
-        if not self.annotation.potentially_enough_annotation_information:
-            self.get_all_statements=self.empty_get_all_statements #override get_all_statements to not return anything
+
 
     def do_init(self, sheet, wikifier):
         item_table=wikifier.item_table
@@ -122,7 +132,7 @@ class AnnotationMapper(YamlMapper):
         self.yaml_data = yaml.safe_load(yamlContent)
 
     
-    def empty_get_all_statements(self, sheet, wikifier):
+    def empty_get_statements(self, sheet, wikifier):
         statements = {}
         cell_errors = []
         metadata = {
@@ -133,49 +143,18 @@ class AnnotationMapper(YamlMapper):
 
 class PartialAnnotationMapper(AnnotationMapper):
     def __init__(self, file_path):
-        self.file_path = file_path
-        with open(file_path, 'r') as f:
-            annotation_blocks_arr=json.load(f)
-        self.annotation=Annotation(annotation_blocks_arr)
+        self.init_annotation(file_path)
         if not self.annotation.data_annotations:
-            self.get_all_statements=self.empty_get_all_statements
-
-    def get_all_statements(self, sheet, wikifier):
-        self.do_init(sheet, wikifier)
-        statements = {}
-        cell_errors = {}
-        metadata = {
-            "data_file": sheet.data_file_name,
-            "sheet_name": sheet.name,
-        }
-
-        for col, row in self.iterator():
-            errors=[]
-            if string_is_valid(str(bindings.excel_sheet[row-1][col-1])):
-                cell = to_excel(col-1, row-1)
-                try:
-                    statement, inner_errors = self.get_cell_statement(
-                        sheet, wikifier, col, row, do_init=False)
-                    statements[cell] = statement
-                    if inner_errors:
-                        errors = inner_errors
-                except T2WMLExceptions.TemplateDidNotApplyToInput as e:
-                    errors = e.errors
-                except Exception as e:
-                    errors = [StatementError(message=str(e),
-                                                       field="fatal",
-                                                       level="Major")]
-                if errors:
-                    cell_errors[cell] = [error.__dict__ if isinstance(error, StatementError) else error for error in errors ]
-
-        return statements, cell_errors, metadata
+            self.get_statements=self.empty_get_statements
 
     def get_cell_statement(self, sheet, wikifier, col, row, do_init=True):
         if do_init:
             self.do_init(sheet, wikifier)
         context = {"t_var_row": row, "t_var_col": col}
-        statement = PartialStatement(
-            context=context, **self.template.eval_template)
-        return statement.serialize(), statement.errors
+        statement = PartialStatement(context=context, **self.template.eval_template)
+        serialized_statement=statement.serialize()
+        if "value" not in serialized_statement: #circumvent the check against empty values
+            serialized_statement["value"]=""
+        return serialized_statement, statement.errors
     
 
