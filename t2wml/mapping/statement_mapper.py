@@ -132,7 +132,7 @@ class AnnotationMapper(YamlMapper):
         self.yaml_data = yaml.safe_load(yamlContent)
 
     
-    def empty_get_statements(self, sheet, wikifier):
+    def empty_get_statements(self, sheet, wikifier, *args, **kwargs):
         statements = {}
         cell_errors = []
         metadata = {
