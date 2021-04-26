@@ -7,7 +7,7 @@ from t2wml.spreadsheets.caching import PickleCacher, FakeCacher
 from t2wml.spreadsheets.conversions import to_excel
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from collections.abc import Mapping
-
+from io import StringIO
 
 def get_cache_class():
     cache_class = FakeCacher
@@ -110,4 +110,9 @@ class Sheet:
         s=Sheet(data=data, **in_json)
         s.cleaned_data=cleaned
         return s
-        
+
+    @classmethod
+    def load_sheet_from_csv_string(cls, csv_string, data_file_path="", sheet_name=""):
+        df=pd.read_csv(StringIO(csv_string))
+        return cls(data_file_path=data_file_path, sheet_name=sheet_name, data=df)
+
