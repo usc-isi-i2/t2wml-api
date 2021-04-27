@@ -1,6 +1,18 @@
 T2WML API History
 ===================================
 
+Changes in version 0.3.0:
+------------------------
+* add auto block detection for dates, countries, and quantities
+* add support for partial statements
+* canonical spreadsheet:
+    - fix bug in canonical spreadsheet that wasn't fetching labels
+    - add dataset id
+* preliminary support for limiting number of statements fetched (wip)
+* order of statements switched to row-major
+* add method for loading a Sheet from an in-memory csv string
+
+
 Changes in version 0.2.11:
 ------------------------
 * if value resolves to empty string don't create statement
