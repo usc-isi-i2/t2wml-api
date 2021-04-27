@@ -672,7 +672,7 @@ class AnnotationNodeGenerator:
 def get_types(cell_content):
     cell_content=str(cell_content)
     is_country = cell_content in countries or cell_content.lower() in countries
-    if make_numeric(cell_content) != "":
+    if make_numeric(cell_content) != "" and cell_content[0] not in ["P", "Q"]:
         is_numeric=True
     else:
         is_numeric=False
@@ -821,9 +821,10 @@ def normalize_to_selection(selection, selection_to_norm):
 
 def check_overlap(row, col, overlaps):
     for selection in overlaps:
-        (x1, y1, x2, y2)=selection
-        if row>=y1 and row <= y2 and col>=x1 and col<=x2:
-            return True
+        if selection:
+            (x1, y1, x2, y2)=selection
+            if row>=y1 and row <= y2 and col>=x1 and col<=x2:
+                return True
     return False
 
 def get_selection(sheet_data, rows, columns, two_d=False, overlaps=None):
