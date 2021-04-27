@@ -668,6 +668,23 @@ class AnnotationNodeGenerator:
         self.project.save()
     
 
+
+def get_types(cell_content):
+    cell_content=str(cell_content)
+    is_country = cell_content in countries or cell_content.lower() in countries
+    if make_numeric(cell_content) != "":
+        is_numeric=True
+    else:
+        is_numeric=False
+    
+    try:
+        parse_datetime(cell_content)
+        is_date=True
+    except:
+        is_date=False
+    return is_country, is_numeric, is_date
+
+
         
 
 def annotation_suggester(sheet, selection, annotation_blocks_array):
@@ -681,22 +698,10 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
 
     (x1, y1), (x2, y2) = (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
     first_cell=sheet[y1, x1]
-    is_country = first_cell in countries or first_cell.lower() in countries
+    is_country, is_numeric, is_date=get_types(first_cell)
 
-    if make_numeric(first_cell) != "":
-        is_numeric=True
-    else:
-        is_numeric=False
-    
-    try:
-        parse_datetime(first_cell)
-        is_date=True
-    except:
-        is_date=False
-    
     children={}
-    
-    
+
     if is_country:
         roles=[]
         if not already_has_subject:
@@ -744,4 +749,141 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
     }
 
     return response
+
+
+
+def basic_block_finder(sheet):
+    print(sheet.data)
+    data=np.ones((sheet.row_len, sheet.col_len))
+    for row in range(sheet.row_len):
+        for col in range(sheet.col_len):
+            content = sheet[row][col]
+            if content.strip()=="":
+                data[row, col]=0
+                continue
+            is_country, is_numeric, is_date=get_types(content)
+            if is_country:
+                data[row, col]=5
+                if is_numeric: #for now override "numeric" countries
+                    data[row, col]=2
+            elif is_date:
+                data[row, col]=3
+                if is_numeric:
+                    data[row, col]=6
+            elif is_numeric:
+                data[row, col]=2
+    annotations=[]
+    c_selection=get_1d_selection(sheet, *np.where(data%5 == 0))
+    if c_selection:
+        (x1, y1, x2, y2)=c_selection
+        annotations.append({
+                "selection":dict(x1=int(x1)+1, y1=int(y1)+1, x2= int(x2)+1, y2=int(y2)+1),
+                "role":"mainSubject",
+                "type": "wikibaseitem",
+        })
+    d_selection=get_1d_selection(sheet, *np.where(data%3==0))
+    if d_selection:
+        (x1, y1, x2, y2)=d_selection
+        annotations.append({
+                "selection":dict(x1=int(x1)+1, y1=int(y1)+1, x2= int(x2)+1, y2=int(y2)+1),
+                "role":"qualifier",
+                "type": "time",
+                "property": "P585"
+        })
+
+    selection=get_2d_selection(sheet, [c_selection, d_selection], *np.where(data%2==0))
+    if selection:
+        (x1, y1, x2, y2)=selection
+        annotations.append({
+                "selection":dict(x1=int(x1)+1, y1=int(y1)+1, x2= int(x2)+1, y2=int(y2)+1),
+                "role":"dependentVar",
+                "type": "quantity"
+        })
+
+    return annotations
+    
+
+def get_1d_selection(sheet, rows, columns):
+    indices=[(row, col) for row, col in zip(rows, columns)]
+    candidates={}
+    for start_row, start_col in indices:
+        if sheet[start_row][start_col].strip()=="":
+            continue
+        candidates[(start_row, start_col, "col")]=[]
+        candidates[(start_row, start_col, "row")]=[]
+
+        col=start_col
+        while (start_row, col) in indices:
+            candidates[(start_row, start_col, "col")].append((start_row, col))
+            col+=1
+        
+        row=start_row
+        while (row, start_col) in indices:
+            candidates[(start_row, start_col, "row")].append((row, start_col))
+            row+=1
+
+    max_index = max(candidates, key=lambda k: len(candidates[k])) if candidates else None
+    if max_index:
+        y1, x1, t = max_index
+        y2, x2 = candidates[max_index][-1]
+        return (x1, y1, x2, y2)
+    return None
+
+
+def get_2d_selection(sheet, overlap_selections, rows, columns):  
+    def check_overlap(row, col):
+        for selection in overlap_selections:
+            (x1, y1, x2, y2)=selection
+            if row>=y1 and row <= y2 and col>=x1 and col<=x2:
+                return True
+        return False
+
+    indices=[(row, col) for row, col in zip(rows, columns)]
+    candidates={}
+    for start_row, start_col in indices:
+        if sheet[start_row][start_col].strip()=="":
+            continue
+        if check_overlap(start_row, start_col):
+            continue
+
+        col=start_col
+        while (start_row, col) in indices:
+            col+=1
+            if check_overlap(start_row, col):
+                break
+        col-=1
+        row=start_row
+        while(row, col) in indices:
+            row+=1
+            if check_overlap(row, col):
+                break
+        row-=1
+        candidates[(start_row, start_col, row, col)]= (col-start_col+1)*(row-start_row+1)
+        
+        
+        row=start_row
+        while (row, start_col) in indices:
+            row+=1
+            if check_overlap(row, start_col):
+                break
+        row-=1
+        col=start_col
+        while(row, col) in indices:
+            col+=1
+            if check_overlap(row, col):
+                break
+
+        col-=1
+        candidates[(start_row, start_col, row, col)]= (col-start_col+1)*(row-start_row+1)
+
+    max_index = max(candidates, key=lambda k: candidates[k]) if candidates else None
+    if max_index:
+        y1, x1, y2, x2 = max_index
+        return (x1, y1, x2, y2)
+    return None
+    
+        
+    
+    
+
 

@@ -189,7 +189,6 @@ def make_numeric(input, decimal=".", latex=False):
     try:
         float(input)
     except:
-        print("Failed to make numeric: "+original_input)
         return "" #if it's not numeric, return an empty cell
     return input
 
