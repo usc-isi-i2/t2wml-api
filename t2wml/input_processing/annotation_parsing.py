@@ -193,6 +193,13 @@ class Block:
         elif self.get_alignment_orientation(relative_value_args) == "col":
             row = str(self.cell_args[0][1]+1)
             return return_string.format(indexer=col_var+row)
+        elif not self.is_2D:
+            if self.row_args[0]==self.row_args[1]: #align by column
+                row = str(self.cell_args[0][1]+1)
+                return return_string.format(indexer=col_var+row)
+            if self.col_args[0]==self.col_args[1]: #align by row
+                col = column_index_to_letter(self.cell_args[0][0])
+                return return_string.format(indexer=col+row_var)
         else:
             print("Don't know how to match with imperfect alignment yet" +
                   self.range_str + ","+relative_value_args.range_str)
@@ -776,8 +783,8 @@ def basic_block_finder(sheet):
     d_selection=get_selection(data, *np.where(data%3==0))
     selection=get_selection(data, *np.where(data%2==0), two_d=True, overlaps=[c_selection, d_selection])
     
-    c_selection=normalize_to_selection(selection, c_selection)
-    d_selection=normalize_to_selection(selection, d_selection)
+    #c_selection=normalize_to_selection(selection, c_selection)
+    #d_selection=normalize_to_selection(selection, d_selection)
         
     if c_selection:
         (x1, y1, x2, y2)=c_selection
