@@ -753,7 +753,6 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
 
 
 def basic_block_finder(sheet):
-    print(sheet.data)
     data=np.ones((sheet.row_len, sheet.col_len))
     for row in range(sheet.row_len):
         for col in range(sheet.col_len):
@@ -773,7 +772,7 @@ def basic_block_finder(sheet):
             elif is_numeric:
                 data[row, col]=2
     annotations=[]
-    c_selection=get_1d_selection(sheet, *np.where(data%5 == 0))
+    c_selection=get_selection(data, *np.where(data%5 == 0))
     if c_selection:
         (x1, y1, x2, y2)=c_selection
         annotations.append({
@@ -781,7 +780,7 @@ def basic_block_finder(sheet):
                 "role":"mainSubject",
                 "type": "wikibaseitem",
         })
-    d_selection=get_1d_selection(sheet, *np.where(data%3==0))
+    d_selection=get_selection(data, *np.where(data%3==0))
     if d_selection:
         (x1, y1, x2, y2)=d_selection
         annotations.append({
@@ -791,7 +790,7 @@ def basic_block_finder(sheet):
                 "property": "P585"
         })
 
-    selection=get_2d_selection(sheet, [c_selection, d_selection], *np.where(data%2==0))
+    selection=get_selection(data, *np.where(data%2==0), two_d=True, overlaps=[c_selection, d_selection])
     if selection:
         (x1, y1, x2, y2)=selection
         annotations.append({
@@ -801,86 +800,81 @@ def basic_block_finder(sheet):
         })
 
     return annotations
+
+
+def check_overlap(row, col, overlaps):
+    for selection in overlaps:
+        (x1, y1, x2, y2)=selection
+        if row>=y1 and row <= y2 and col>=x1 and col<=x2:
+            return True
+    return False
+
+def get_selection(sheet_data, rows, columns, two_d=False, overlaps=None):
+    overlaps=overlaps or []
+    indices=[(row, col) for row, col in zip(rows, columns)]
+    candidates={}
+
+    for start_row, start_col in indices:
+        if sheet_data[start_row][start_col]==0 or check_overlap(start_row, start_col, overlaps):
+            continue
+        
+        #search for row
+        col=start_col
+        while (start_row, col) in indices and not check_overlap(start_row, col, overlaps):
+            col+=1
+        col-=1
+
+        row=start_row
+        if two_d:
+            while(row, col) in indices and not check_overlap(row, col, overlaps):
+                row+=1
+            row-=1
+
+        candidates[(start_row, row, start_col, col)]=0
+
+        #search for column:
+        row=start_row
+        while (row, start_col) in indices and not check_overlap(row, start_col, overlaps):
+            row+=1
+        row-=1
+
+        col=start_col
+        if two_d:
+            while(row, col) in indices and not check_overlap(row, col, overlaps):
+                col+=1
+            col-=1
+        
+        candidates[(start_row, row, start_col, col)]=0
     
+    actual_candidates={}
+    for candidate in candidates:
+        try:
+            #trim zeros:
+            (y1, y2, x1, x2) = candidate
+            data=sheet_data[y1:y2+1, x1:x2+1]
+            zero_rows= np.where(~data.any(axis=1))[0]
+            zero_columns=np.where(~data.any(axis=0))[0]
+            num_rows, num_columns = data.shape
+            num_rows-=1
+            num_columns-=1
+            while num_rows in zero_rows:
+                num_rows-=1
+            
+            while num_columns in zero_columns:
+                num_columns-=1
+            #data=data[:num_rows, :num_columns]
+            actual_candidates[(x1, y1, num_columns+x1, num_rows+y1)]=num_rows+1*num_columns+1
+        except Exception as e:
+            print(e)
 
-def get_1d_selection(sheet, rows, columns):
-    indices=[(row, col) for row, col in zip(rows, columns)]
-    candidates={}
-    for start_row, start_col in indices:
-        if sheet[start_row][start_col].strip()=="":
-            continue
-        candidates[(start_row, start_col, "col")]=[]
-        candidates[(start_row, start_col, "row")]=[]
-
-        col=start_col
-        while (start_row, col) in indices:
-            candidates[(start_row, start_col, "col")].append((start_row, col))
-            col+=1
-        
-        row=start_row
-        while (row, start_col) in indices:
-            candidates[(start_row, start_col, "row")].append((row, start_col))
-            row+=1
-
-    max_index = max(candidates, key=lambda k: len(candidates[k])) if candidates else None
-    if max_index:
-        y1, x1, t = max_index
-        y2, x2 = candidates[max_index][-1]
-        return (x1, y1, x2, y2)
-    return None
+    max_index = max(actual_candidates, key=lambda k: actual_candidates[k]) if actual_candidates else None
+    return max_index
 
 
-def get_2d_selection(sheet, overlap_selections, rows, columns):  
-    def check_overlap(row, col):
-        for selection in overlap_selections:
-            (x1, y1, x2, y2)=selection
-            if row>=y1 and row <= y2 and col>=x1 and col<=x2:
-                return True
-        return False
 
-    indices=[(row, col) for row, col in zip(rows, columns)]
-    candidates={}
-    for start_row, start_col in indices:
-        if sheet[start_row][start_col].strip()=="":
-            continue
-        if check_overlap(start_row, start_col):
-            continue
-
-        col=start_col
-        while (start_row, col) in indices:
-            col+=1
-            if check_overlap(start_row, col):
-                break
-        col-=1
-        row=start_row
-        while(row, col) in indices:
-            row+=1
-            if check_overlap(row, col):
-                break
-        row-=1
-        candidates[(start_row, start_col, row, col)]= (col-start_col+1)*(row-start_row+1)
         
         
-        row=start_row
-        while (row, start_col) in indices:
-            row+=1
-            if check_overlap(row, start_col):
-                break
-        row-=1
-        col=start_col
-        while(row, col) in indices:
-            col+=1
-            if check_overlap(row, col):
-                break
 
-        col-=1
-        candidates[(start_row, start_col, row, col)]= (col-start_col+1)*(row-start_row+1)
-
-    max_index = max(candidates, key=lambda k: candidates[k]) if candidates else None
-    if max_index:
-        y1, x1, y2, x2 = max_index
-        return (x1, y1, x2, y2)
-    return None
     
         
     
