@@ -11,6 +11,7 @@ Changes in version 0.3.0:
 * preliminary support for limiting number of statements fetched (wip)
 * order of statements switched to row-major
 * add method for loading a Sheet from an in-memory csv string
+* add support for simple imperfect alignments
 
 
 Changes in version 0.2.11:
