@@ -773,6 +773,12 @@ def basic_block_finder(sheet):
                 data[row, col]=2
     annotations=[]
     c_selection=get_selection(data, *np.where(data%5 == 0))
+    d_selection=get_selection(data, *np.where(data%3==0))
+    selection=get_selection(data, *np.where(data%2==0), two_d=True, overlaps=[c_selection, d_selection])
+    
+    c_selection=normalize_to_selection(selection, c_selection)
+    d_selection=normalize_to_selection(selection, d_selection)
+        
     if c_selection:
         (x1, y1, x2, y2)=c_selection
         annotations.append({
@@ -780,7 +786,7 @@ def basic_block_finder(sheet):
                 "role":"mainSubject",
                 "type": "wikibaseitem",
         })
-    d_selection=get_selection(data, *np.where(data%3==0))
+
     if d_selection:
         (x1, y1, x2, y2)=d_selection
         annotations.append({
@@ -789,17 +795,28 @@ def basic_block_finder(sheet):
                 "type": "time",
                 "property": "P585"
         })
-
-    selection=get_selection(data, *np.where(data%2==0), two_d=True, overlaps=[c_selection, d_selection])
     if selection:
         (x1, y1, x2, y2)=selection
         annotations.append({
                 "selection":dict(x1=int(x1)+1, y1=int(y1)+1, x2= int(x2)+1, y2=int(y2)+1),
                 "role":"dependentVar",
-                "type": "quantity"
+                "type": "quantity",
+                "property":"P1114"
         })
 
     return annotations
+
+def normalize_to_selection(selection, selection_to_norm):
+    if not selection or not selection_to_norm:
+        return selection_to_norm
+    (n_x1, n_y1, n_x2, n_y2)=selection
+
+    (x1, y1, x2, y2)=selection_to_norm
+    if x1==x2 and y1!=y2: #row
+        return (x1, n_y1, x2, n_y2)
+    if y1==y2 and x1!=x2: #column
+        return (n_x1, y1, n_x2, y2)
+    return selection_to_norm
 
 
 def check_overlap(row, col, overlaps):
