@@ -41,7 +41,7 @@ class YamlFormatter:
     region:
         {region}
     template:
-        subject: {mainSubjectLine}
+        {mainSubjectLine}
         property: {propertyLine}
         value: {dataLine}\n{optionalsLines}
         {qualifierLines}"""
@@ -476,9 +476,11 @@ class Annotation():
 
         region = "range: {range_str}".format(range_str=data_region.range_str)
         if subject_region:
-            mainSubjectLine = subject_region.get_expression(data_region)
+            mainSubjectLine = "subject: "+subject_region.get_expression(data_region)
+        elif "subject" in data_region.annotation:
+            mainSubjectLine="" #no need to do anything, will be added when adding fields
         else: 
-            mainSubjectLine = "# subject region not specified"
+            mainSubjectLine = "subject: #subject region not specified"
 
         propertyLine, optionalsLines = self.get_optionals_and_property(
             data_region, use_q=False)
