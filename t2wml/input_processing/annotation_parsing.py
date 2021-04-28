@@ -829,34 +829,33 @@ def normalize_to_selection(selection, selection_to_norm):
     return selection_to_norm
 
 
-def check_overlap(start_row, start_col, row, col, overlaps):
+def does_overlap(start_y, start_x, end_y, end_x, overlaps):
     for selection in overlaps:
         if selection:
             (x1, y1, x2, y2)=selection
-            if start_row>=y1 and row <= y2 and start_col>=x1 and col<=x2:
-                return True
-            if start_row<=y1 and row >= y2 and start_col<=x1 and col>=x2:
-                return True
+            if (end_x<x1 or x2<start_x) or (start_y>y2 or y1>end_y):
+                continue
+            return True
     return False
 
 def get_selection(sheet_data, rows, columns, two_d=False, overlaps=None):
     overlaps=overlaps or []
-    indices=[(row, col) for row, col in zip(rows, columns)]
+    indices=[(int(row), int(col)) for row, col in zip(rows, columns)]
     candidates={}
 
     for start_row, start_col in indices:
-        if sheet_data[start_row][start_col]==0 or check_overlap(start_row, start_col, start_row, start_col, overlaps):
+        if sheet_data[start_row][start_col]==0 or does_overlap(start_row, start_col, start_row, start_col, overlaps):
             continue
         
         #search for row
         col=start_col
-        while (start_row, col) in indices and not check_overlap(start_row, start_col, start_row, col, overlaps):
+        while (start_row, col) in indices and not does_overlap(start_row, start_col, start_row, col, overlaps):
             col+=1
         col-=1
 
         row=start_row
         if two_d:
-            while(row, col) in indices and not check_overlap(start_row, start_col, row, col, overlaps):
+            while(row, col) in indices and not does_overlap(start_row, start_col, row, col, overlaps):
                 row+=1
             row-=1
 
@@ -864,13 +863,13 @@ def get_selection(sheet_data, rows, columns, two_d=False, overlaps=None):
 
         #search for column:
         row=start_row
-        while (row, start_col) in indices and not check_overlap(start_row, start_col, row, start_col, overlaps):
+        while (row, start_col) in indices and not does_overlap(start_row, start_col, row, start_col, overlaps):
             row+=1
         row-=1
 
         col=start_col
         if two_d:
-            while(row, col) in indices and not check_overlap(start_row, start_col, row, col, overlaps):
+            while(row, col) in indices and not does_overlap(start_row, start_col, row, col, overlaps):
                 col+=1
             col-=1
         
