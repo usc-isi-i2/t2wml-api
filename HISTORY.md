@@ -1,5 +1,10 @@
 T2WML API History
 ===================================
+Changes in version 0.3.1:
+------------------------
+* normalize block edges
+* use subject from annotation if provided
+* fix bug in overlap checking
 
 Changes in version 0.3.0:
 ------------------------
