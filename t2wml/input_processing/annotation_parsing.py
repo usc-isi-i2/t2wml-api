@@ -829,11 +829,13 @@ def normalize_to_selection(selection, selection_to_norm):
     return selection_to_norm
 
 
-def check_overlap(row, col, overlaps):
+def check_overlap(start_row, start_col, row, col, overlaps):
     for selection in overlaps:
         if selection:
             (x1, y1, x2, y2)=selection
-            if row>=y1 and row <= y2 and col>=x1 and col<=x2:
+            if start_row>=y1 and row <= y2 and start_col>=x1 and col<=x2:
+                return True
+            if start_row<=y1 and row >= y2 and start_col<=x1 and col>=x2:
                 return True
     return False
 
@@ -843,18 +845,18 @@ def get_selection(sheet_data, rows, columns, two_d=False, overlaps=None):
     candidates={}
 
     for start_row, start_col in indices:
-        if sheet_data[start_row][start_col]==0 or check_overlap(start_row, start_col, overlaps):
+        if sheet_data[start_row][start_col]==0 or check_overlap(start_row, start_col, start_row, start_col, overlaps):
             continue
         
         #search for row
         col=start_col
-        while (start_row, col) in indices and not check_overlap(start_row, col, overlaps):
+        while (start_row, col) in indices and not check_overlap(start_row, start_col, start_row, col, overlaps):
             col+=1
         col-=1
 
         row=start_row
         if two_d:
-            while(row, col) in indices and not check_overlap(row, col, overlaps):
+            while(row, col) in indices and not check_overlap(start_row, start_col, row, col, overlaps):
                 row+=1
             row-=1
 
@@ -862,13 +864,13 @@ def get_selection(sheet_data, rows, columns, two_d=False, overlaps=None):
 
         #search for column:
         row=start_row
-        while (row, start_col) in indices and not check_overlap(row, start_col, overlaps):
+        while (row, start_col) in indices and not check_overlap(start_row, start_col, row, start_col, overlaps):
             row+=1
         row-=1
 
         col=start_col
         if two_d:
-            while(row, col) in indices and not check_overlap(row, col, overlaps):
+            while(row, col) in indices and not check_overlap(start_row, start_col, row, col, overlaps):
                 col+=1
             col-=1
         
