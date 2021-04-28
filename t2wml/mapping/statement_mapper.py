@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from string import punctuation
 import json
 import yaml
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
@@ -9,18 +8,8 @@ from t2wml.input_processing.yaml_parsing import validate_yaml, Template
 from t2wml.input_processing.region import YamlRegion
 from t2wml.input_processing.clean_yaml_parsing import get_cleaned_dataframe
 from t2wml.input_processing.annotation_parsing import Annotation
+from t2wml.input_processing.utils import string_is_valid
 from t2wml.spreadsheets.conversions import to_excel
-
-def string_is_valid(text: str) -> bool:
-    def check_special_characters(text: str) -> bool:
-        return all(char in punctuation for char in str(text))
-    if text is None or check_special_characters(text):
-        return False
-    text = text.strip().lower()
-    if text in ["", "#na", "nan"]:
-        return False
-    return True
-
 
 class StatementMapper(ABC):
     """an abstract class for creating statementmapper classes. refer to the api documentation for more details.

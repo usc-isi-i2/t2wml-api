@@ -1,6 +1,7 @@
 from collections import defaultdict
 import os
 import json
+from t2wml.input_processing.utils import string_is_valid
 from uuid import uuid4
 from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
 import numpy as np
@@ -764,7 +765,7 @@ def basic_block_finder(sheet):
     for row in range(sheet.row_len):
         for col in range(sheet.col_len):
             content = sheet[row][col]
-            if content.strip()=="":
+            if not string_is_valid(content):
                 data[row, col]=0
                 continue
             is_country, is_numeric, is_date=get_types(content)
@@ -783,8 +784,8 @@ def basic_block_finder(sheet):
     d_selection=get_selection(data, *np.where(data%3==0))
     selection=get_selection(data, *np.where(data%2==0), two_d=True, overlaps=[c_selection, d_selection])
     
-    #c_selection=normalize_to_selection(selection, c_selection)
-    #d_selection=normalize_to_selection(selection, d_selection)
+    c_selection=normalize_to_selection(selection, c_selection)
+    d_selection=normalize_to_selection(selection, d_selection)
         
     if c_selection:
         (x1, y1, x2, y2)=c_selection
