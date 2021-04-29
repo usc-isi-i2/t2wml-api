@@ -1,5 +1,10 @@
 T2WML API History
 ===================================
+Changes in version 0.3.2:
+------------------------
+* add links field to annotation
+* fix some bugs with subject field in annotation
+
 Changes in version 0.3.1:
 ------------------------
 * normalize block edges
