@@ -238,6 +238,8 @@ class Annotation():
     
     @property
     def annotation_block_array(self):
+        for block in self.annotations_array: #add links
+            block.annotation["links"]={key:block.matches[key].id for key in block.matches}
         return [block.annotation for block in self.annotations_array]
     
     def _preprocess_annotation(self, annotations):
@@ -409,7 +411,7 @@ class Annotation():
             optionalsLines += YamlFormatter.get_optionals_string(
                 "unit: " + unit.get_expression(region, use_q)+"\n", use_q)
         for key in region.annotation:
-            if key in ["changed", "id", "title"]: 
+            if key in ["changed", "id", "title", "links"]: 
                 continue
             if key not in ["role", "selection", "type", "property"]:
                 try:
