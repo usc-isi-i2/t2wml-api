@@ -392,6 +392,8 @@ class Annotation():
         self._run_cost_matrix(self.unit_annotations, [self.data_annotations, self.qualifier_annotations])
         data_annotations=self.data_annotations[0] if self.data_annotations else []
         subject_annotations=self.subject_annotations[0] if self.subject_annotations else []
+        if subject_annotations and not data_annotations.annotation.get("subject"):
+            subject_annotations.create_link(data_annotations)
         return data_annotations, subject_annotations, self.qualifier_annotations
 
     def get_optionals_and_property(self, region, use_q):
