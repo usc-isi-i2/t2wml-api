@@ -477,10 +477,10 @@ class Annotation():
                 dataLine= "=value[$col, $row]"
 
         region = "range: {range_str}".format(range_str=data_region.range_str)
-        if subject_region:
-            mainSubjectLine = "subject: "+subject_region.get_expression(data_region)
-        elif "subject" in data_region.annotation:
+        if data_region.annotation.get("subject"):
             mainSubjectLine="" #no need to do anything, will be added when adding fields
+        elif subject_region:
+            mainSubjectLine = "subject: "+subject_region.get_expression(data_region)
         else: 
             mainSubjectLine = "subject: #subject region not specified"
 
