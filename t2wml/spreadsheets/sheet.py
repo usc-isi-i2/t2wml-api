@@ -82,11 +82,13 @@ class Sheet:
                 "Cell " + to_excel(params[1], params[0]) + " is outside the bounds of the current data file")
 
     @property
-    def row_len(self):
+    def row_len(self): 
+        # number of rows
         return self.data.shape[0]
 
     @property
     def col_len(self):
+        # number of columns
         return self.data.shape[1]
     
     def to_json(self):
