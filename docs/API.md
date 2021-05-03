@@ -287,7 +287,7 @@ class SimpleSheetMapper(StatementMapper):
             error["subject"]=str(e)
         
         try:
-            value=sheet[col, row]
+            value=sheet[row][col]
             statement["value"]=value
         except Exception as e:
             error["value"]=str(e)
