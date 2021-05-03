@@ -255,6 +255,7 @@ class Annotation():
 
 
         for block in annotations:
+            block["link"]="" #reset all auto-generated links each time
             userlink=block.get("userlink")
             if userlink:
                 if userlink not in ids: #remove links to deleted blocks
