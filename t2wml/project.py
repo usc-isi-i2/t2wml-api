@@ -44,6 +44,15 @@ class Project:
 
         self.cache_id=cache_id
 
+        if not self.entity_file.exists():
+            with open(self.entity_file, 'w') as f:
+                f.write("{}")
+            
+    
+    @property
+    def entity_file(self):
+        return Path(self.directory) / "project_entity_file.json"
+
     @property
     def dataset_id(self):
         return clean_id(self.title)
