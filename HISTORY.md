@@ -1,5 +1,13 @@
 T2WML API History
 ===================================
+Changes in version 0.3.3:
+------------------------
+* much faster block suggestion code
+* added some countries to country wikifier
+* improved string_is_valid check
+* delete links to nonexistent blocks in autosuggested links
+* add field entity_file to project
+
 Changes in version 0.3.2:
 ------------------------
 * add links field to annotation
