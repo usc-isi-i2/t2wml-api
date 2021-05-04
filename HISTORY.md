@@ -1,5 +1,9 @@
 T2WML API History
 ===================================
+Changes in version 0.3.5:
+------------------------
+* cache custom nodes in memory
+
 Changes in version 0.3.4:
 ------------------------
 * strict_make_numeric added
