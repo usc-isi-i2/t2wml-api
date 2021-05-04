@@ -193,7 +193,11 @@ def make_numeric(input, decimal=".", latex=False):
 
     ''' 
     original_input=str(input)
-    input=strict_make_numeric(input, decimal)
+    input=strip_whitespace(str(input), where="everywhere")
+    if decimal!=".":
+        input=input.replace(".", "")
+        input=input.replace(decimal, ".")
+    input=input.replace(",", "")
     input= re.sub(r"^[^\d.-]*", "", input) #begining
     input= re.sub(r"[^\d.]*$", "", input) #end
     try:
