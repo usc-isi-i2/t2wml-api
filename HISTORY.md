@@ -1,5 +1,12 @@
 T2WML API History
 ===================================
+Changes in version 0.3.4:
+------------------------
+* strict_make_numeric added
+* some additional entries in country wikifier
+* in auto blocks, find longerst stretch and allow 10% total length be skips
+* fix race condition for wikified labels
+
 Changes in version 0.3.3:
 ------------------------
 * much faster block suggestion code
