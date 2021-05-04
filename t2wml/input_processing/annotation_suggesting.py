@@ -173,7 +173,6 @@ class HistogramSelection:
                     "selection":dict(x1=number_block[0][1]+1, y1=number_block[0][0]+1, x2= number_block[1][1]+1, y2=number_block[1][0]+1),
                     "role":"dependentVar",
                     "type": "quantity",
-                    "property":"P1114"
             })
 
         return annotations
