@@ -3,12 +3,12 @@ import numpy as np
 from t2wml.input_processing.utils import string_is_valid
 from t2wml.wikification.country_wikifier_cache import countries
 from t2wml.utils.date_utils import parse_datetime
-from t2wml.parsing.cleaning_functions import make_numeric
+from t2wml.parsing.cleaning_functions import strict_make_numeric
 
 def get_types(cell_content):
     cell_content=str(cell_content).strip()
     is_country = cell_content in countries or cell_content.lower() in countries
-    if make_numeric(cell_content) != "" and cell_content[0] not in ["P", "Q"]:
+    if strict_make_numeric(cell_content) != "" and cell_content[0] not in ["P", "Q"]:
         is_numeric=True
     else:
         is_numeric=False
@@ -223,7 +223,6 @@ class HistogramSelection:
         for final_column in range(column, 0, -1):
             if (row, final_column) in block_set:
                 break
-        return ((row, initial_column), (row, final_column))
 
     def get_2d_block(sheet, vertical_count, horizontal_count, block_set, blank_set, blocks_to_avoid):
         for block in blocks_to_avoid:

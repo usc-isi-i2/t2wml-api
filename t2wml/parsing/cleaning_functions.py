@@ -166,6 +166,20 @@ def pad(input, length, pad_text, where=start):
     if where == end:
         return input+ padding
 
+
+@string_modifier
+def strict_make_numeric(input, decimal="."):
+    input=strip_whitespace(str(input), where="everywhere")
+    if decimal!=".":
+        input=input.replace(".", "")
+        input=input.replace(decimal, ".")
+    input=input.replace(",", "")
+    try:
+        float(input)
+    except:
+        return "" #if it's not numeric, return an empty cell
+    return input
+
 @string_modifier
 def make_numeric(input, decimal=".", latex=False):
     '''make-numeric:
@@ -179,11 +193,7 @@ def make_numeric(input, decimal=".", latex=False):
 
     ''' 
     original_input=str(input)
-    input=strip_whitespace(str(input), where="everywhere")
-    if decimal!=".":
-        input=input.replace(".", "")
-        input=input.replace(decimal, ".")
-    input=input.replace(",", "")
+    input=strict_make_numeric(input, decimal)
     input= re.sub(r"^[^\d.-]*", "", input) #begining
     input= re.sub(r"[^\d.]*$", "", input) #end
     try:
