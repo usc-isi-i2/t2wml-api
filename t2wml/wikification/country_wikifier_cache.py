@@ -1,4 +1,7 @@
 countries = {
+    "organisation of eastern caribbean states": "Q392770",
+    "organization of eastern caribbean states": "Q392770",
+    "european union": "Q458",
     "hong kong":"Q8646",
     "hkg":"Q8646",
     "taiwan":"Q865",
@@ -36,6 +39,7 @@ countries = {
     "bah": "Q398",
     "israel": "Q801",
     "state of israel": "Q801",
+    "israel and west bank": "Q801",
     "il": "Q801",
     "🇮🇱": "Q801",
     "holy land": "Q801",
