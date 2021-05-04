@@ -134,8 +134,8 @@ class HistogramSelection:
         country_block=HistogramSelection.get_1d_block(sheet, country_index, country_is_vertical, countries, blanks)
         number_block=HistogramSelection.get_2d_block(sheet, vertical_numbers, horizontal_numbers, numbers, blanks, [date_block, country_block])
         
-        date_block=HistogramSelection.normalize_to_selection(date_block, number_block)
-        country_block=HistogramSelection.normalize_to_selection(country_block, number_block)
+        #date_block=HistogramSelection.normalize_to_selection(date_block, number_block)
+        #country_block=HistogramSelection.normalize_to_selection(country_block, number_block)
 
         return HistogramSelection._create_annotations(date_block, country_block, number_block)
         
