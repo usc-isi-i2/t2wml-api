@@ -247,6 +247,8 @@ class Annotation():
             if not isinstance(block, dict):
                 raise InvalidAnnotationException("Each annotation entry must be a dict")
             
+            block.pop("selectedArea", None) #if we somehow got this, remove it
+
             try:
                 id=block["id"]
             except KeyError:
