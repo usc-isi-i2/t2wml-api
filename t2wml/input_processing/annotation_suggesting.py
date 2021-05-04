@@ -1,5 +1,5 @@
 from collections import Counter
-import numpy as np
+from math import floor
 from t2wml.input_processing.utils import string_is_valid
 from t2wml.wikification.country_wikifier_cache import countries
 from t2wml.utils.date_utils import parse_datetime
@@ -128,11 +128,13 @@ class HistogramSelection:
                     numbers.add((row, col))
         
         date_index, date_is_vertical= HistogramSelection.get_most_common(horizontal_dates, vertical_dates)
+        date_count=horizontal_dates[date_index]
         country_index, country_is_vertical= HistogramSelection.get_most_common(horizontal_countries, vertical_countries)
+        country_count=horizontal_dates[country_index]
 
-        date_block=HistogramSelection.get_1d_block(sheet, date_index, date_is_vertical, dates, blanks)
-        country_block=HistogramSelection.get_1d_block(sheet, country_index, country_is_vertical, countries, blanks)
-        number_block=HistogramSelection.get_2d_block(sheet, vertical_numbers, horizontal_numbers, numbers, blanks, [date_block, country_block])
+        date_block=HistogramSelection.get_1d_block(sheet, date_index, date_is_vertical, date_count, dates, blanks)
+        country_block=HistogramSelection.get_1d_block(sheet, country_index, country_is_vertical, country_count, countries, blanks)
+        number_block=HistogramSelection.get_2d_block(sheet, horizontal_numbers, vertical_numbers, numbers, blanks, [date_block, country_block])
         
         date_block=HistogramSelection.normalize_to_selection(date_block, number_block)
         country_block=HistogramSelection.normalize_to_selection(country_block, number_block)
@@ -191,40 +193,78 @@ class HistogramSelection:
             return h_index, False
         return v_index, True
     
-    def get_1d_block(sheet, index, is_vertical, block_set, blank_set):
+    def get_1d_block(sheet, index, is_vertical, count, block_set, blank_set):
         if index is None:
             return None
+        threshold= max(floor(0.1 * count), 1)
+        contig_dict={}
         if is_vertical:
             column=index
-            for initial_row in range(sheet.row_len):
-                if (initial_row, column) in block_set:
-                    break
-            
-            for row in range(initial_row, sheet.row_len):
-                if not ((row, column) in block_set or (row, column) in blank_set):
-                    break
-            
-            #remove blanks
-            final_row=row
-            for final_row in range(row, 0, -1):
-                if (final_row, column) in block_set:
-                    break
-            
-            return ((initial_row, column), (final_row, column))
-        
-        #horizontal:
-        row=index
-        for initial_column in range(sheet.col_len):
-            if (row, initial_column) in block_set:
-                break
-        for column in range(initial_column, sheet.col_len):
-            if not((row, column) in block_set or (row, column) in blank_set):
-                break
-        for final_column in range(column, 0, -1):
-            if (row, final_column) in block_set:
-                break
+            start_row=0
+            while start_row<sheet.row_len:
+                total=0
+                for initial_row in range(start_row, sheet.row_len):
+                    if (initial_row, column) in block_set:
+                        break
+                
+                row=initial_row
+                while row < sheet.row_len:
+                    bad_skips=0
+                    while not ((row, column) in block_set):
+                        if not ((row, column) in blank_set):
+                            bad_skips+=1
+                            if bad_skips>threshold:
+                                break
+                        row+=1
 
-    def get_2d_block(sheet, vertical_count, horizontal_count, block_set, blank_set, blocks_to_avoid):
+                    if bad_skips>threshold:
+                        break
+                    row+=1
+                    total+=1
+                
+                #remove blanks and invalids
+                final_row=row
+                for final_row in range(row, 0, -1):
+                    if (final_row, column) in block_set:
+                        break
+                    total-=1
+                contig_dict[((initial_row, column), (final_row, column))] = total
+                start_row=row+1
+            return max(contig_dict, key=lambda p: contig_dict[p])
+
+        else:        #horizontal:
+            row=index
+            start_column=0
+            while start_column<sheet.col_len:
+                total=0
+                for initial_column in range(start_column, sheet.col_len):
+                    if (row, initial_column) in block_set:
+                        break
+
+                col=initial_column
+                while row < sheet.row_len:
+                    bad_skips=0
+                    while not ((row, col) in block_set):
+                        if not ((row, col) in blank_set):
+                            bad_skips+=1
+                            if bad_skips>threshold:
+                                break
+                        col+=1
+                    if bad_skips>threshold:
+                        break
+                    col+=1
+                    total+=1
+
+                for final_column in range(col, 0, -1):
+                    total-=1
+                    if (row, final_column) in block_set:
+                        break
+                contig_dict[((row, initial_column), (row, final_column))] = total
+                start_column=col+1
+
+            return max(contig_dict, key=lambda p: contig_dict[p])
+
+    def get_2d_block(sheet, horizontal_count, vertical_count, block_set, blank_set, blocks_to_avoid):
         for block in blocks_to_avoid:
             if block:
                 (start_r, start_c), (end_r, end_c) = block
@@ -246,10 +286,10 @@ class HistogramSelection:
                     break
             contiguous_columns[start_i]["finish"]=j-1
             start_i=j+1
-        
         start_column=max(contiguous_columns, key=lambda p: contiguous_columns[p]["count"])
         end_column=contiguous_columns[start_column]["finish"]
-        ((initial_row, column), (final_row, column))=HistogramSelection.get_1d_block(sheet, start_column, True, block_set, blank_set)
+        v_index, v_count = vertical_count.most_common(1)[0]
+        ((initial_row, column), (final_row, column))=HistogramSelection.get_1d_block(sheet, start_column, True, v_count, block_set, blank_set)
         return (initial_row, start_column), (final_row, end_column)
             
 
