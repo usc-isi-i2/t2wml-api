@@ -654,7 +654,7 @@ class AnnotationNodeGenerator:
         if os.path.isfile(filepath):
             custom_nodes=kgtk_to_dict(filepath)
         else:
-            custom_nodes=defaultdict(dict)
+            custom_nodes=dict()
 
         
         prov=get_provider()
@@ -662,7 +662,7 @@ class AnnotationNodeGenerator:
             for item in item_entities:
                 node_id=self.get_Qnode(item)
                 if node_id not in custom_nodes: #only set to auto if creating fresh
-                    custom_nodes[node_id]["label"]=item
+                    custom_nodes[node_id]={"label":item}
             for (row, col, data_type) in properties:
                 property = sheet[row][col]
                 if property:
@@ -676,11 +676,13 @@ class AnnotationNodeGenerator:
                                         description="")
 
                         prov.save_entry(node_id, from_file=True, **custom_nodes[node_id])
-                
-        dict_to_kgtk(custom_nodes, filepath)
-        add_entities_from_file(filepath)
-        self.project.add_entity_file(filepath, precedence=False)    
-        self.project.save()
+        prov.update_cache(custom_nodes)
+        
+        if custom_nodes:
+            dict_to_kgtk(custom_nodes, filepath)
+            add_entities_from_file(filepath)
+            self.project.add_entity_file(filepath, precedence=False)    
+            self.project.save()
     
 
 
