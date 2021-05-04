@@ -2,6 +2,9 @@ from collections import defaultdict
 import os
 import json
 from uuid import uuid4
+import pandas as pd
+from t2wml.utils.bindings import update_bindings
+from t2wml.wikification.utility_functions import get_provider, dict_to_kgtk, kgtk_to_dict, add_entities_from_file
 from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
 import numpy as np
 from munkres import Munkres
@@ -593,9 +596,7 @@ class AnnotationNodeGenerator:
         return f"P{self.project_id}-{clean_id(property)}"
 
     def preload(self, sheet, wikifier):
-        import pandas as pd
-        from t2wml.utils.bindings import update_bindings
-        from t2wml.wikification.utility_functions import get_provider, dict_to_kgtk, kgtk_to_dict
+
 
         properties, items = self.get_custom_properties_and_qnodes()
     
@@ -657,25 +658,27 @@ class AnnotationNodeGenerator:
 
         
         prov=get_provider()
-        for item in item_entities:
-            node_id=self.get_Qnode(item)
-            if node_id not in custom_nodes: #only set to auto if creating fresh
-                custom_nodes[node_id]["label"]=item
-        for (row, col, data_type) in properties:
-            property = sheet[row][col]
-            if property:
-                node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
-                if node_id==self.get_Pnode(property): #it's a custom property
-                    if node_id in custom_nodes: #just update data type
-                        custom_nodes[node_id]["data_type"]=data_type
-                    else:
-                        custom_nodes[node_id]=dict(data_type=data_type, 
-                                    label=property, 
-                                    description="")
+        with prov as p:
+            for item in item_entities:
+                node_id=self.get_Qnode(item)
+                if node_id not in custom_nodes: #only set to auto if creating fresh
+                    custom_nodes[node_id]["label"]=item
+            for (row, col, data_type) in properties:
+                property = sheet[row][col]
+                if property:
+                    node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
+                    if node_id==self.get_Pnode(property): #it's a custom property
+                        if node_id in custom_nodes: #just update data type
+                            custom_nodes[node_id]["data_type"]=data_type
+                        else:
+                            custom_nodes[node_id]=dict(data_type=data_type, 
+                                        label=property, 
+                                        description="")
 
-                    prov.save_entry(node_id, from_file=True, **custom_nodes[node_id])
+                        prov.save_entry(node_id, from_file=True, **custom_nodes[node_id])
                 
         dict_to_kgtk(custom_nodes, filepath)
+        add_entities_from_file(filepath)
         self.project.add_entity_file(filepath, precedence=False)    
         self.project.save()
     
