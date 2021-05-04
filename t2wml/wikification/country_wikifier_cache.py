@@ -1150,6 +1150,7 @@ countries = {
     "bdi": "Q967",
     "democratic republic of the congo": "Q974",
     "drc": "Q974",
+    "congo democratic republic":  "Q974",
     "dr congo": "Q974",
     "congo-kinshasa": "Q974",
     "zaire": "Q974",
