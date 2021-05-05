@@ -34,54 +34,39 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
     is_country, is_numeric, is_date=get_types(first_cell)
 
     children={}
+    type=None
 
     if is_country:
-        roles=[]
         if not already_has_subject:
-            roles.append("mainSubject")
-        roles.append("qualifier")
-        if not already_has_var:
-            roles.append("dependentVar")
-        
-        types=["string", "wikibaseitem"]
-        if is_numeric:
-            types.append("quantity")
+            role="mainSubject"
+        else:
+            role="qualifier"
+            type="wikibaseitem"
     
     elif is_date:
-        roles=["qualifier"]
-        if not already_has_var:
-            roles.append("dependentVar")
-        types=["time"]
-        if is_numeric:
-            types.append("quantity")
-        types.append("string")
+        role="qualifier"
+        type="time"
         children["property"]="P585"
     
     elif is_numeric:
-        roles=["qualifier"]
         if not already_has_var:
-            roles.insert(0, "dependentVar")
-        types=["quantity", "string"]
+            role="dependentVar"
+        else:
+            role="qualifier"
+        type="quantity"
 
     else:
         if x1==x2 and y1==y2: #single cell selection, default to property
-            roles= ["property", "qualifier", "dependentVar", "mainSubject", "unit"]
+            role="property"
         else: #all else, default to qualifier
-            roles= ["qualifier", "property", "dependentVar", "mainSubject", "unit"]
-        if already_has_var:
-            roles.remove("dependentVar")
-        if already_has_subject:
-            roles.remove("mainSubject")
-        types= ["string", "wikibaseitem"]
+            role="qualifier"
+        type="string"
 
-    
-    response= { 
-        "roles": roles,
-        "types": types,
-        "children": children
-    }
+    suggestion=dict(role=role, children=children)
+    if type:
+        suggestion["type"]=type
 
-    return response
+    return suggestion
 
 
 class HistogramSelection:
