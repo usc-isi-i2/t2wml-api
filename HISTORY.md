@@ -1,5 +1,10 @@
 T2WML API History
 ===================================
+Changes in version 0.3.6:
+------------------------
+* don't autosuggest P1114
+* change format of suggestion
+
 Changes in version 0.3.5:
 ------------------------
 * cache custom nodes in memory
