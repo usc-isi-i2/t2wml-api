@@ -1,4 +1,5 @@
 import os
+import logging
 from pathlib import Path
 import pandas as pd
 from t2wml.spreadsheets.utilities import PandasLoader, load_pickle
@@ -6,6 +7,7 @@ from t2wml.settings import t2wml_settings
 
 class FakeCacher:
     def __init__(self, data_file_path, sheet_name):
+        logging.debug("using Fake Cacher")
         self.data_file_path = data_file_path
         self.sheet_name = sheet_name
         self.pandas_wrapper = PandasLoader(self.data_file_path)
@@ -24,6 +26,7 @@ def pickle_folder(data_file_path):
 
 class PickleCacher:
     def __init__(self, data_file_path, sheet_name):
+        logging.debug("using Pickle Cacher")
         self.data_file_path = data_file_path
         self.sheet_name = sheet_name
         self.pandas_wrapper = PandasLoader(self.data_file_path)

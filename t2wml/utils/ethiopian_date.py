@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding=utf-8
 # maintainer: rgaudin
+import logging
 
 """  Ethiopian Calendar tool for Python 2.6
 Copyright (c) 2010 Renaud Gaudin <rgaudin@gmail.com>
@@ -63,7 +64,7 @@ class EthiopianDateConverter(object):
         * year: an int
         * month: an int
         * date: an int """
-
+        logging.debug("enter EthiopianDateConverter.to_greorian")
         # prevent incorect input
         inputs = (year, month, date)
         if 0 in inputs or [data.__class__ for data in inputs].count(int) != 3:
@@ -117,7 +118,7 @@ class EthiopianDateConverter(object):
         # Gregorian months ordered according to Ethiopian
         order = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         gregorian_month = order[m]
-
+        logging.debug("returning from EthiopianDateConverter.to_greorian")
         return datetime.date(gregorian_year, gregorian_month, gregorian_date)
 
     @classmethod
@@ -127,7 +128,7 @@ class EthiopianDateConverter(object):
         * year: an int
         * month: an int
         * date: an int """
-
+        logging.debug("enter EthiopianDateConverter.to_ethiopian")
         # prevent incorect input
         inputs = (year, month, date)
         if 0 in inputs or [data.__class__ for data in inputs].count(int) != 3:
@@ -207,11 +208,13 @@ class EthiopianDateConverter(object):
         # Ethiopian months ordered according to Gregorian
         order = [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 2, 3, 4]
         ethiopian_month = order[m]
-
+        logging.debug("returning from EthiopianDateConverter.to_ethiopian")
         return ethiopian_year, ethiopian_month, ethiopian_date
     
     @classmethod
     def iso_to_gregorian_iso(cls, iso):
+        logging.debug("enter EthiopianDateConverter.iso_to_greorian_iso")
         dt = datetime.datetime.fromisoformat(iso)
         gregorian=cls.date_to_gregorian(dt)
+        logging.debug("returning from EthiopianDateConverter.iso_to_greorian_iso")
         return gregorian.isoformat()

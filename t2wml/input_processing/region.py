@@ -1,3 +1,4 @@
+import logging
 from t2wml.utils.bindings import bindings
 from t2wml.input_processing.yaml_parsing import CodeParser
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
@@ -19,6 +20,7 @@ class Region:
 
 class YamlRegion(CodeParser, Region):
     def __init__(self, yaml_data, context=None):
+        logging.debug("enter yaml region init")
         self.context= context or {}
         self.yaml_data=yaml_data
         self.range_args = self.get_range_arguments(yaml_data)
@@ -26,6 +28,7 @@ class YamlRegion(CodeParser, Region):
         self.columns, self.rows, self.cells = self.get_select_arguments(yaml_data)
         self.skip_cols, self.skip_rows, self.skip_cells = self.get_skip_arguments(yaml_data)
         self.index_pairs= self.build_pairs()
+        logging.debug("exit yaml region init")
 
     def check_range_boundaries(self, region):
         if region['t_var_left'] > region['t_var_right']:

@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import logging
 from pandas import DataFrame
 from collections import defaultdict
 from t2wml.utils.t2wml_exceptions import ItemNotFoundException
@@ -11,6 +12,7 @@ class ItemTable:
         self.lookup_table = defaultdict(dict, lookup_table)
 
     def lookup_func(self, lookup, file, sheet, column, row, value):
+        logging.debug("enter ItemTable.lookup_func")
         # order of priority: cell+value> cell> col+value> col> row+value> row> value
         column = int(column)
         row = int(row)
@@ -28,8 +30,9 @@ class ItemTable:
         for tup in tuples:
             item = lookup.get(str(tup))
             if item:
+                logging.debug("returning from ItemTable.lookup_func")
                 return item
-
+        logging.debug("raising not found from ItemTable.lookup_func")
         raise ValueError("Not found")
 
     def get_item(self, column:int, row:int, context:str='', sheet=None):
@@ -70,6 +73,7 @@ class ItemTable:
         return None, None, None
 
     def update_table_from_dataframe(self, df: DataFrame):
+        logging.debug("enter ItemTable update table from dataframe")
         try:
             df = df.fillna('')
             df = df.replace(r'^\s+$', '', regex=True)
@@ -108,6 +112,8 @@ class ItemTable:
         except Exception as e:
             print(e)
             raise e
+        finally:
+            logging.debug("finished ItemTable update table from dataframe")
 
 
 class Wikifier:
@@ -144,6 +150,7 @@ class Wikifier:
         Returns:
             dict: a dictionary describing which item definitions were already present and overwritten
         """
+        logging.debug("enter Wikifier add_file")
         df = pd.read_csv(file_path)
         try:
             overwritten = self.item_table.update_table_from_dataframe(df)
@@ -152,6 +159,7 @@ class Wikifier:
                 "Could not apply {} : {}".format(file_path, str(e)))
         self.wiki_files.append(file_path)
         self._data_frames.append(df)
+        logging.debug("returning from Wikifier add_file")
         return overwritten
 
     def add_dataframe(self, df: DataFrame):
@@ -168,6 +176,7 @@ class Wikifier:
         Returns:
             dict: a dictionary describing which item definitions were already present and overwritten
         """
+        logging.debug("entering Wikifier add_dataframe")
         expected_columns = set(['row', 'column', 'value', 'context', 'item'])
         columns = set(df.columns)
         missing_columns = expected_columns.difference(columns)
@@ -179,6 +188,7 @@ class Wikifier:
         except Exception as e:
             raise ValueError("Could not apply dataframe: "+str(e))
         self._data_frames.append(df)
+        logging.debug("returning from Wikifier add_dataframe")
         return overwritten
 
     def save(self, filename: str):
@@ -187,6 +197,7 @@ class Wikifier:
         Args:
             filename (str): location of save file
         """
+        logging.debug("enter wikifier save"+ filename)
         output = json.dumps({
             "wiki_files": self.wiki_files,
             "lookup_table": self.item_table.lookup_table,
@@ -194,6 +205,7 @@ class Wikifier:
         })
         with open(filename, 'w', encoding="utf-8") as f:
             f.write(output)
+        logging.debug("exit Wikifier save", filename)
 
     @classmethod
     def load(cls, filename:str):
@@ -205,6 +217,7 @@ class Wikifier:
         Returns:
             Wikifier: initialized wikifier
         """
+        logging.debug("enter wikifier load"+ filename)
         with open(filename, 'r', encoding="utf-8") as f:
             wiki_args = json.load(f)
         wikifier = Wikifier()
@@ -213,4 +226,5 @@ class Wikifier:
             lookup_table=wiki_args["lookup_table"])
         wikifier._data_frames = [pd.read_json(
             json_string) for json_string in wiki_args["dataframes"]]
+        logging.debug("return from wikifier load"+ filename)
         return wikifier

@@ -1,3 +1,4 @@
+import logging
 import math
 import re
 import string
@@ -19,9 +20,11 @@ everywhere="everywhere"
 
 def string_modifier(func):
     def wrapper(input, *args, **kwargs):
+        logging.debug("enter cleaning function")
         where=kwargs.get("where")
         if where:
             if where not in [start, end, start_and_end, everywhere]:
+                logging.debug("raise error from cleaning function")
                 raise ValueError("Invalid argument for where: "+where)
 
         if input is not None:  # if value is None, don't modify
@@ -33,9 +36,12 @@ def string_modifier(func):
             
             try:
                 input.value = res_string
+                logging.debug("returning from cleaning function")
                 return input
             except:
+                logging.debug("returning from cleaning function")
                 return res_string
+        logging.debug("returning from cleaning function")
         return input
     return wrapper
 

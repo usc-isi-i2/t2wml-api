@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 import json
 import yaml
@@ -26,6 +27,7 @@ class StatementMapper(ABC):
         pass
 
     def get_statements(self, sheet, wikifier, start=0, end=None):
+        logging.debug("enter get_statements")
         self.do_init(sheet, wikifier)
         statements = {}
         cell_errors = {}
@@ -37,6 +39,7 @@ class StatementMapper(ABC):
         i=0
 
         for col, row in self.iterator():
+            logging.debug(f"loop in get_statements: col {col} row {row}")
             i+=1
             if i<start:
                 continue
@@ -60,6 +63,7 @@ class StatementMapper(ABC):
                     cell_errors[cell] = [error.__dict__ if isinstance(error, StatementError) else error for error in errors ]
             if i == end:
                 break
+        logging.debug("returning from get_statements")
         return statements, cell_errors, metadata
 
 
@@ -71,18 +75,22 @@ class YamlMapper(StatementMapper):
         self.yaml_data = validate_yaml(file_path)
 
     def do_init(self, sheet, wikifier):
+        logging.debug("enter YamlMapper do_init")
         if self.yaml_data.get("cleaningMapping"):
             new_df=get_cleaned_dataframe(sheet, self.yaml_data["cleaningMapping"])
             sheet.cleaned_data=new_df
         update_bindings(item_table=wikifier.item_table, sheet=sheet)
+        logging.debug("exiting YamlMapper do_init")
         
 
     def get_cell_statement(self, sheet, wikifier, col, row, do_init=True):
+        logging.debug("enter YamlMapper get_cell_statement")
         if do_init:
             self.do_init(sheet, wikifier)
         context = {"t_var_row": row, "t_var_col": col}
         statement = EvaluatedStatement(
             context=context, **self.template.eval_template)
+        logging.debug("returning from YamlMapper get_cell_statement")
         return statement.serialize(), statement.errors
 
     def iterator(self):
@@ -92,11 +100,14 @@ class YamlMapper(StatementMapper):
 
     @property
     def template(self):
+        logging.debug("enter template property in YamlMapper")
         try:
+            logging.debug("returning from template property in YamlMapper")
             return self._template
         except:
             self._template = Template.create_from_yaml(
                 self.yaml_data['statementMapping']['template'])
+            logging.debug("returning from template property in YamlMapper")
             return self._template
 
 class AnnotationMapper(YamlMapper):
@@ -108,26 +119,32 @@ class AnnotationMapper(YamlMapper):
             self.get_statements=self.empty_get_statements #override get_statements to not return anything
     
     def init_annotation(self, file_path):
+        logging.debug("enter AnnotationMapper init_annotation")
         self.file_path = file_path
         with open(file_path, 'r') as f:
             annotation_blocks_arr=json.load(f)
         self.annotation=Annotation(annotation_blocks_arr)
+        logging.debug("exit AnnotationMapper init_annotation")
 
 
     def do_init(self, sheet, wikifier):
+        logging.debug("enter AnnotationMapper do_init")
         item_table=wikifier.item_table
         update_bindings(item_table=item_table, sheet=sheet)
         yamlContent=self.annotation.generate_yaml(sheet=sheet, item_table=item_table)[0]
         self.yaml_data = yaml.safe_load(yamlContent)
+        logging.debug("exit AnnotationMapper do_init")
 
     
     def empty_get_statements(self, sheet, wikifier, *args, **kwargs):
+        logging.debug("enter empty_get_statements")
         statements = {}
         cell_errors = []
         metadata = {
             "data_file": sheet.data_file_name,
             "sheet_name": sheet.name,
         }
+        logging.debug("return from empty_get_statements")
         return statements, cell_errors, metadata
 
 class PartialAnnotationMapper(AnnotationMapper):
@@ -137,6 +154,7 @@ class PartialAnnotationMapper(AnnotationMapper):
             self.get_statements=self.empty_get_statements
 
     def get_cell_statement(self, sheet, wikifier, col, row, do_init=True):
+        logging.debug("enter PArtialAnnotationMapper get cell statement")
         if do_init:
             self.do_init(sheet, wikifier)
         context = {"t_var_row": row, "t_var_col": col}
@@ -144,6 +162,7 @@ class PartialAnnotationMapper(AnnotationMapper):
         serialized_statement=statement.serialize()
         if "value" not in serialized_statement: #circumvent the check against empty values
             serialized_statement["value"]=""
+        logging.debug("returning from PArtialAnnotationMapper get cell statement")
         return serialized_statement, statement.errors
     
 

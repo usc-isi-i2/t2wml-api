@@ -1,7 +1,7 @@
 import json
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
+import logging
 from t2wml.mapping.kgtk import create_kgtk
-
 from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet
 from t2wml.mapping.statement_mapper import YamlMapper, StatementMapper
@@ -63,7 +63,9 @@ class KnowledgeGraph:
         Returns:
             KnowledgeGraph: an initialized KnowledgeGraph instance
         """
+        logging.debug("enter kg.generate")
         statements, errors, metadata = statement_mapper.get_statements(sheet, wikifier, start, end)
+        logging.debug("returning from kg.generate")
         return cls(statements, errors, metadata, sheet)
 
     @classmethod

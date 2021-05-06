@@ -3,6 +3,7 @@ import requests
 import tempfile
 import pandas as pd
 import numpy as np
+import logging
 from t2wml.spreadsheets.conversions import to_excel,  cell_range_str_to_tuples
 
 class WikifierService:
@@ -25,6 +26,7 @@ class WikifierService:
             DataFrame: wikifier dataframe with columns 'row', 'column', 'value', 'context', 'item'
             dict: dictionary of cells that failed to wikify
         """
+        logging.debug("enter wikify region in wikifier_service.py")
         (start_col, start_row), (end_col,
                                  end_row) = cell_range_str_to_tuples(cell_range)
         end_col += 1
@@ -54,7 +56,7 @@ class WikifierService:
 
         output = self._normalize_dataframe(
             output, row_offset, context, sheet, flattened_sheet_data, empty_vals)
-
+        logging.debug("returning from wikify region in wikifier_service.py")
         return output, problems
 
     def _call_wikify_service(self, sheet_data, payload):

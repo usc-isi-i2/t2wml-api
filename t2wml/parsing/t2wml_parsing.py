@@ -1,3 +1,4 @@
+import logging
 from t2wml.utils.bindings import bindings
 from t2wml.parsing.classes import (CellExpression, ItemExpression,
                                    ReturnClass)
@@ -29,16 +30,19 @@ class T2WMLCode:
 
 
 def t2wml_parse(e_str, context={}):
+    logging.debug("enter t2wml_parse")
     value = CellExpression()
     item = ItemExpression()
     globals = dict(value=value, item=item)
     globals.update(eval_globals)
     globals.update(context)
     result = eval(e_str, globals)
+    logging.debug("returning from t2wml_parse")
     return result
 
 
 def iter_on_n(expression, context={}, upper_limit=None):
+    logging.debug("enter iter_on_n")
     # handle iter on variable n. if there is no variable n this will anyway return in first iteration
     if upper_limit is None:
         upper_limit = max(bindings.excel_sheet.row_len,
@@ -49,22 +53,30 @@ def iter_on_n(expression, context={}, upper_limit=None):
             context_dir.update(context)
             return_value = t2wml_parse(expression, context_dir)
             if return_value:
+                logging.debug("return value from iter_on_n")
                 return return_value
             # else:
             #    print(n)
         except IndexError:
             break
+    logging.debug("return None from iter_on_n")
 
 
 def iter_on_n_for_code(input, context={}):
+    logging.debug("enter iter_on_n_for_code")
     if isinstance(input, str):
+        logging.debug("return from iter_on_n_for_code")
         return ReturnClass(None, None, input)
     if isinstance(input, T2WMLCode):
         if input.has_q_var:
             test=context.get("t_var_qrow", None)
             if test is None:
+                logging.debug("raise error from iter_on_n_for_code")
                 raise ValueError("qcol/qrow not defined- did you mean to specify a qualifier region? is your qualifier value cell-dependent?")
         if input.has_n:
+            logging.debug("return from iter_on_n_for_code via iter_on_n")
             return iter_on_n(input.code, context)
+        logging.debug("return from iter_on_n_for_code")
         return t2wml_parse(input.code, context)
+    logging.debug("return from iter_on_n_for_code")
     return t2wml_parse(input, context)

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import logging
 from SPARQLWrapper import SPARQLWrapper, JSON
 from t2wml.settings import t2wml_settings
 
@@ -44,6 +45,7 @@ class SparqlProvider(WikidataProvider):
         self.cache = {}
 
     def query_wikidata_for_property_type(self, wikidata_property):
+        logging.debug("enter SparlProvider query wikidata for property type")
         query = """SELECT ?label ?desc ?type
                 WHERE 
                 {{
@@ -57,7 +59,9 @@ class SparqlProvider(WikidataProvider):
         sparql = SPARQLWrapper(self.sparql_endpoint, agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36')
         sparql.setQuery(query)
         sparql.setReturnFormat(JSON)
+        logging.debug("SparlqProvider: sending the query: "+query)
         results = sparql.query().convert()
+        logging.debug("SparlqProvider: response to query received")
         try:
             results_0=results["results"]["bindings"][0]
             data_type = results_0["type"]["value"].split("#")[1]
@@ -66,6 +70,7 @@ class SparqlProvider(WikidataProvider):
         except IndexError:
             data_type = "Property Not Found"
             label=description=""
+        logging.debug("returning from SparlProvider query wikidata for property type")
         return dict(data_type=data_type, label=label, description=description)
 
     def get_property_type(self, wikidata_property: str):
@@ -100,10 +105,14 @@ class FallbackSparql(SparqlProvider):
     '''
 
     def get_property_type(self, wikidata_property, *args, **kwargs):
+        
         try:
+            logging.debug("entering FallBackSparql try_get_property_type")
             data_type = self.try_get_property_type(
                 wikidata_property, *args, **kwargs)
-        except:
+            logging.debug("FallBackSparql try_get_property_type returned successfully")
+        except Exception as e:
+            logging.debug(f"FallBackSparql try_get_property_type failed because {str(e)}, falling back to sparql query")
             data_type = super().get_property_type(wikidata_property)
         return data_type
 
@@ -113,8 +122,10 @@ class FallbackSparql(SparqlProvider):
 
 class DictionaryProvider(SparqlProvider):
     def __init__(self, ref_dict, sparql_endpoint=None, *args, **kwargs):
+        logging.debug("initializing dictionary provider")
         super().__init__(sparql_endpoint)
         self.cache = ref_dict
+        logging.debug("finished initializing dictionary provider")
     
 class KGTKFileProvider():
     def __init__(self, file_path):

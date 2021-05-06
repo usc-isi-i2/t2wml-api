@@ -1,3 +1,4 @@
+import logging
 from collections import Counter
 from math import floor
 from t2wml.input_processing.utils import string_is_valid
@@ -21,6 +22,7 @@ def get_types(cell_content):
 
 
 def annotation_suggester(sheet, selection, annotation_blocks_array):
+    logging.debug("enter annotation suggester")
     already_has_subject=False
     already_has_var=False
     for block in annotation_blocks_array:
@@ -65,13 +67,14 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
     suggestion=dict(role=role, children=children)
     if type:
         suggestion["type"]=type
-
+    logging.debug("return from annotation suggester")
     return suggestion
 
 
 class HistogramSelection:
     @staticmethod
     def block_finder(sheet):
+        logging.debug("enter HistrogramSelection.blockfinder")
         vertical_numbers=Counter()
         horizontal_numbers=Counter()
         horizontal_dates=Counter()
@@ -123,7 +126,7 @@ class HistogramSelection:
         
         date_block=HistogramSelection.normalize_to_selection(date_block, number_block)
         country_block=HistogramSelection.normalize_to_selection(country_block, number_block)
-
+        logging.debug("return from HistrogramSelection.blockfinder")
         return HistogramSelection._create_annotations(date_block, country_block, number_block)
         
     def normalize_to_selection(selection, normalize_against):

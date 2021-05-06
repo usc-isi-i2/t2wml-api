@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 import os
 import json
@@ -75,6 +76,7 @@ class YamlFormatter:
 
 class Block:
     def __init__(self, annotation):
+        logging.debug("enter Block.init")
         self.annotation=annotation
         self.role = annotation["role"]
         self.selection = annotation["selection"]
@@ -83,10 +85,13 @@ class Block:
         self.userlink=annotation.get("userlink", None)
         self.cell_args = self.get_cell_args(self.selection)
         self.matches = {} #a dictionary of "unit", "property", etc which links to other blocks
+        logging.debug("exit Block.init")
     
     def create_link(self, linked_block):
+        logging.debug("enter Block.create_link")
         linked_block.matches[self.role] = self
         self.annotation["link"] = linked_block.id
+        logging.debug("exit Block.create_link")
 
     def get_cell_args(self, selection):
         return (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
@@ -169,6 +174,7 @@ class Block:
         return COST_MATRIX_DEFAULT
 
     def get_expression(self, relative_value_args, use_q=False):
+        logging.debug("enter Block.get_expression")
         if self.use_item:
             return_string = "=item[{indexer}]"
         else:
@@ -180,6 +186,7 @@ class Block:
         if self.cell_args[0] == self.cell_args[1]:  # single cell
             cell_str = column_index_to_letter(
                 self.cell_args[0][0]) + ", " + str(self.cell_args[0][1]+1)
+            logging.debug("return from Block.get_expression")
             return return_string.format(indexer=cell_str)
 
         row_var = ", $qrow-$n" if use_q else ", $row-$n"
@@ -187,21 +194,26 @@ class Block:
 
         if self.get_alignment_orientation(relative_value_args) == "row":
             col = column_index_to_letter(self.cell_args[0][0])
+            logging.debug("return from Block.get_expression")
             return return_string.format(indexer=col+row_var)
 
         elif self.get_alignment_orientation(relative_value_args) == "col":
             row = str(self.cell_args[0][1]+1)
+            logging.debug("return from Block.get_expression")
             return return_string.format(indexer=col_var+row)
         elif not self.is_2D:
             if self.row_args[0]==self.row_args[1]: #align by column
                 row = str(self.cell_args[0][1]+1)
+                logging.debug("return from Block.get_expression")
                 return return_string.format(indexer=col_var+row)
             if self.col_args[0]==self.col_args[1]: #align by row
                 col = column_index_to_letter(self.cell_args[0][0])
+                logging.debug("return from Block.get_expression")
                 return return_string.format(indexer=col+row_var)
         else:
             print("Don't know how to match with imperfect alignment yet" +
                   self.range_str + ","+relative_value_args.range_str)
+            logging.debug("return from Block.get_expression")
             return "#TODO: ????? -Don't know how to match with imperfect alignment yet"
 
 
@@ -210,6 +222,7 @@ class Block:
 
 class Annotation():
     def __init__(self, annotation_blocks_array=None):
+        logging.debug("enter Annotation __init__")
         self.annotations_array = self._preprocess_annotation(annotation_blocks_array or [])        
         self.data_annotations = []
         self.subject_annotations = []
@@ -233,6 +246,7 @@ class Annotation():
                     pass
                 else:
                     raise ValueError("unrecognized role type for annotation")
+        logging.debug("exit Annotation __init__")
     
     @property
     def annotation_block_array(self):
@@ -241,13 +255,16 @@ class Annotation():
         return [block.annotation for block in self.annotations_array]
     
     def _preprocess_annotation(self, annotations):
+        logging.debug("enter Annotation preprocess annotation")
         if not isinstance(annotations, list):
             raise InvalidAnnotationException("Annotations must be a list")
 
         ids=set()
         
+        logging.debug("first loop over blocks for preprocessing")
         for block in annotations:
             if not isinstance(block, dict):
+                logging.debug("raised error from Annotation preprocess annotation")
                 raise InvalidAnnotationException("Each annotation entry must be a dict")
             
             block.pop("selectedArea", None) #if we somehow got this, remove it
@@ -258,7 +275,7 @@ class Annotation():
                 id=block["id"]=str(uuid4())
             ids.add(id)
 
-
+        logging.debug("finished first loop. second loop over blocks for preprocessing")
         for block in annotations:
             block["link"]="" #reset all auto-generated links each time
             userlink=block.get("userlink")
@@ -271,14 +288,17 @@ class Annotation():
             try:
                 role = block["role"]
                 if role not in ["dependentVar", "mainSubject", "qualifier", "property", "unit", "metadata"]:
+                    logging.debug("raised error from Annotation preprocess annotation")
                     raise InvalidAnnotationException('Unrecognized value for role, must be from: "dependentVar", "mainSubject", "qualifier", "property", "unit", "metadata"')
                 if role in ["dependentVar", "qualifier"]:
                     try:
                         block_type=block["type"]
                     except KeyError:
+                        logging.debug("raised error from Annotation preprocess annotation")
                         raise InvalidAnnotationException("dependentVar and qualifier blocks must specify type")
                     
             except KeyError:
+                logging.debug("raised error from Annotation preprocess annotation")
                 raise InvalidAnnotationException("Each annotation entry must contain a field 'role'")
             
             try:
@@ -289,17 +309,21 @@ class Annotation():
                     block.pop("selections")
                     print("Deprecation warning: Switch from selections to selection")
                 else:
+                    logging.debug("raised error from Annotation preprocess annotation")
                     raise InvalidAnnotationException("Each annotation entry must contain a field 'selection'")
             normalize_rectangle(block)
 
+        logging.debug("finished second loop")
         annotations_arr = [Block(block) for block in annotations]
 
         #initialize userlinks
+        logging.debug("create links")
         self.annotations_dict={block.id: block for block in annotations_arr}
         for block in annotations_arr:
             if block.userlink:
                 block.create_link(self.annotations_dict[block.userlink])
-
+        logging.debug("finished creating links")
+        logging.debug("return from Annotation preprocess annotation")
         return annotations_arr
 
     @property
@@ -309,6 +333,7 @@ class Annotation():
         return False
 
     def _create_targets(self, role, targets_collection):
+        logging.debug("enter Annotation _create_targets")
         match_targets = []
         for arr in targets_collection: #combine the arrays
             match_targets += arr
@@ -326,14 +351,16 @@ class Annotation():
             # no assigning unit to something not of type quantity
             elif role == "unit" and target.type != "quantity":
                 match_targets.remove(target)
-
+        logging.debug("return from Annotation _create_targets")
         return match_targets
     
     def _winnow_match_candidates(self, match_candidates):
+        logging.debug("enter Annotation _winnow_match_candidates")
         new_match_candidates=[]
         for cand in match_candidates:
             if not cand.userlink:
                 new_match_candidates.append(cand)
+        logging.debug("return from Annotation _winnow_match_candidates")
         return new_match_candidates
 
     def _run_cost_matrix(self, match_candidates, targets_collection):
@@ -341,7 +368,7 @@ class Annotation():
         match_candidates: eg property, unit
         targets_collection: array of arrays of qualifiers, dependent variables
         '''
-
+        logging.debug("enter Annotation _run_cost_matrix")
         match_candidates=self._winnow_match_candidates(match_candidates)
         if not len(match_candidates):
             return
@@ -385,9 +412,11 @@ class Annotation():
             match_can = match_candidates[c_i]
             match_targ = match_targets[t_i]
             match_can.create_link(match_targ)
+        logging.debug("exit Annotation _run_cost_matrix")
 
     
     def initialize(self, sheet=None, item_table=None):
+        logging.debug("enter Annotation initialize")
         self._run_cost_matrix(
             self.property_annotations, [self.data_annotations, self.qualifier_annotations])
         self._run_cost_matrix(self.unit_annotations, [self.data_annotations, self.qualifier_annotations])
@@ -395,9 +424,11 @@ class Annotation():
         subject_annotations=self.subject_annotations[0] if self.subject_annotations else []
         if subject_annotations and not data_annotations.annotation.get("subject"):
             subject_annotations.create_link(data_annotations)
+        logging.debug("return from Annotation _run_cost_matrix")
         return data_annotations, subject_annotations, self.qualifier_annotations
 
     def get_optionals_and_property(self, region, use_q):
+        logging.debug("enter Annotation get optionals and property")
         const_property=region.annotation.get("property", None)
         if const_property:
             propertyLine=str(const_property)
@@ -424,10 +455,11 @@ class Annotation():
                     optionalsLines +=YamlFormatter.get_optionals_string(
                         "# error parsing annotation for key: "+key+" : "+str(e), use_q)
 
-
+        logging.debug("return from Annotation get optionals and property")
         return propertyLine, optionalsLines
 
     def _get_qualifier_yaml(self, qualifier_region, data_region):
+        logging.debug("enter Annotation get qualifier yaml")
         propertyLine, optionalsLines = self.get_optionals_and_property(
             qualifier_region, use_q=True)
         region = None
@@ -463,10 +495,11 @@ class Annotation():
 
         qualifier_string = YamlFormatter.get_qualifier_string(
             propertyLine, optionalsLines, valueLine, region)
-
+        logging.debug("return from Annotation get qualifier yaml")
         return qualifier_string
 
     def generate_yaml(self, sheet=None, item_table=None):
+        logging.debug("enter Annotatio generate yaml")
         if not self.data_annotations:
             return ["# cannot create yaml without a dependent variable\n"]
         data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
@@ -501,34 +534,44 @@ class Annotation():
         yaml = YamlFormatter.get_yaml_string(
             region, mainSubjectLine, propertyLine, dataLine, optionalsLines, qualifierLines)
         yaml = self.comment_messages + yaml
+        logging.debug("return from Annotatio generate yaml")
         return [yaml] #array for now... 
     
     def save(self, filepath):
+        logging.debug("enter Annotatio save")
         with open(filepath, 'w', encoding="utf-8") as f:
             f.write(json.dumps(self.annotation_block_array))
+        logging.debug("exit Annotation save")
 
     @classmethod
     def load(cls, filepath):
+        logging.debug("enter Annotation load")
         with open(filepath, 'r', encoding="utf-8") as f:
             annotations = json.load(f)
         instance = cls(annotations)
+        logging.debug("return from Annotation load")
         return instance
 
 class AnnotationNodeGenerator:
     def __init__(self, annotation, project):
+        logging.debug("enter ANG init")
         self.annotation=annotation
         self.project=project
         if not os.path.isdir(self.autogen_dir):
             os.mkdir(self.autogen_dir)
+        logging.debug("exit ANG init")
     
     def _get_units(self, region):
+        logging.debug("enter ANG _get_units")
         unit=region.matches.get("unit")
         if unit:
             units=set()
             for row in range(unit.row_args[0], unit.row_args[1]+1):
                     for col in range(unit.col_args[0], unit.col_args[1]+1):
                         units.add((row, col))
+            logging.debug("return from ANG _get_units")
             return list(units)
+        logging.debug("return from ANG _get_units")
         return []
 
 
@@ -537,16 +580,20 @@ class AnnotationNodeGenerator:
         #if const_property:
         #    return [ (const_property, region.type)]
         #else:
+            logging.debug("enter ANG _get_properties")
             range_property = region.matches.get("property")
             if range_property:
                 range_properties=set()
                 for row in range(range_property.row_args[0], range_property.row_args[1]+1):
                     for col in range(range_property.col_args[0], range_property.col_args[1]+1):
                         range_properties.add((row, col, region.type))
+                logging.debug("return from ANG _get_properties")
                 return list(range_properties)
+            logging.debug("return from ANG _get_properties")
             return []
 
     def get_custom_properties_and_qnodes(self):
+        logging.debug("enter ANG get_custom_properties_and_qnodes")
         custom_properties=set()
         custom_items=set()
 
@@ -574,15 +621,17 @@ class AnnotationNodeGenerator:
                 for row in range(block.row_args[0], block.row_args[1]+1):
                     for col in range(block.col_args[0], block.col_args[1]+1):
                         custom_items.add((row, col))
-        
+        logging.debug("return from ANG get_custom_properties_and_qnodes")
         return list(custom_properties), list(custom_items)
 
     
     @property
     def autogen_dir(self):
+        logging.debug("enter ANGautogen dir property")
         auto= os.path.join(self.project.directory, "annotations", f"autogen-files-{self.project.dataset_id}")
         if not os.path.exists(auto):
             os.makedirs(auto, exist_ok=True)
+        logging.debug("return from ANGautogen dir property")
         return auto
     
     @property
@@ -596,6 +645,7 @@ class AnnotationNodeGenerator:
         return f"P{self.project_id}-{clean_id(property)}"
 
     def preload(self, sheet, wikifier):
+        logging.debug("enter ANG preload")
 
 
         properties, items = self.get_custom_properties_and_qnodes()
@@ -607,7 +657,7 @@ class AnnotationNodeGenerator:
         columns=['row', 'column', 'value', 'context', 'item', 'file', 'sheet']
         dataframe_rows=[]
         item_entities=set()
-
+        logging.debug("ANG preload-- part one wikification")
         #part one: wikification
         for (row, col) in items:
             item_string=sheet[row][col]
@@ -631,7 +681,7 @@ class AnnotationNodeGenerator:
                     pnode=self.get_Pnode(property)
                     dataframe_rows.append([row, col, property, '', pnode, sheet.data_file_name, sheet.name])
 
-
+        logging.debug("ANG preload-- create dataframe from wikfication")
         if dataframe_rows:
             df=pd.DataFrame(dataframe_rows, columns=columns)
             filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
@@ -650,6 +700,7 @@ class AnnotationNodeGenerator:
             self.project.add_wikifier_file(filepath, precedence=False)
                 
         #part two: entity creation
+        logging.debug("ANG preload-- part 2 entities")
         filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
         if os.path.isfile(filepath):
             custom_nodes=kgtk_to_dict(filepath)
@@ -676,13 +727,16 @@ class AnnotationNodeGenerator:
                                         description="")
 
                         prov.save_entry(node_id, from_file=True, **custom_nodes[node_id])
+        logging.debug("ANG preload-- part 2 entities-- update cache")
         prov.update_cache(custom_nodes)
         
         if custom_nodes:
+            logging.debug("ANG preload-- part 2 entities-- save stuff")
             dict_to_kgtk(custom_nodes, filepath)
             add_entities_from_file(filepath)
             self.project.add_entity_file(filepath, precedence=False)    
             self.project.save()
+        logging.debug("exit ANG preload")
     
 
 

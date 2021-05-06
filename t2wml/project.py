@@ -2,6 +2,7 @@ from t2wml.mapping.datamart_edges import clean_id
 import yaml
 import os
 import warnings
+import logging
 from pathlib import Path
 from shutil import copyfile
 from t2wml.spreadsheets.sheet import SpreadsheetFile
@@ -19,6 +20,7 @@ class Project:
                     _saved_state=None, #deprecated but i don't want a trillion warnings
                     **kwargs    
                 ):
+        logging.debug("init project")
         if kwargs:
             warnings.warn("Passed unsupported arguments to Project, may be deprecated:"+str(kwargs.keys()), DeprecationWarning)
         if not os.path.isdir(directory):
@@ -47,7 +49,7 @@ class Project:
         if not self.entity_file.exists():
             with open(self.entity_file, 'w') as f:
                 f.write("{}")
-            
+        logging.debug("finished init project")
     
     @property
     def entity_file(self):
@@ -58,6 +60,7 @@ class Project:
         return clean_id(self.title)
 
     def _add_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
+        logging.debug("enter project._add_file")
         if os.path.isabs(file_path):
             root=Path(self.directory)
             full_path=Path(file_path)
@@ -91,7 +94,7 @@ class Project:
                 file_path=file_name
             except Exception as e:
                 raise ValueError("Failed to copy provided file to project directory: "+str(e))
-            
+        logging.debug("returning from project._add_file")
         return Path(file_path).as_posix() #save forward slash strings, windows anyway knows how to handle them 
     
     def add_data_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
@@ -168,6 +171,7 @@ class Project:
         return file_path
     
     def add_annotation_file(self, annotation_path, data_path, sheet_name, copy_from_elsewhere=False, overwrite=False, rename=False):
+        logging.debug("add annotation file to project")
         annotation_path=self._add_file(annotation_path, copy_from_elsewhere, overwrite, rename)
         data_path=self._normalize_path(data_path)
         self.validate_data_file_and_sheet_name(data_path, sheet_name)
@@ -181,6 +185,7 @@ class Project:
                 self.annotations[data_path][sheet_name]=dict(val_arr=[annotation_path], selected=annotation_path)
         else:
             self.annotations[data_path]={sheet_name:dict(val_arr=[annotation_path], selected=annotation_path)}
+        logging.debug("finished adding annotation file")
         return annotation_path
 
     def _normalize_path(self, file_path):
@@ -255,11 +260,6 @@ class Project:
             except Exception as e:
                 print(e)
                 
-
-
-
-        
-
     def rename_file_in_project(self, old_name, new_name, rename_in_fs=False):
         old_name=self._normalize_path(old_name)
         new_name=self._normalize_path(new_name)
@@ -309,21 +309,20 @@ class Project:
             old_file_path=self.get_full_path(old_name)
             os.rename(old_file_path, new_file_path)
         
-
-    
-
-
     def save(self):
+        logging.debug("save project")
         output_dict=dict(self.__dict__)
         output_dict.pop('directory')
         proj_file_text=(yaml.dump(output_dict))
         proj_file_path=os.path.join(self.directory, "project.t2wml")
         with open(proj_file_path, 'w', encoding="utf-8") as f:
             f.write(proj_file_text)
+        logging.debug("finished save project")
         return proj_file_path
 
     @classmethod
     def load(cls, filepath):
+        logging.debug("load project")
         if os.path.isdir(filepath):
             filepath=os.path.join(filepath, "project.t2wml")
         if not os.path.isfile(filepath):
@@ -338,6 +337,7 @@ class Project:
             proj= cls(**proj_input)
         except Exception as e:
             raise ValueError("Was not able to initialize project from the yaml file: "+str(e))
+        logging.debug("finished load project")
         return proj
 
 

@@ -1,5 +1,5 @@
 from collections import defaultdict
-import json
+import logging
 import csv
 from pathlib import Path
 from t2wml.utils.date_utils import VALID_PROPERTY_TYPES
@@ -15,30 +15,39 @@ def get_default_provider():
     return wikidata_provider
 
 def get_provider():
+    logging.debug("enter get_provider")
     wikidata_provider = t2wml_settings.wikidata_provider
     if wikidata_provider is None:
         wikidata_provider = get_default_provider()
         t2wml_settings.wikidata_provider = wikidata_provider
+    logging.debug("returning from get_provider")
     return wikidata_provider
 
 
 def get_property_type(prop):
+    logging.debug("enter get_property_type")
     try:
         prop_type = _get_property_type(prop)
+        logging.debug("returning from get_property_type")
         return str(prop_type).lower()
     except QueryBadFormed:
+        logging.debug("raising QueryBadFormed error from get_property_type")
         raise T2WMLExceptions.UnsupportedPropertyType(
             "The value given for property is not a valid property:" + str(prop))
     except ValueError:
+        logging.debug("raising ValueError from get_property_type")
         raise T2WMLExceptions.UnsupportedPropertyType(
             "Property not found:" + str(prop))
 
 
 def _get_property_type(wikidata_property):
+    logging.debug("enter _get_property_type")
     provider = get_provider()
     property_type = provider.get_property_type(wikidata_property)
     if property_type == "Property Not Found":
+        logging.debug("raising unsupported property type error from _get_property_type")
         raise T2WMLExceptions.UnsupportedPropertyType("Property "+wikidata_property+" not found")
+    logging.debug("returning from _get_property_type")
     return property_type
 
 
@@ -58,6 +67,7 @@ def validate_id(node_id):
 
 def kgtk_to_dict(file_path):
     #if label is P2010050001 (datamart tag), the key is tags and a list is generated
+    logging.debug("entering kgtk_to_dict")
     input_dict=defaultdict(dict)
     with open(file_path, 'r', encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter="\t")
@@ -72,9 +82,11 @@ def kgtk_to_dict(file_path):
                     input_dict[node1]["tags"]=[value]
             else:
                 input_dict[node1][label]=value
+    logging.debug("returning from kgtk_to_dict")
     return dict(input_dict)
 
 def dict_to_kgtk(in_dict, out_path):
+    logging.debug("entering dict_to_kgtk")
     tsv_dict_columns=["id", "node1", "label", "node2"]
     tsv_dict_arr=[]
     for node1, node_dict in in_dict.items():
@@ -92,6 +104,7 @@ def dict_to_kgtk(in_dict, out_path):
         dw.writeheader()
         for line in tsv_dict_arr:
             dw.writerow(line)
+    logging.debug("exiting dict_to_kgtk")
 
 
 
@@ -117,6 +130,7 @@ def add_entities_from_file(file_path: str, validate_ids=True):
     Returns:
         dict: a dictionary of "added", "present" (already present, updated), and "failed" properties from the file
     """
+    logging.debug("entering add_entities_from_file")
     if Path(file_path).suffix != ".tsv":
         raise T2WMLExceptions.UnsupportedPropertyType(
             "Only .tsv property files are currently supported")
@@ -157,4 +171,5 @@ def add_entities_from_file(file_path: str, validate_ids=True):
             except Exception as e:
                 print(e)
                 return_dict["failed"].append((node_id, str(e)))
+    logging.debug("returning from add_entities_from_file")
     return return_dict

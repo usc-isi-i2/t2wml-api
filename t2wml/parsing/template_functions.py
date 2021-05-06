@@ -1,4 +1,5 @@
 import re
+import logging
 from t2wml.utils.date_utils import parse_datetime
 from SPARQLWrapper import SPARQLWrapper, JSON
 from t2wml.utils.bindings import bindings
@@ -8,15 +9,20 @@ from t2wml.parsing.cleaning_functions import string_modifier
 
 def boolean_modifer(func):
     def wrapper(input, *args, **kwargs):
+        logging.debug("enter boolean function")
         if input:  # if value is not None
             if isinstance(input, RangeClass):  # handle ranges separately:
                 for i, val in enumerate(input):
                     if val:
                         flag = func(input[i], *args, **kwargs)
                         if flag == True:
+                            logging.debug("exiting boolean function")
                             return True
+                logging.debug("exiting boolean function")
                 return False
+            logging.debug("exiting boolean function")
             return func(input, *args, **kwargs)
+        logging.debug("exiting boolean function")
         return False
     return wrapper
 

@@ -1,4 +1,5 @@
 from pathlib import Path
+import logging
 import pandas as pd
 import json
 from t2wml.settings import t2wml_settings
@@ -22,6 +23,7 @@ class SpreadsheetFile(Mapping):
     Keys are sheet names, values are initialized Sheet instances.
     """
     def __init__(self, file_path: str):
+        logging.debug("started init SpreadSheetFile")
         self.file_path = file_path
         self.dict = {}
         pandas_loader = PandasLoader(file_path)
@@ -29,6 +31,7 @@ class SpreadsheetFile(Mapping):
         for sheet_name in pandas_data:
             self.dict[sheet_name] = Sheet(
                 self.file_path, sheet_name, pandas_data[sheet_name])
+        logging.debug("finished init SpreadSheetFile")
 
     @property
     def sheet_names(self):
@@ -55,6 +58,7 @@ class Sheet:
             data (dataframe, optional): dataframe of contents of sheet. For creating a sheet from already loaded data.
                                         Defaults to None.
         """
+        logging.debug("started init Sheet")
         self.data_file_path = str(data_file_path)
         self.data_file_name = Path(data_file_path).name
         self.name = sheet_name
@@ -67,6 +71,7 @@ class Sheet:
             cache_class = get_cache_class()
             sc = cache_class(data_file_path, sheet_name)
             self.raw_data = sc.get_sheet()
+        logging.debug("finished init Sheet")
     
     @property
     def data(self):
@@ -75,6 +80,7 @@ class Sheet:
         return self.raw_data
 
     def __getitem__(self, params):
+        logging.debug("sheet _getitem_ with"+str(params))
         try:
             return self.data.iloc[params]
         except IndexError:
@@ -92,10 +98,12 @@ class Sheet:
         return self.data.shape[1]
     
     def to_json(self):
+        logging.debug("enter sheet.to_json")
         if self.cleaned_data is not None:
             cleaned=json.loads(self.cleaned_data.to_json(orient='values'))
         else:
             cleaned=None
+        logging.debug("returning from sheet.to_json")
         return dict(cleaned=cleaned, 
                     data=json.loads(self.data.to_json(orient='values')),
                     data_file_path=self.data_file_path, 
@@ -103,6 +111,7 @@ class Sheet:
 
     @staticmethod
     def from_json(in_json):
+        logging.debug("enter sheet.from_json")
         cleaned=in_json.pop("cleaned")
         if cleaned:
             cleaned=pd.DataFrame(cleaned)
@@ -111,6 +120,7 @@ class Sheet:
             data=pd.DataFrame(data)
         s=Sheet(data=data, **in_json)
         s.cleaned_data=cleaned
+        logging.debug("returning from sheet.from_json")
         return s
 
     @classmethod

@@ -1,4 +1,4 @@
-import sys
+import logging
 import yaml
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.parsing.t2wml_parsing import T2WMLCode
@@ -11,6 +11,7 @@ class ForwardSlashEscape(Exception):  # used for a little hack down below
 
 class CodeParser:
     def fix_code_string(self, e_str):
+        logging.debug("enter CodeParser.fix_code_string")
         # we made various compromises between valid code from the get-go and easy for the user code.
         # this function transforms user code into python-acceptable code
         e_str = str(e_str)
@@ -22,6 +23,7 @@ class CodeParser:
         e_str = e_str.replace("$", "t_var_")
         # "condition and result" is equivalent to "if condition, result"
         e_str = e_str.replace("->", " and ")
+        logging.debug("return from CodeParser.fix_code_string")
         return e_str[1:]  # get rid of starting equal sign
 
     def is_code_string(self, statement):
@@ -53,18 +55,23 @@ class TemplateParser(CodeParser):
         self.eval_template = self.create_eval_template(self.template)
 
     def get_code_replacement(self, input_str):
+        logging.debug("enter TemplateParser.get_code_replacement")
         try:
             if self.is_code_string(input_str):
                 try:
                     fixed = self.fix_code_string(input_str)
                     compiled_statement = compile(fixed, "<string>", "eval")
+                    logging.debug("return from TemplateParser.get_code_replacement")
                     return T2WMLCode(compiled_statement, fixed, input_str)
                 except Exception as e:
+                    logging.debug("raise from TemplateParser.get_code_replacement")
                     raise T2WMLExceptions.ErrorInYAMLFileException(
                         "Invalid expression: "+str(input_str))
             else:
+                logging.debug("return from TemplateParser.get_code_replacement")
                 return input_str
         except ForwardSlashEscape as e:
+            logging.debug("return from TemplateParser.get_code_replacement")
             return e.new_str
     
     def recursive_get_code_replacement(self, input):
@@ -92,13 +99,16 @@ class Template:
 
     @staticmethod
     def create_from_yaml(yaml_data):
+        logging.debug("enter Template.create_from_yaml")
         template = dict(yaml_data)
         template_parser = TemplateParser(template)
         eval_template = template_parser.eval_template
+        logging.debug("return from Template.create_from_yaml")
         return Template(template, eval_template)
 
 
 def validate_yaml(yaml_file_path):
+    logging.debug("enter validate yaml")
     with open(yaml_file_path, 'r', encoding="utf-8") as stream:
         try:
             yaml_file_data = yaml.safe_load(stream)
@@ -210,5 +220,5 @@ def validate_yaml(yaml_file_path):
 
     if errors:
         raise T2WMLExceptions.ErrorInYAMLFileException(errors)
-
+    logging.debug("return from validate yaml")
     return yaml_file_data

@@ -1,9 +1,12 @@
+import logging
 from pathlib import Path
 import pandas as pd
 
 def post_process_data(data):
+    logging.debug("enter PandasLoader post_process data")
     data = data.fillna("")
     data = data.replace(r'^\s+$', "", regex=True)
+    logging.debug("returning from PandasLoader post_process data")
     return data
 
 def load_pickle(pickle_path):
@@ -22,6 +25,7 @@ class PandasLoader:
         """
         returns a single sheet's data frame
         """
+        logging.debug("enter PandasLoader.load_sheet")
         if self.is_excel:
             data = pd.read_excel(
                 self.file_path, sheet_name=sheet_name, **self.pd_args)     
@@ -32,6 +36,7 @@ class PandasLoader:
                 data = pd.read_csv(self.file_path, sep="\t", **self.pd_args)
             else: #attempt to parse type using csv sniffer
                 data = pd.read_table(self.file_path, sep=None, **self.pd_args)
+        logging.debug("returning from PandasLoader.load_sheet")
         return post_process_data(data)
     
     @property
@@ -43,6 +48,7 @@ class PandasLoader:
         """
         returns a dictionary of sheet_names and their data frames
         """
+        logging.debug("enter PandasLoader load_file")
         if self.is_excel:
             return_dict = {}
             loaded_file = pd.read_excel(
@@ -51,10 +57,12 @@ class PandasLoader:
                 data = loaded_file[sheet_name]
                 data = post_process_data(data)
                 return_dict[sheet_name] = data
+            logging.debug("return from PandasLoader load_file")
             return return_dict
         else:
             data = self.load_sheet(None)
             sheet_name = self.non_excel_sheet_name
+            logging.debug("return from PandasLoader load_file")
             return {sheet_name: data}
 
 

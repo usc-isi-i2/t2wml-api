@@ -1,3 +1,4 @@
+import logging
 from t2wml.utils.t2wml_exceptions import ModifyingItemsIsForbiddenException
 from t2wml.utils.bindings import bindings
 from t2wml.spreadsheets.conversions import to_excel
@@ -92,6 +93,7 @@ class RangeClass:
 
 class Item(ReturnClass):
     def __init__(self, col, row, context):
+        logging.debug("enter init Item")
         super().__init__(col, row)
         item_table = bindings.item_table
         
@@ -100,10 +102,12 @@ class Item(ReturnClass):
             self._value = data_sheet[row, col]
         else:
             self._value = item_table.get_item(self.col, self.row, context)
+        logging.debug("exit init Item")
 
 
 class ItemRange(RangeClass):
     def __init__(self, col, row, context):
+        logging.debug("enter init ItemRange")
         if isinstance(col, slice):
             cols = [i for i in range(col.start, col.stop)]
         else:
@@ -119,6 +123,7 @@ class ItemRange(RangeClass):
             for c in cols:
                 row_arr.append(Item(c, r, context))
             self.data.append(row_arr)
+        logging.debug("exit init ItemRange")
 
     def __setitem__(self, flat_index, data):
         raise ModifyingItemsIsForbiddenException("Should not be changing the value of Items")
@@ -126,6 +131,7 @@ class ItemRange(RangeClass):
 
 class ItemExpression:
     def __getitem__(self, args):
+        logging.debug("__getitem__ ItemExpression")
         if len(args) > 2:
             context = args[2]
         else:
@@ -139,9 +145,11 @@ class ItemExpression:
 
 class Cell(ReturnClass):
     def __init__(self, col, row):
+        logging.debug("enter init Cell")
         super().__init__(col, row)
         data_sheet = bindings.excel_sheet
         self._value = data_sheet[row, col]
+        logging.debug("exit init Cell")
 
     @property
     def value(self):
@@ -154,6 +162,7 @@ class Cell(ReturnClass):
 
 class CellRange(RangeClass):
     def __init__(self, col_args, row_args):
+        logging.debug("enter init CellRange")
         data_sheet = bindings.excel_sheet
         self.col_args = col_args
         self.row_args = row_args
@@ -164,6 +173,7 @@ class CellRange(RangeClass):
             data = [data]
         self.data = data
         self.row_length = len(self.data[0])
+        logging.debug("exit init cellrange")
 
     def __repr__(self):
         return str(self.data)

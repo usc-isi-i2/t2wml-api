@@ -1,3 +1,4 @@
+import logging
 from copy import deepcopy
 from collections import defaultdict
 from t2wml.input_processing.region import YamlRegion
@@ -78,6 +79,7 @@ class Node:
         return list(self._errors)
 
     def validate(self):
+        logging.debug("enter Node validate")
         if t2wml_settings.no_wikification:
             return
         try:
@@ -132,6 +134,7 @@ class Node:
             self._errors.append(StatementError(field="property",
                                                message="Unsupported property type: "+property_type,
                                                qualifier=self.qualifier_index))
+        logging.debug("finished Node validate")
 
     def validate_datetime(self):
         try:
@@ -245,6 +248,7 @@ class NodeForEval(Node):
         return cell_indices
 
     def validate(self):
+        logging.debug("enter NodeForEval validate")
         # if it isn't already defined outside
         t_var_qcol = self.context.get("t_var_qcol", None)
         if t_var_qcol is None:
@@ -254,6 +258,7 @@ class NodeForEval(Node):
         for key in list(self.__dict__.keys()):
             self.parse_key(key)
         Node.validate(self)
+        logging.debug("exit NodeForEval validate")
 
     def serialize(self):
         return_dict = super().serialize()
@@ -268,6 +273,7 @@ class EvaluatedStatement(Statement, NodeForEval):
         return NodeForEval
 
     def _validate(self):
+        logging.debug("enter EvaluatedStatement _validate")
         try:
             subject = self.subject
         except AttributeError:
@@ -337,6 +343,7 @@ class EvaluatedStatement(Statement, NodeForEval):
                     self._errors.append((StatementError(field="reference",
                                                         message=str(e),
                                                         qualifier=False)))
+        logging.debug("exit EvaluatedStatement _validate")
 
 
     def validate(self):

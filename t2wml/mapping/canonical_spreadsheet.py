@@ -1,21 +1,27 @@
+import logging
 import csv
 from io import StringIO
 from t2wml.wikification.utility_functions import get_provider
 
 def try_get_label(input):
+    logging.debug("enter try_get_label in canonical spreadsheet")
     provider = get_provider()
     if not input:
+        logging.debug("return from try_get_label in canonical spreadsheet")
         return input
     if input[0] in ["P", "Q"]:
         try:
             entry = provider.get_entity(input)
             if entry and 'label' in entry:
+                logging.debug("return from try_get_label in canonical spreadsheet")
                 return entry['label']
         except Exception as e:
             pass
+    logging.debug("return from try_get_label in canonical spreadsheet")
     return input
 
 def get_cells_and_columns(statements, project=None):
+    logging.debug("enter get_cells_and_columns in canonical spreadsheet")
     column_titles=["subject", "property", "value"]
 
     dict_values=[]
@@ -45,11 +51,13 @@ def get_cells_and_columns(statements, project=None):
         column_titles.append("dataset")
         for dict in dict_values:
             dict["dataset"]=project.dataset_id
+    logging.debug("return from get_cells_and_columns in canonical spreadsheet")
     return column_titles, dict_values
 
 
 
 def create_canonical_spreadsheet(statements, project=None):
+    logging.debug("enter create_canonical_spreadsheet in canonical spreadsheet")
     column_titles, dict_values = get_cells_and_columns(statements, project)
     
     string_stream = StringIO("", newline="")
@@ -67,6 +75,7 @@ def create_canonical_spreadsheet(statements, project=None):
 
     output = string_stream.getvalue()
     string_stream.close()
+    logging.debug("return from create_canonical_spreadsheet in canonical spreadsheet")
     return output
 
 

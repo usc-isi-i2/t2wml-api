@@ -1,5 +1,6 @@
 import warnings
 import pandas
+import logging
 from datetime import datetime
 try:
     from etk.wikidata.utils import parse_datetime_string
@@ -54,6 +55,7 @@ def translate_precision_to_integer(precision: str) -> int:
 
 
 def parse_datetime(value, additional_formats=None, precisions=None):
+    logging.debug("enter parse_datetime")
     used_format=None
     additional_formats=additional_formats or []
     precisions= precisions or []
@@ -77,13 +79,16 @@ def parse_datetime(value, additional_formats=None, precisions=None):
                         precision=translate_precision_to_integer(precisions[index])
                     except IndexError: #no precision defined for that format
                         precision=None
+                logging.debug("returning from parse_datetime (if additional formats)")
                 return datetime_string.isoformat(), precision, used_format
             except ValueError as e:
                 pass
         if not datetime_string:
+            logging.debug("raising error from parse_dateime (not datetime string)")
             raise ValueError("Failed to parse datetime string with the provided format/s")
     else: #no format specified. attempt to guess date
         if has_etk:
+            logging.debug("enter parse_datetime's if has_etk")
             # use this line to make etk stop harassing us with "no lang features detected" warnings
             with warnings.catch_warnings(record=True) as w:
                 datetime_string, precision = parse_datetime_string(
@@ -93,11 +98,14 @@ def parse_datetime(value, additional_formats=None, precisions=None):
                 )
             if not precision: #only if user didn't hard-define a precision do we take from etk
                 precision=int(precision.value.__str__())
+            logging.debug("returning from parse_datetime (if has etk)")
             return datetime_string, precision, used_format
         
         try:
             datetime_string = pandas.to_datetime(value, infer_datetime_format=True)
+            logging.debug("returning from parse_datetime (default)")
             return datetime_string.isoformat(), precision, used_format
         except:
+            logging.debug("raising error from parse_dateime (no date detected)")
             raise ValueError('No date / datetime detected')
 
