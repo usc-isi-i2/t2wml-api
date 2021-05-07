@@ -32,7 +32,7 @@ class ItemTable:
 
         raise ValueError("Not found")
 
-    def get_item(self, column:int, row:int, context:str='', sheet=None):
+    def get_item(self, column:int, row:int, context:str='', sheet=None, value=None):
         lookup = self.lookup_table.get(context)
         if not lookup:
             raise ItemNotFoundException(
@@ -41,7 +41,8 @@ class ItemTable:
             sheet = bindings.excel_sheet
         file=sheet.data_file_name
         sheet_name=sheet.name
-        value = str(sheet[row, column])
+        if value is None:
+            value = str(sheet[row, column])
         try:
             item = self.lookup_func(lookup, file, sheet_name, column, row, value)
             return item
@@ -64,9 +65,10 @@ class ItemTable:
         # used to serialize table
         bindings.excel_sheet = sheet
         for context in self.lookup_table:
-            item = self.get_item(column, row, context, sheet=sheet)
+            value= bindings.excel_sheet[row, column]
+            item = self.get_item(column, row, context, sheet=sheet, value=value)
             if item:
-                return item, context, bindings.excel_sheet[row, column]
+                return item, context, value
         return None, None, None
 
     def update_table_from_dataframe(self, df: DataFrame):

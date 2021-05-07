@@ -619,7 +619,7 @@ class AnnotationNodeGenerator:
             item_string=sheet[row, col]
             if item_string:
                 try:
-                    exists = wikifier.item_table.get_item(col, row, sheet=sheet)                
+                    exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=item_string)                
                     if not exists:
                         raise ValueError
                 except:
@@ -630,7 +630,7 @@ class AnnotationNodeGenerator:
             property=sheet[row, col]
             if property:
                 try:
-                    exists = wikifier.item_table.get_item(col, row, sheet=sheet)
+                    exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=property)
                     if not exists:
                         raise ValueError
                 except:
@@ -672,7 +672,7 @@ class AnnotationNodeGenerator:
             for (row, col, data_type) in properties:
                 property = sheet[row, col]
                 if property:
-                    node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
+                    node_id = wikifier.item_table.get_item(col, row, sheet=sheet, value=property)
                     if node_id==self.get_Pnode(property): #it's a custom property
                         if node_id in custom_nodes: #just update data type
                             custom_nodes[node_id]["data_type"]=data_type
