@@ -616,7 +616,7 @@ class AnnotationNodeGenerator:
 
         #part one: wikification
         for (row, col) in items:
-            item_string=sheet[row][col]
+            item_string=sheet[row, col]
             if item_string:
                 try:
                     exists = wikifier.item_table.get_item(col, row, sheet=sheet)                
@@ -627,7 +627,7 @@ class AnnotationNodeGenerator:
                     item_entities.add(item_string)
         
         for (row, col, data_type) in properties:
-            property=sheet[row][col]
+            property=sheet[row, col]
             if property:
                 try:
                     exists = wikifier.item_table.get_item(col, row, sheet=sheet)
@@ -670,7 +670,7 @@ class AnnotationNodeGenerator:
                 if node_id not in custom_nodes: #only set to auto if creating fresh
                     custom_nodes[node_id]={"label":item}
             for (row, col, data_type) in properties:
-                property = sheet[row][col]
+                property = sheet[row, col]
                 if property:
                     node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
                     if node_id==self.get_Pnode(property): #it's a custom property

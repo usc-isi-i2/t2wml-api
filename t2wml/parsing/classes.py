@@ -87,7 +87,7 @@ class RangeClass:
     def __getitem__(self, flat_index):
         row = flat_index//self.row_length
         col = flat_index % self.row_length
-        return self.data[row][col]
+        return self.data[row, col]
 
 
 class Item(ReturnClass):
@@ -171,7 +171,7 @@ class CellRange(RangeClass):
     def __setitem__(self, flat_index, data):
         row = flat_index//self.row_length
         col = flat_index % self.row_length
-        self.data[row][col] = data
+        self.data[row, col] = data
 
 
 class CellExpression:

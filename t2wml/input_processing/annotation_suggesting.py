@@ -85,7 +85,7 @@ class HistogramSelection:
 
         for row in range(sheet.row_len):
             for col in range(sheet.col_len):
-                content = sheet[row][col]
+                content = sheet[row, col]
                 if not string_is_valid(content):
                     blanks.add((row, col))
                     continue
