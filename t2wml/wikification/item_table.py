@@ -10,7 +10,12 @@ class ItemTable:
     def __init__(self, lookup_table={}):
         self.lookup_table = defaultdict(dict, lookup_table)
 
-    def lookup_func(self, lookup, file, sheet, column, row, value):
+    def lookup_func(self, context, file, sheet, column, row, value):
+        lookup = self.lookup_table.get(context)
+        if not lookup:
+            raise ItemNotFoundException(
+                "Search for cell item failed. (No values defined for context: {})".format(context))
+
         # order of priority: cell+value> cell> col+value> col> row+value> row> value
         column = int(column)
         row = int(row)
@@ -33,10 +38,6 @@ class ItemTable:
         raise ValueError("Not found")
 
     def get_item(self, column:int, row:int, context:str='', sheet=None, value=None):
-        lookup = self.lookup_table.get(context)
-        if not lookup:
-            raise ItemNotFoundException(
-                "Search for cell item failed. (No values defined for context: {})".format(context))
         if not sheet:
             sheet = bindings.excel_sheet
         file=sheet.data_file_name
@@ -44,7 +45,7 @@ class ItemTable:
         if value is None:
             value = str(sheet[row, column])
         try:
-            item = self.lookup_func(lookup, file, sheet_name, column, row, value)
+            item = self.lookup_func(context, file, sheet_name, column, row, value)
             return item
         except ValueError:
             return None  # currently this is what the rest of the API expects. could change later

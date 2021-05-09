@@ -41,7 +41,7 @@ class StatementMapper(ABC):
             if i<start:
                 continue
             errors=[]
-            if string_is_valid(str(bindings.excel_sheet[row-1][col-1])):
+            if string_is_valid(str(bindings.excel_sheet[row-1, col-1])):
                 cell = to_excel(col-1, row-1)
                 try:
                     statement, inner_errors = self.get_cell_statement(
