@@ -73,7 +73,6 @@ class ItemTable:
         return None, None, None
 
     def update_table_from_dataframe(self, df: DataFrame):
-        try:
             df = df.fillna('')
             df = df.replace(r'^\s+$', '', regex=True)
             overwritten = {}
@@ -106,11 +105,8 @@ class ItemTable:
                 self.lookup_table[context][key] = item
 
             if len(overwritten):
-                print("Wikifier update overwrote existing values: "+str(overwritten))
+                print(f"Wikifier update overwrote {len(overwritten)} existing values")
             return overwritten
-        except Exception as e:
-            print(e)
-            raise e
 
 
 class Wikifier:

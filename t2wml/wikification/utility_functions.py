@@ -155,6 +155,5 @@ def add_entities_from_file(file_path: str, validate_ids=True):
                 else:
                     return_dict["updated"].append(node_id)
             except Exception as e:
-                print(e)
                 return_dict["failed"].append((node_id, str(e)))
     return return_dict

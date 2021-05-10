@@ -200,8 +200,6 @@ class Block:
                 col = column_index_to_letter(self.cell_args[0][0])
                 return return_string.format(indexer=col+row_var)
         else:
-            print("Don't know how to match with imperfect alignment yet" +
-                  self.range_str + ","+relative_value_args.range_str)
             return "#TODO: ????? -Don't know how to match with imperfect alignment yet"
 
 

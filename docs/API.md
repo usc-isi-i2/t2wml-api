@@ -57,7 +57,6 @@ wikifier.add_file(wikifier_filepath1)
 wikifier.add_file(wikifier_filepath2)
 spreadsheet_file=SpreadsheetFile(data_file)
 for sheet_name, sheet in spreadsheet_file.items():
-    print("processing sheet "+sheet_name)
     sheet=spreadsheet_file[sheet_name]
     kg=KnowledgeGraph.generate(yaml_mapper, sheet, wikifier)
     out_filepath=sheet_name+".tsv"

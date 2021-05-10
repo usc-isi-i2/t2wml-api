@@ -47,15 +47,12 @@ class ReturnClass:
         return str(self.value)
 
     def __bool__(self):
-        try:
             if self.value is None: #unfindable items are False values
                 return False
             if len(str(self.value).strip())==0: #empty cells are False values
                 return False
             return True #for now everything else is True (may eventually need to add NaN or something...)
-        except Exception as e:
-            print(e)
-            raise(e)
+
             
     def __repr__(self):
         return to_excel(self.col, self.row) + " : "+str(self.value)

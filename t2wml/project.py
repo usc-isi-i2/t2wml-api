@@ -83,7 +83,7 @@ class Project:
                         index+=1
                         file_name=Path(file_path).stem+"_"+str(index)+Path(file_path).suffix
                         dst=os.path.join(self.directory, file_name)
-                    print("renamed to: ", file_name)
+                    #print("renamed to: ", file_name)
                 else:
                     raise FileWithThatNameInProject(str(dst))
             try:
@@ -97,7 +97,7 @@ class Project:
     def add_data_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
         if file_path in self.data_files:
-            print("This file is already present in the project's data files")
+            pass #print("This file is already present in the project's data files")
         else:
             full_file_path=Path(self.directory) /  file_path
             sf = SpreadsheetFile(full_file_path)
@@ -108,7 +108,7 @@ class Project:
                         copy_from_elsewhere=False, overwrite=False, rename=False):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
         if file_path in self.yaml_files:
-            print("This file is already present in the project's yaml files")
+            pass #print("This file is already present in the project's yaml files")
         else:
             self.yaml_files.append(file_path)
         if data_file and sheet_name:
@@ -132,7 +132,7 @@ class Project:
         if data_path in self.yaml_sheet_associations:
             try:
                 if yaml_path in self.yaml_sheet_associations[data_path][sheet_name]["val_arr"]:
-                    print("that yaml association has already been added")
+                    pass #print("that yaml association has already been added")
                 else:
                     self.yaml_sheet_associations[data_path][sheet_name]["val_arr"].append(yaml_path)
             except KeyError:
@@ -143,7 +143,7 @@ class Project:
     def add_wikifier_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False, precedence=True):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
         if file_path in self.wikifier_files:
-            print("This file is already present in the project's wikifier files")
+            pass #print("This file is already present in the project's wikifier files")
             self.wikifier_files.remove(file_path)
         
         if precedence:
@@ -159,7 +159,7 @@ class Project:
     def add_entity_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False, precedence=True):
         file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
         if file_path in self.entity_files:
-            print("This file is already present in the project's entity files")
+            pass #print("This file is already present in the project's entity files")
             self.entity_files.remove(file_path)
         if precedence:
             self.entity_files.append(file_path)
@@ -174,7 +174,7 @@ class Project:
         if data_path in self.annotations:
             try:
                 if annotation_path in self.annotations[data_path][sheet_name]["val_arr"]:
-                    print("that yaml association has already been added")
+                    pass #print("that yaml association has already been added")
                 else:
                     self.annotations[data_path][sheet_name]["val_arr"].append(annotation_path)
             except KeyError:
