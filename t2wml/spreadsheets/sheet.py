@@ -76,11 +76,11 @@ class Sheet:
 
     def __getitem__(self, params):
         try:
-            return self.data.iat[params]
+            return self.data.iloc[params]
         except IndexError:
             raise T2WMLExceptions.CellOutsideofBoundsException(
                 "Cell " + to_excel(params[1], params[0]) + " is outside the bounds of the current data file")
-    
+
     @property
     def row_len(self): 
         # number of rows
@@ -118,3 +118,4 @@ class Sheet:
         df=pd.read_csv(StringIO(csv_string), **pandas_options)
         df=post_process_data(df)
         return cls(data_file_path=data_file_path, sheet_name=sheet_name, data=df)
+

@@ -130,8 +130,6 @@ A Sheet is created with a path to a data file and a sheet name.
 
 For csv files, the sheet name is the same as the file name, so for a file example.csv, the sheet name would also be "example.csv".
 
-The sheet class is a wrapper around a pandas dataframe. The sheet indexing method uses pandas `iat` method for performance reasons to access single cells- if the user needs to access the sheet's data in another way, they can perform operations on the sheet's `data` property, which is simply a pandas dataframe. 
-
 A SpreadsheetFile is a convenience class for holding a collection of sheets within one file. It is initialized with the path to the data file. It inherits from immutable Mapping/Dictionary and therefore all mapping methods (len, get, keys, items, indexing, iteration) are available on it. The keys are the sheet names and the values are the sheets.
 
 ## Wikifier
@@ -288,7 +286,7 @@ class SimpleSheetMapper(StatementMapper):
             error["subject"]=str(e)
         
         try:
-            value=sheet[row, col]
+            value=sheet[row][col]
             statement["value"]=value
         except Exception as e:
             error["value"]=str(e)
