@@ -15,7 +15,7 @@ REQUIREMENTS = [
 
 setuptools.setup(
     name="t2wml-api", 
-    version="0.2.5",
+    version="0.4.0",
     description="Programming API for T2WML, a cell-based Language for mapping tables into wikidata records",
 	author="USC ISI and The Research Software Company",
     url="https://github.com/usc-isi-i2/t2wml/",
@@ -26,4 +26,5 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     install_requires=REQUIREMENTS,
+    include_package_data=True
 )

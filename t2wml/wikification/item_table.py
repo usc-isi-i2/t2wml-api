@@ -10,12 +10,18 @@ class ItemTable:
     def __init__(self, lookup_table={}):
         self.lookup_table = defaultdict(dict, lookup_table)
 
-    def lookup_func(self, lookup, file, sheet, column, row, value):
+    def lookup_func(self, context, file, sheet, column, row, value):
+        lookup = self.lookup_table.get(context)
+        if not lookup:
+            raise ItemNotFoundException(
+                "Search for cell item failed. (No values defined for context: {})".format(context))
+
         # order of priority: cell+value> cell> col+value> col> row+value> row> value
         column = int(column)
         row = int(row)
         tuples = [
             (file, sheet, column, row, value),
+            (file, sheet, '', '', value),
             ('', '', column, row, value),
             ('', '', column, row, ''),
             ('', '', column, '', value),
@@ -32,18 +38,15 @@ class ItemTable:
 
         raise ValueError("Not found")
 
-    def get_item(self, column:int, row:int, context:str='', sheet=None):
-        lookup = self.lookup_table.get(context)
-        if not lookup:
-            raise ItemNotFoundException(
-                "Search for cell item failed. (No values defined for context: {})".format(context))
+    def get_item(self, column:int, row:int, context:str='', sheet=None, value=None):
         if not sheet:
             sheet = bindings.excel_sheet
         file=sheet.data_file_name
         sheet_name=sheet.name
-        value = str(sheet[row, column])
+        if value is None:
+            value = str(sheet[row, column])
         try:
-            item = self.lookup_func(lookup, file, sheet_name, column, row, value)
+            item = self.lookup_func(context, file, sheet_name, column, row, value)
             return item
         except ValueError:
             return None  # currently this is what the rest of the API expects. could change later
@@ -64,13 +67,13 @@ class ItemTable:
         # used to serialize table
         bindings.excel_sheet = sheet
         for context in self.lookup_table:
-            item = self.get_item(column, row, context, sheet=sheet)
+            value= bindings.excel_sheet[row, column]
+            item = self.get_item(column, row, context, sheet=sheet, value=value)
             if item:
-                return item, context, bindings.excel_sheet[row, column]
+                return item, context, value
         return None, None, None
 
     def update_table_from_dataframe(self, df: DataFrame):
-        try:
             df = df.fillna('')
             df = df.replace(r'^\s+$', '', regex=True)
             overwritten = {}
@@ -103,11 +106,8 @@ class ItemTable:
                 self.lookup_table[context][key] = item
 
             if len(overwritten):
-                print("Wikifier update overwrote existing values: "+str(overwritten))
+                print(f"Wikifier update overwrote {len(overwritten)} existing values")
             return overwritten
-        except Exception as e:
-            print(e)
-            raise e
 
 
 class Wikifier:

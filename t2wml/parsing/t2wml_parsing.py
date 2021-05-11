@@ -50,8 +50,6 @@ def iter_on_n(expression, context={}, upper_limit=None):
             return_value = t2wml_parse(expression, context_dir)
             if return_value:
                 return return_value
-            # else:
-            #    print(n)
         except IndexError:
             break
 

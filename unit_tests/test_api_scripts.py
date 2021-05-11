@@ -78,7 +78,6 @@ class TestScripts(unittest.TestCase):
         wikifier.add_file(wikifier_filepath1)
         spreadsheet_file = SpreadsheetFile(data_file)
         for sheet_name, sheet in spreadsheet_file.items():
-            print("processing sheet "+sheet_name)
             kg = KnowledgeGraph.generate(yaml_mapper, sheet, wikifier)
             out_filepath = os.path.join(output_folder, sheet_name+".tsv")
             kg.save_kgtk(out_filepath)

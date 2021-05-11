@@ -48,7 +48,11 @@ class KnowledgeGraph:
         return cls(statements, errors, metadata, sheet)
 
     @classmethod
-    def generate(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier):
+    def get_single_cell(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier, row:int, col:int):
+        statement, errors = statement_mapper.get_cell_statement(sheet, wikifier, col, row, do_init=True)
+
+    @classmethod
+    def generate(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier, start=0, end=None):
         """create a KnowledgeGraph instance from API classes
 
         Args:
@@ -59,8 +63,7 @@ class KnowledgeGraph:
         Returns:
             KnowledgeGraph: an initialized KnowledgeGraph instance
         """
-        statements, errors, metadata = statement_mapper.get_all_statements(
-            sheet, wikifier)
+        statements, errors, metadata = statement_mapper.get_statements(sheet, wikifier, start, end)
         return cls(statements, errors, metadata, sheet)
 
     @classmethod
@@ -101,7 +104,7 @@ class KnowledgeGraph:
         elif filetype in ["kgtk", "tsv"]:
             output = create_kgtk(self.statements, file_path, sheet_name, project=project)
         elif filetype == "csv":
-            output = create_canonical_spreadsheet(self.statements)
+            output = create_canonical_spreadsheet(self.statements, project=project)
         else:
             raise T2WMLExceptions.FileTypeNotSupportedException(
                 "No support for "+filetype+" format")

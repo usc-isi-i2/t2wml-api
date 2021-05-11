@@ -70,7 +70,7 @@ def replace_regex(input, to_replace, replacement="", count=0):
 
 @string_modifier
 def remove_numbers(input, where=everywhere):
-    regex="\d*"
+    regex=r"\d*"
     if where==everywhere:
         input= re.sub(str(regex), "", input)
     if where==start or where==start_and_end:
@@ -83,7 +83,7 @@ def remove_numbers(input, where=everywhere):
 
 @string_modifier
 def remove_letters(input, where=everywhere):
-    regex="\D*"
+    regex=r"\D*"
     if where==everywhere:
         input= re.sub(str(regex), "", input)
     if where==start or where==start_and_end:
@@ -112,7 +112,7 @@ def normalize_whitespace(input, tab=False):
     replacement=" "
     if tab:
         replacement="\t"
-    return re.sub("\s{1,}", replacement, input)
+    return re.sub(r"\s{1,}", replacement, input)
 
 @string_modifier
 def change_case(input, case="sentence"):
@@ -166,24 +166,43 @@ def pad(input, length, pad_text, where=start):
     if where == end:
         return input+ padding
 
+
+@string_modifier
+def strict_make_numeric(input, decimal="."):
+    input=strip_whitespace(str(input), where="everywhere")
+    if decimal!=".":
+        input=input.replace(".", "")
+        input=input.replace(decimal, ".")
+    input=input.replace(",", "")
+    try:
+        float(input)
+    except:
+        return "" #if it's not numeric, return an empty cell
+    return input
+
 @string_modifier
 def make_numeric(input, decimal=".", latex=False):
     '''make-numeric:
     auto: smart function to make the values of a cell numeric
-    remove leading and trailing non-numeric characters
+    remove leading and trailing non-numeric characters. 
+        * leaves - in front and . in front and end
+        * non-numeric characters in the middle are not removed, so 10e5 still works, 
+        and something like 1dsjf3d4 wouldn't parse
     interprets commas and dots smartly
     removes whitespace inside the number
-    interprets exponential notation
+
     ''' 
     original_input=str(input)
+    input=strip_whitespace(str(input), where="everywhere")
     if decimal!=".":
         input=input.replace(".", "")
         input=input.replace(decimal, ".")
-    input= re.sub("[^\d.|^\deE\d|-]", "", input)
+    input=input.replace(",", "")
+    input= re.sub(r"^[^\d.-]*", "", input) #begining
+    input= re.sub(r"[^\d.]*$", "", input) #end
     try:
         float(input)
     except:
-        print("Failed to make numeric: "+original_input)
         return "" #if it's not numeric, return an empty cell
     return input
 
@@ -221,5 +240,4 @@ cleaning_functions_dict=dict(
     make_ascii=make_ascii, #v confirm definition
     fill_empty=fill_empty, #v
 )
-
 

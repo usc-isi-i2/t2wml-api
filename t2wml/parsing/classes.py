@@ -47,15 +47,12 @@ class ReturnClass:
         return str(self.value)
 
     def __bool__(self):
-        try:
             if self.value is None: #unfindable items are False values
                 return False
             if len(str(self.value).strip())==0: #empty cells are False values
                 return False
             return True #for now everything else is True (may eventually need to add NaN or something...)
-        except Exception as e:
-            print(e)
-            raise(e)
+
             
     def __repr__(self):
         return to_excel(self.col, self.row) + " : "+str(self.value)
@@ -87,7 +84,7 @@ class RangeClass:
     def __getitem__(self, flat_index):
         row = flat_index//self.row_length
         col = flat_index % self.row_length
-        return self.data[row][col]
+        return self.data[row, col]
 
 
 class Item(ReturnClass):
@@ -171,7 +168,7 @@ class CellRange(RangeClass):
     def __setitem__(self, flat_index, data):
         row = flat_index//self.row_length
         col = flat_index % self.row_length
-        self.data[row][col] = data
+        self.data[row, col] = data
 
 
 class CellExpression:

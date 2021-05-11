@@ -4,7 +4,7 @@ from io import StringIO
 from pathlib import Path
 from t2wml.mapping.datamart_edges import (clean_id, create_metadata_for_custom_qnode, create_metadata_for_project, create_metadata_for_variable, 
                 create_metadata_for_qualifier_property, link_statement_to_dataset)
-from t2wml.utils.utilities import VALID_PROPERTY_TYPES
+from t2wml.utils.date_utils import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.wikification.utility_functions import get_property_type
 from t2wml.wikification.utility_functions import kgtk_to_dict
@@ -110,8 +110,8 @@ def handle_additional_edges(project, statements):
             variable_ids.add(variable)
             variable_dict=entity_dict.get(variable, None)
             if variable_dict is not None:
-                label=variable_dict.get("label", "A "+variable)
-                description=variable_dict.get("description", variable+" relation")
+                label=variable_dict.get("label", variable)
+                description=variable_dict.get("description", "")
                 data_type=variable_dict.get("data_type", "quantity")
                 if data_type.lower()=="wikibaseitem":
                     qnode_ids.add(statement["value"])
@@ -140,9 +140,8 @@ def handle_additional_edges(project, statements):
     
     for qnode_id in qnode_ids:
         variable_dict=entity_dict.get(qnode_id, {})
-        label=variable_dict.get("label", "A "+qnode_id)
-        #description=variable_dict.get("description", "A "+variable)
-        if variable_dict is not None:
+        if variable_dict:
+            label=variable_dict.get("label", qnode_id)
             tsv_data+=create_metadata_for_custom_qnode(qnode_id, label)
 
     for result_dict in tsv_data:

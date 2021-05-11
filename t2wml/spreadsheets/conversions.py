@@ -24,8 +24,8 @@ def cell_str_to_tuple(cell: str):
     :param cell_index: (col, row)
     :return:
     """
-    column = re.search('[a-zA-Z]+', cell).group(0)
-    row = re.search('[0-9]+', cell).group(0)
+    column = re.search(r'[a-zA-Z]+', cell).group(0)
+    row = re.search(r'[0-9]+', cell).group(0)
     return column_letter_to_index(column), int(row)-1
 
 

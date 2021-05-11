@@ -7,33 +7,33 @@ from t2wml.parsing.classes import ReturnClass
 from t2wml.spreadsheets.conversions import to_excel
 from t2wml.wikification.utility_functions import get_property_type
 from t2wml.utils.ethiopian_date import EthiopianDateConverter
-from t2wml.utils.utilities import VALID_PROPERTY_TYPES, parse_datetime
+from t2wml.utils.date_utils import VALID_PROPERTY_TYPES, parse_datetime
 from t2wml.settings import t2wml_settings
 
 
 class StatementError:
     def __init__(self, message, field, qualifier=-1, level=None):
-        #set role
-        if qualifier>-1:
-            role="qualifier"
-            level="Minor" if level is None else level
+        # set role
+        if qualifier > -1:
+            role = "qualifier"
+            level = "Minor" if level is None else level
         else:
-            role=field
+            role = field
             if field not in ["value", "subject",  "property", "unit"]:
-                role="value"
-                level="Minor" if level is None else level
+                role = "value"
+                level = "Minor" if level is None else level
 
-        #set level
+        # set level
         if role in ["value", "subject", "property"]:
-            level="Major" if level is None else level
+            level = "Major" if level is None else level
         else:
-            level="Minor" if level is None else level
+            level = "Minor" if level is None else level
 
-        self.role=role
-        self.message=message
-        self.qualifier_index=qualifier
-        self.level=level
-        self.field=field
+        self.role = role
+        self.message = message
+        self.qualifier_index = qualifier
+        self.level = level
+        self.field = field
 
 
 def fake_iter():
@@ -43,29 +43,32 @@ def fake_iter():
 def handle_ethiopian_calendar(node, add_node_list):
     calendar = node.__dict__.get("calendar")
     if calendar in ["Q215271", "Ethiopian"]:
-        if t2wml_settings.handle_calendar!="leave":
+        if t2wml_settings.handle_calendar != "leave":
             try:
-                gregorian_value = EthiopianDateConverter.iso_to_gregorian_iso(node.value)
-                if t2wml_settings.handle_calendar=="replace":
-                    node.value=gregorian_value
-                if t2wml_settings.handle_calendar=="add":
-                    new_node=Node(**deepcopy(node.__dict__), validate=False)
-                    new_node.value=gregorian_value
-                    new_node.__dict__["calendar"]="Q1985727"
-                    #TODO: handle precision
+                gregorian_value = EthiopianDateConverter.iso_to_gregorian_iso(
+                    node.value)
+                if t2wml_settings.handle_calendar == "replace":
+                    node.value = gregorian_value
+                if t2wml_settings.handle_calendar == "add":
+                    new_node = Node(**deepcopy(node.__dict__), validate=False)
+                    new_node.value = gregorian_value
+                    new_node.__dict__["calendar"] = "Q1985727"
+                    # TODO: handle precision
                     add_node_list.append(new_node)
             except Exception as e:
                 node._errors.append(StatementError(field="calendar",
-                                                    message="Failed to convert to gregorian calendar: "+str(e),
-                                                    qualifier=node.qualifier_index),
-                                                    level="Minor")
+                                                   message="Failed to convert to gregorian calendar: " +
+                                                   str(e),
+                                                   qualifier=node.qualifier_index),
+                                    level="Minor")
+
 
 class Node:
     def __init__(self, property=None, value=None, validate=True, qualifier_index=-1, **kwargs):
         self._errors = []
         self.property = property
         self.value = value
-        self.qualifier_index=qualifier_index
+        self.qualifier_index = qualifier_index
         self.__dict__.update(kwargs)
         if validate:
             self.validate()
@@ -77,23 +80,23 @@ class Node:
     def validate(self):
         if t2wml_settings.no_wikification:
             return
-
         try:
             if self.property:
                 try:
                     property_type = get_property_type(self.property)
                 except Exception as e:
                     self._errors.append(StatementError(field="property",
-                                                    message="Could not get property type for " + str(self.property),
-                                                    qualifier=self.qualifier_index))
+                                                       message="Could not get property type for " +
+                                                       str(self.property),
+                                                       qualifier=self.qualifier_index))
                     property_type = "Not found"
             else:
                 self._errors.append(StatementError(field="property",
-                                                    message="Missing property",
-                                                    qualifier=self.qualifier_index))
+                                                   message="Missing property",
+                                                   qualifier=self.qualifier_index))
                 property_type = "Not found"
         except AttributeError:  # we init value, but it might be popped elsewhere, don't assume it exists
-            #Not creating an error here because it's created when we pop elsewhere?
+            # Not creating an error here because it's created when we pop elsewhere?
             property_type = "Not found"
 
         try:
@@ -103,8 +106,8 @@ class Node:
                         float(self.value)
                     except:
                         self._errors.append(StatementError(field="value",
-                                                    message="Quantity type property must have numeric value",
-                                                    qualifier=self.qualifier_index))
+                                                           message="Quantity type property must have numeric value",
+                                                           qualifier=self.qualifier_index))
 
                 if property_type == "time":
                     self.validate_datetime()
@@ -115,20 +118,20 @@ class Node:
                             self.longitude, self.latitude]
                     except AttributeError:
                         self._errors.append(StatementError(field="value",
-                                                    message="GlobeCoordinates must specify longitude and latitude or point value",
-                                                    qualifier=self.qualifier_index))
+                                                           message="GlobeCoordinates must specify longitude and latitude or point value",
+                                                           qualifier=self.qualifier_index))
                 else:
                     self._errors.append(StatementError(field="value",
-                                                    message="Missing value field",
-                                                    qualifier=self.qualifier_index))
+                                                       message="Missing value field",
+                                                       qualifier=self.qualifier_index))
         except AttributeError:  # we init value, but it might be popped elsewhere, don't assume it exists
-            #Not creating an error here because it's created when we pop elsewhere?
+            # Not creating an error here because it's created when we pop elsewhere?
             pass
 
-        if property_type not in VALID_PROPERTY_TYPES and property_type!="Not found":
+        if property_type not in VALID_PROPERTY_TYPES and property_type != "Not found":
             self._errors.append(StatementError(field="property",
-                                                message="Unsupported property type: "+property_type,
-                                                qualifier=self.qualifier_index))
+                                               message="Unsupported property type: "+property_type,
+                                               qualifier=self.qualifier_index))
 
     def validate_datetime(self):
         try:
@@ -141,12 +144,12 @@ class Node:
             if parsed_precision:
                 self.precision = parsed_precision
             if used_format:
-                self.format=used_format
+                self.format = used_format
         except:
             self._errors.append(StatementError(field="value",
-                                               message="Invalid datetime: "+str(self.value),
+                                               message="Invalid datetime: " +
+                                               str(self.value),
                                                qualifier=self.qualifier_index))
-        
 
     def serialize(self):
         return_dict = dict(self.__dict__)
@@ -175,7 +178,7 @@ class Statement(Node):
             return True
         except AttributeError:
             return False
-    
+
     def validate(self):
         raise NotImplementedError
 
@@ -197,8 +200,8 @@ class NodeForEval(Node):
         super().__init__(property, value, **kwargs)
 
     def parse_key(self, key):
-        cell_indices=None, None
-        if key=="region": #skip
+        cell_indices = None, None
+        if key == "region":  # skip
             return cell_indices
         if isinstance(self.__dict__[key], T2WMLCode):
             try:
@@ -207,27 +210,28 @@ class NodeForEval(Node):
                 try:
                     value = entry_parsed.value
                 except AttributeError:
-                    if not isinstance(entry_parsed, ReturnClass): #sometimes parses to a string or number, not a returnclass
-                        value=str(entry_parsed)
+                    # sometimes parses to a string or number, not a returnclass
+                    if not isinstance(entry_parsed, ReturnClass):
+                        value = str(entry_parsed)
                     else:
-                        value=None
+                        value = None
                 if value is None:
                     self._errors.append(StatementError(field=key,
-                                                    message=f"Failed to resolve for {key} ({self.__dict__[key].unmodified_str})",
-                                                    qualifier=self.qualifier_index))
+                                                       message=f"Failed to resolve for {key} ({self.__dict__[key].unmodified_str})",
+                                                       qualifier=self.qualifier_index))
                     self.__dict__.pop(key)
-                elif value=="":
+                elif value == "":
                     if t2wml_settings.warn_for_empty_cells:
                         self._errors.append(StatementError(field=key,
-                                            message="Empty cell",
-                                            qualifier=self.qualifier_index,
-                                            type="Minor"))
+                                                           message="Empty cell",
+                                                           qualifier=self.qualifier_index,
+                                                           level="Minor"))
                     self.__dict__.pop(key)
                 else:
                     self.__dict__[key] = value
 
                 try:
-                    cell_indices= (entry_parsed.col, entry_parsed.row)
+                    cell_indices = (entry_parsed.col, entry_parsed.row)
                     cell = to_excel(entry_parsed.col, entry_parsed.row)
                     self.cells[key] = cell
                 except AttributeError:
@@ -235,21 +239,21 @@ class NodeForEval(Node):
 
             except Exception as e:
                 self._errors.append(StatementError(field=key,
-                                    message=f"Error parsing {key} ({self.__dict__[key].unmodified_str}): {str(e)}",
-                                                    qualifier=self.qualifier_index))
+                                                   message=f"Error parsing {key} ({self.__dict__[key].unmodified_str}): {str(e)}",
+                                                   qualifier=self.qualifier_index))
                 self.__dict__.pop(key)
         return cell_indices
 
     def validate(self):
-        t_var_qcol=self.context.get("t_var_qcol", None) #if it isn't already defined outside
+        # if it isn't already defined outside
+        t_var_qcol = self.context.get("t_var_qcol", None)
         if t_var_qcol is None:
-            (col, row)=self.parse_key("value")
+            (col, row) = self.parse_key("value")
             if col is not None:
-                self.context.update({"t_var_qcol":col+1, "t_var_qrow":row+1})
+                self.context.update({"t_var_qcol": col+1, "t_var_qrow": row+1})
         for key in list(self.__dict__.keys()):
             self.parse_key(key)
         Node.validate(self)
-
 
     def serialize(self):
         return_dict = super().serialize()
@@ -263,50 +267,52 @@ class EvaluatedStatement(Statement, NodeForEval):
     def node_class(self):
         return NodeForEval
 
-    def validate(self):
+    def _validate(self):
         try:
             subject = self.subject
         except AttributeError:
             self._errors.append(StatementError(field="subject",
-                                    message="Missing subject",
-                                    qualifier=False))
+                                               message="Missing subject",
+                                               qualifier=False))
 
         self.node_class.validate(self)
         self.context.pop("t_var_qrow", None)
         self.context.pop("t_var_qcol", None)
 
-        gregorian_nodes=[]
+        gregorian_nodes = []
 
         if self.has_qualifiers:
             new_qualifiers = []
             for i, q in enumerate(self.qualifier):
-                region=q.get("region", None)
+                region = q.get("region", None)
                 if region:
-                    iterator=YamlRegion(region, context=self.context)
+                    iterator = YamlRegion(region, context=self.context)
                 else:
-                    iterator=fake_iter()
+                    iterator = fake_iter()
                 for col, row in iterator:
                     try:
-                        q_context=dict(t_var_qrow=row, t_var_qcol=col)
+                        q_context = dict(t_var_qrow=row, t_var_qcol=col)
                         q_context.update(self.context)
-                        node_qual = self.node_class(context=q_context, qualifier_index=i, **q)
+                        node_qual = self.node_class(
+                            context=q_context, qualifier_index=i, **q)
                         handle_ethiopian_calendar(node_qual, gregorian_nodes)
 
-                        self._errors+=node_qual.errors
-                        
+                        self._errors += node_qual.errors
+
                         try:
                             node_qual.value
                         except AttributeError:
                             if t2wml_settings.warn_for_empty_cells:
                                 self._errors.append((StatementError(field="value",
-                                                    message="Empty cell",
-                                                    qualifier=i)))
-                            continue #either way, discard qualifier
-                        
-                        discard_qual=False
+                                                                    message="Empty cell",
+                                                                    level="Minor",
+                                                                    qualifier=i)))
+                            continue  # either way, discard qualifier
+
+                        discard_qual = False
                         for error in node_qual._errors:
                             if error.field in ["property", "value"]:
-                                discard_qual=True
+                                discard_qual = True
                         if discard_qual:
                             continue  # discard qualifier
 
@@ -314,10 +320,10 @@ class EvaluatedStatement(Statement, NodeForEval):
                             new_qualifiers.append(node_qual)
                     except Exception as e:
                         self._errors.append((StatementError(field="fatal",
-                                                    message=str(e),
-                                                    qualifier=i)))
+                                                            message=str(e),
+                                                            qualifier=i)))
             self.qualifier = new_qualifiers
-        
+
         handle_ethiopian_calendar(self, gregorian_nodes)
         if len(gregorian_nodes):
             self.qualifier = self.qualifier+gregorian_nodes
@@ -325,16 +331,27 @@ class EvaluatedStatement(Statement, NodeForEval):
         if self.has_references:
             for i, r in enumerate(self.reference):
                 try:
-                    self.reference[i] = self.node_class(context=self.context, **r)
-                except Exception as e: #problem with reference
+                    self.reference[i] = self.node_class(
+                        context=self.context, **r)
+                except Exception as e:  # problem with reference
                     self._errors.append((StatementError(field="reference",
-                                                    message=str(e),
-                                                    qualifier=False)))
+                                                        message=str(e),
+                                                        qualifier=False)))
 
-        #check if statement is discarded from statement collection for major errors
+
+    def validate(self):
+        self._validate()
+
+        # check if statement is discarded from statement collection for major errors
         for error in self._errors:
-            if error.level=="Major":
-                raise T2WMLExceptions.TemplateDidNotApplyToInput(errors=self._errors)
+            if error.level == "Major":
+                raise T2WMLExceptions.TemplateDidNotApplyToInput(
+                    errors=self._errors)
 
 
 
+class PartialStatement(EvaluatedStatement):
+    def validate(self):
+        self._validate()
+    
+    #def serialize

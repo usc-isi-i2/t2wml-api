@@ -2,11 +2,13 @@ from collections import defaultdict
 import os
 import json
 from uuid import uuid4
+import pandas as pd
+from t2wml.utils.bindings import update_bindings
+from t2wml.wikification.utility_functions import get_provider, dict_to_kgtk, kgtk_to_dict, add_entities_from_file
 from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
 import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
-from t2wml.settings import t2wml_settings
 from t2wml.mapping.datamart_edges import clean_id
 
 COST_MATRIX_DEFAULT = 10
@@ -37,7 +39,7 @@ class YamlFormatter:
     region:
         {region}
     template:
-        subject: {mainSubjectLine}
+        {mainSubjectLine}
         property: {propertyLine}
         value: {dataLine}\n{optionalsLines}
         {qualifierLines}"""
@@ -170,7 +172,10 @@ class Block:
         if self.use_item:
             return_string = "=item[{indexer}]"
         else:
-            return_string = "=value[{indexer}]"
+            if self.type=="quantity":
+                return_string="=make_numeric(value[{indexer}])"
+            else:
+                return_string = "=value[{indexer}]"
 
         if self.cell_args[0] == self.cell_args[1]:  # single cell
             cell_str = column_index_to_letter(
@@ -187,9 +192,14 @@ class Block:
         elif self.get_alignment_orientation(relative_value_args) == "col":
             row = str(self.cell_args[0][1]+1)
             return return_string.format(indexer=col_var+row)
+        elif not self.is_2D:
+            if self.row_args[0]==self.row_args[1]: #align by column
+                row = str(self.cell_args[0][1]+1)
+                return return_string.format(indexer=col_var+row)
+            if self.col_args[0]==self.col_args[1]: #align by row
+                col = column_index_to_letter(self.cell_args[0][0])
+                return return_string.format(indexer=col+row_var)
         else:
-            print("Don't know how to match with imperfect alignment yet" +
-                  self.range_str + ","+relative_value_args.range_str)
             return "#TODO: ????? -Don't know how to match with imperfect alignment yet"
 
 
@@ -205,6 +215,7 @@ class Annotation():
         self.property_annotations = []
         self.unit_annotations = []
         self.comment_messages = ""
+        self.has_been_initialized=False
         for block in self.annotations_array:
                 role = block.role
                 if role == "dependentVar":
@@ -224,6 +235,8 @@ class Annotation():
     
     @property
     def annotation_block_array(self):
+        for block in self.annotations_array: #add links
+            block.annotation["links"]={key:block.matches[key].id for key in block.matches}
         return [block.annotation for block in self.annotations_array]
     
     def _preprocess_annotation(self, annotations):
@@ -236,6 +249,8 @@ class Annotation():
             if not isinstance(block, dict):
                 raise InvalidAnnotationException("Each annotation entry must be a dict")
             
+            block.pop("selectedArea", None) #if we somehow got this, remove it
+
             try:
                 id=block["id"]
             except KeyError:
@@ -244,6 +259,7 @@ class Annotation():
 
 
         for block in annotations:
+            block["link"]="" #reset all auto-generated links each time
             userlink=block.get("userlink")
             if userlink:
                 if userlink not in ids: #remove links to deleted blocks
@@ -371,12 +387,19 @@ class Annotation():
 
     
     def initialize(self, sheet=None, item_table=None):
-        self._run_cost_matrix(
-            self.property_annotations, [self.data_annotations, self.qualifier_annotations])
-        self._run_cost_matrix(self.unit_annotations, [self.data_annotations, self.qualifier_annotations])
-        data_annotations=self.data_annotations[0] if self.data_annotations else []
-        subject_annotations=self.subject_annotations[0] if self.subject_annotations else []
-        return data_annotations, subject_annotations, self.qualifier_annotations
+        if not self.has_been_initialized:
+            self._run_cost_matrix(
+                self.property_annotations, [self.data_annotations, self.qualifier_annotations])
+            self._run_cost_matrix(self.unit_annotations, [self.data_annotations, self.qualifier_annotations])
+            data_annotations=self.data_annotations[0] if self.data_annotations else []
+            subject_annotations=self.subject_annotations[0] if self.subject_annotations else []
+            if subject_annotations and not data_annotations.annotation.get("subject"):
+                subject_annotations.create_link(data_annotations)
+            self.has_been_initialized=True
+            self.data_annotations=data_annotations
+            self.subject_annotations=subject_annotations
+            return data_annotations, subject_annotations, self.qualifier_annotations
+        return self.data_annotations, self.subject_annotations, self.qualifier_annotations
 
     def get_optionals_and_property(self, region, use_q):
         const_property=region.annotation.get("property", None)
@@ -386,11 +409,6 @@ class Annotation():
             property = region.matches.get("property", None)
             if property is None:
                 propertyLine = "#TODO-- no property alignment found"
-                if not t2wml_settings.no_wikification:
-                    suggested_property=type_suggested_property_mapping.get(region.type, "")
-                    if suggested_property:
-                        propertyLine = suggested_property + " #(auto-suggestion) " + propertyLine
-                
             else:
                 propertyLine = property.get_expression(region, use_q)
 
@@ -400,7 +418,7 @@ class Annotation():
             optionalsLines += YamlFormatter.get_optionals_string(
                 "unit: " + unit.get_expression(region, use_q)+"\n", use_q)
         for key in region.annotation:
-            if key in ["changed", "id"]: 
+            if key in ["changed", "id", "title", "links", "link"]: 
                 continue
             if key not in ["role", "selection", "type", "property"]:
                 try:
@@ -422,6 +440,8 @@ class Annotation():
             if qualifier_region.use_item:
                 valueLine = "=item[$qcol, $qrow]"
             else:
+                if qualifier_region.type=="quantity":
+                    valueLine="=make_numeric(value[$qcol, $qrow])"
                 valueLine = "=value[$qcol, $qrow]"
 
             alignment = qualifier_region.get_alignment_orientation(data_region, require_precise=True)
@@ -458,13 +478,18 @@ class Annotation():
         if data_region.use_item:
             dataLine= "=item[$col, $row]"
         else:
-            dataLine= "=value[$col, $row]"
+            if data_region.type=="quantity":
+                dataLine= "=make_numeric(value[$col, $row])"
+            else:
+                dataLine= "=value[$col, $row]"
 
         region = "range: {range_str}".format(range_str=data_region.range_str)
-        if subject_region:
-            mainSubjectLine = subject_region.get_expression(data_region)
+        if data_region.annotation.get("subject"):
+            mainSubjectLine="" #no need to do anything, will be added when adding fields
+        elif subject_region:
+            mainSubjectLine = "subject: "+subject_region.get_expression(data_region)
         else: 
-            mainSubjectLine = "# subject region not specified"
+            mainSubjectLine = "subject: #subject region not specified"
 
         propertyLine, optionalsLines = self.get_optionals_and_property(
             data_region, use_q=False)
@@ -575,9 +600,7 @@ class AnnotationNodeGenerator:
         return f"P{self.project_id}-{clean_id(property)}"
 
     def preload(self, sheet, wikifier):
-        import pandas as pd
-        from t2wml.utils.bindings import update_bindings
-        from t2wml.wikification.utility_functions import get_default_provider, get_provider, dict_to_kgtk, kgtk_to_dict
+
 
         properties, items = self.get_custom_properties_and_qnodes()
     
@@ -588,29 +611,31 @@ class AnnotationNodeGenerator:
         columns=['row', 'column', 'value', 'context', 'item', 'file', 'sheet']
         dataframe_rows=[]
         item_entities=set()
+        property_entities=dict()
 
         #part one: wikification
         for (row, col) in items:
-            item_string=sheet[row][col]
+            item_string=sheet[row, col]
             if item_string:
                 try:
-                    exists = wikifier.item_table.get_item(col, row, sheet=sheet)                
-                    if not exists:
+                    exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=item_string)                
+                    if not exists and item_string not in item_entities:
                         raise ValueError
                 except:
-                    dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string), sheet.data_file_name, sheet.name])
+                    dataframe_rows.append(['', '', item_string, '', self.get_Qnode(item_string), sheet.data_file_name, sheet.name])
                     item_entities.add(item_string)
         
         for (row, col, data_type) in properties:
-            property=sheet[row][col]
+            property=sheet[row, col]
             if property:
                 try:
-                    exists = wikifier.item_table.get_item(col, row, sheet=sheet)
-                    if not exists:
+                    exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=property)
+                    if not exists and property not in property_entities:
                         raise ValueError
                 except:
                     pnode=self.get_Pnode(property)
-                    dataframe_rows.append([row, col, property, '', pnode, sheet.data_file_name, sheet.name])
+                    property_entities[property]=data_type
+                    dataframe_rows.append(['', '', property, '', pnode, sheet.data_file_name, sheet.name])
 
 
         if dataframe_rows:
@@ -635,32 +660,41 @@ class AnnotationNodeGenerator:
         if os.path.isfile(filepath):
             custom_nodes=kgtk_to_dict(filepath)
         else:
-            custom_nodes=defaultdict(dict)
+            custom_nodes=dict()
 
         
         prov=get_provider()
-        for item in item_entities:
-            node_id=self.get_Qnode(item)
-            if node_id not in custom_nodes: #only set to auto if creating fresh
-                custom_nodes[node_id]["label"]=item
-        for (row, col, data_type) in properties:
-            property = sheet[row][col]
-            if property:
-                node_id = wikifier.item_table.get_item(col, row, sheet=sheet)
-                if node_id==self.get_Pnode(property): #it's a custom property
-                    if node_id in custom_nodes: #just update data type
-                        custom_nodes[node_id]["data_type"]=data_type
-                    else:
-                        custom_nodes[node_id]=dict(data_type=data_type, 
-                                    label=property, 
-                                    description="")
-
-                    prov.save_entry(node_id, from_file=True, **custom_nodes[node_id])
-                
-        dict_to_kgtk(custom_nodes, filepath)
-        self.project.add_entity_file(filepath, precedence=False)    
+        with prov as p:
+            for item in item_entities:
+                node_id=self.get_Qnode(item)
+                if node_id not in custom_nodes: #only set to auto if creating fresh
+                    custom_nodes[node_id]={"label":item}
+            for property, data_type in property_entities.items():
+                if property:
+                    node_id = wikifier.item_table.get_item(col, row, sheet=sheet, value=property)
+                    if node_id==self.get_Pnode(property): #it's a custom property
+                        if node_id in custom_nodes: #just update data type
+                            custom_nodes[node_id]["data_type"]=data_type
+                        else:
+                            custom_nodes[node_id]=dict(data_type=data_type, 
+                                        label=property, 
+                                        description="")
+        prov.update_cache(custom_nodes)
+        
+        if custom_nodes:
+            dict_to_kgtk(custom_nodes, filepath)
+            self.project.add_entity_file(filepath, precedence=False)    
+        
         self.project.save()
     
 
+
         
+        
+
+    
+        
+    
+    
+
 

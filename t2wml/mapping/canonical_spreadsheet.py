@@ -1,12 +1,21 @@
 import csv
 from io import StringIO
+from t2wml.wikification.utility_functions import get_provider
 
 def try_get_label(input):
+    provider = get_provider()
+    if not input:
+        return input
+    if input[0] in ["P", "Q"]:
+        try:
+            entry = provider.get_entity(input)
+            if entry and 'label' in entry:
+                return entry['label']
+        except Exception as e:
+            pass
     return input
 
-
-
-def create_canonical_spreadsheet(statements):
+def get_cells_and_columns(statements, project=None):
     column_titles=["subject", "property", "value"]
 
     dict_values=[]
@@ -32,9 +41,18 @@ def create_canonical_spreadsheet(statements):
                     column_titles.append(key)
                 statement_dict[key]=try_get_label(statement[key])
         dict_values.append(statement_dict)
+    if project:
+        column_titles.append("dataset")
+        for dict in dict_values:
+            dict["dataset"]=project.dataset_id
+    return column_titles, dict_values
+
+
+
+def create_canonical_spreadsheet(statements, project=None):
+    column_titles, dict_values = get_cells_and_columns(statements, project)
     
     string_stream = StringIO("", newline="")
-
     writer = csv.DictWriter(string_stream, column_titles,
                              restval="", 
                              lineterminator="\n",

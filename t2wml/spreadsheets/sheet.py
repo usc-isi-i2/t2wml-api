@@ -2,12 +2,12 @@ from pathlib import Path
 import pandas as pd
 import json
 from t2wml.settings import t2wml_settings
-from t2wml.spreadsheets.utilities import PandasLoader
+from t2wml.spreadsheets.utilities import PandasLoader, post_process_data
 from t2wml.spreadsheets.caching import PickleCacher, FakeCacher
 from t2wml.spreadsheets.conversions import to_excel
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from collections.abc import Mapping
-
+from io import StringIO
 
 def get_cache_class():
     cache_class = FakeCacher
@@ -82,11 +82,13 @@ class Sheet:
                 "Cell " + to_excel(params[1], params[0]) + " is outside the bounds of the current data file")
 
     @property
-    def row_len(self):
+    def row_len(self): 
+        # number of rows
         return self.data.shape[0]
 
     @property
     def col_len(self):
+        # number of columns
         return self.data.shape[1]
     
     def to_json(self):
@@ -110,4 +112,10 @@ class Sheet:
         s=Sheet(data=data, **in_json)
         s.cleaned_data=cleaned
         return s
-        
+
+    @classmethod
+    def load_sheet_from_csv_string(cls, csv_string, data_file_path="", sheet_name="", **pandas_options):
+        df=pd.read_csv(StringIO(csv_string), **pandas_options)
+        df=post_process_data(df)
+        return cls(data_file_path=data_file_path, sheet_name=sheet_name, data=df)
+

@@ -16,6 +16,9 @@ class WikidataProvider(ABC):
     def save_entry(self, property, data_type, *args, **kwargs):
         pass
 
+    def update_cache(self, update_dict):
+        pass
+
     def __enter__(self):
         return self
 
@@ -85,7 +88,9 @@ class SparqlProvider(WikidataProvider):
             self.cache[property]["label"]=label
         if description:
             self.cache[property]["description"]=label
-        
+    
+    def update_cache(self, update_dict):
+        self.cache.update(update_dict)
 
 
 class FallbackSparql(SparqlProvider):
@@ -110,7 +115,7 @@ class DictionaryProvider(SparqlProvider):
     def __init__(self, ref_dict, sparql_endpoint=None, *args, **kwargs):
         super().__init__(sparql_endpoint)
         self.cache = ref_dict
-
+    
 class KGTKFileProvider():
     def __init__(self, file_path):
         from t2wml.wikification.utility_functions import kgtk_to_dict

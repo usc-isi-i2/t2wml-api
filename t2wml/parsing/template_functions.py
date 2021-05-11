@@ -1,5 +1,5 @@
 import re
-from t2wml.utils.utilities import parse_datetime
+from t2wml.utils.date_utils import parse_datetime
 from SPARQLWrapper import SPARQLWrapper, JSON
 from t2wml.utils.bindings import bindings
 from t2wml.settings import t2wml_settings

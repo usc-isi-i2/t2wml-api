@@ -1,5 +1,79 @@
 T2WML API History
 ===================================
+Changes in version 0.4.0:
+------------------------
+A variety of stability and performance fixes
+
+Changes in version 0.3.6:
+------------------------
+* don't autosuggest P1114
+* change format of suggestion
+
+Changes in version 0.3.5:
+------------------------
+* cache custom nodes in memory
+
+Changes in version 0.3.4:
+------------------------
+* strict_make_numeric added
+* some additional entries in country wikifier
+* in auto blocks, find longerst stretch and allow 10% total length be skips
+* fix race condition for wikified labels
+
+Changes in version 0.3.3:
+------------------------
+* much faster block suggestion code
+* added some countries to country wikifier
+* improved string_is_valid check
+* delete links to nonexistent blocks in autosuggested links
+* add field entity_file to project
+
+Changes in version 0.3.2:
+------------------------
+* add links field to annotation
+* fix some bugs with subject field in annotation
+
+Changes in version 0.3.1:
+------------------------
+* normalize block edges
+* use subject from annotation if provided
+* fix bug in overlap checking
+
+Changes in version 0.3.0:
+------------------------
+* add auto block detection for dates, countries, and quantities
+* add support for partial statements
+* canonical spreadsheet:
+    - fix bug in canonical spreadsheet that wasn't fetching labels
+    - add dataset id
+* preliminary support for limiting number of statements fetched (wip)
+* order of statements switched to row-major
+* add method for loading a Sheet from an in-memory csv string
+* add support for simple imperfect alignments
+
+
+Changes in version 0.2.11:
+------------------------
+* if value resolves to empty string don't create statement
+* fix bug in warn_for_empty_cells
+* refine make_numeric to only replace in beginning and end and to do a better job stripping whitespace and commas
+
+Changes in version 0.2.9:
+------------------------
+* smoother handling of irregular numbers in annotations:
+    * default to using make_numeric for anything of type quantity when creating yaml
+    * use make_numeric when checking suggestion for quantityness
+* don't send "title" in yaml
+
+Changes in version 0.2.8:
+------------------------
+* canonical spreadsheet returns labels not qnodes
+* added a function to suggest possible annotation choices for annotation blocks
+* bug fix: added preloaded_properties.tsv to manifest.in when building package
+
+Changes in version 0.2.6:
+------------------------
+* bug fix to creation of additional kgtk edges
 
 Changes in version 0.2.5:
 ------------------------
