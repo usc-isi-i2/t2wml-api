@@ -1,5 +1,9 @@
 T2WML API History
 ===================================
+Changes in version 0.4.0:
+------------------------
+A variety of stability and performance fixes
+
 Changes in version 0.3.6:
 ------------------------
 * don't autosuggest P1114
