@@ -21,6 +21,7 @@ class ItemTable:
         row = int(row)
         tuples = [
             (file, sheet, column, row, value),
+            (file, sheet, '', '', value),
             ('', '', column, row, value),
             ('', '', column, row, ''),
             ('', '', column, '', value),
