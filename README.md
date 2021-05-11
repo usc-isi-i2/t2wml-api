@@ -10,4 +10,4 @@
 
 1. make a fresh virtual environment
 2. `pip install --extra-index-url https://pypi.fury.io/theresearchsoftwarecompany/ t2wml-api`
-3. You can now use `from t2wml import...` to write code (see the [API guide](API.md))
+3. You can now use `from t2wml import...` to write code (see the [API guide](docs/API.md))
