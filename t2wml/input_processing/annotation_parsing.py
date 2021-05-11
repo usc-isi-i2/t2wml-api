@@ -611,6 +611,7 @@ class AnnotationNodeGenerator:
         columns=['row', 'column', 'value', 'context', 'item', 'file', 'sheet']
         dataframe_rows=[]
         item_entities=set()
+        property_entities=dict()
 
         #part one: wikification
         for (row, col) in items:
@@ -618,10 +619,10 @@ class AnnotationNodeGenerator:
             if item_string:
                 try:
                     exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=item_string)                
-                    if not exists:
+                    if not exists and item_string not in item_entities:
                         raise ValueError
                 except:
-                    dataframe_rows.append([row, col, item_string, '', self.get_Qnode(item_string), sheet.data_file_name, sheet.name])
+                    dataframe_rows.append(['', '', item_string, '', self.get_Qnode(item_string), sheet.data_file_name, sheet.name])
                     item_entities.add(item_string)
         
         for (row, col, data_type) in properties:
@@ -629,11 +630,12 @@ class AnnotationNodeGenerator:
             if property:
                 try:
                     exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=property)
-                    if not exists:
+                    if not exists and property not in property_entities:
                         raise ValueError
                 except:
                     pnode=self.get_Pnode(property)
-                    dataframe_rows.append([row, col, property, '', pnode, sheet.data_file_name, sheet.name])
+                    property_entities[property]=data_type
+                    dataframe_rows.append(['', '', property, '', pnode, sheet.data_file_name, sheet.name])
 
 
         if dataframe_rows:
@@ -667,8 +669,7 @@ class AnnotationNodeGenerator:
                 node_id=self.get_Qnode(item)
                 if node_id not in custom_nodes: #only set to auto if creating fresh
                     custom_nodes[node_id]={"label":item}
-            for (row, col, data_type) in properties:
-                property = sheet[row, col]
+            for property, data_type in property_entities.items():
                 if property:
                     node_id = wikifier.item_table.get_item(col, row, sheet=sheet, value=property)
                     if node_id==self.get_Pnode(property): #it's a custom property
@@ -678,15 +679,13 @@ class AnnotationNodeGenerator:
                             custom_nodes[node_id]=dict(data_type=data_type, 
                                         label=property, 
                                         description="")
-
-                        prov.save_entry(node_id, from_file=True, **custom_nodes[node_id])
         prov.update_cache(custom_nodes)
         
         if custom_nodes:
             dict_to_kgtk(custom_nodes, filepath)
-            add_entities_from_file(filepath)
             self.project.add_entity_file(filepath, precedence=False)    
-            self.project.save()
+        
+        self.project.save()
     
 
 
