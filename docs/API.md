@@ -144,7 +144,7 @@ Thereafter, wikification information can be added to the wikifier with either th
 Adding wikification information is order-sensitive, because later additions will overwrite earlier ones. A message to the user will be printed when this occurs.
 
 A wikifier can be saved to a file with the function `save(filename)` and then loaded from that file with `load(filename)`
-The wikifier keeps track of the filepaths of any files added with add_file, and keeps a list of all of its dataframes (those loaded from a file and those loaded directly). A small convenience function for printing out information about the wikifier is included, `print_data` .
+The wikifier keeps track of the filepaths of any files added with add_file, and keeps a list of all of its dataframes (those loaded from a file and those loaded directly). 
 
 Internally, the wikifier creates an ItemTable, for looking up items by string or by cell, and is used extensively in creating statements.
 
@@ -160,7 +160,6 @@ Example code:
     wf.add_dataframe(df)
     wf.save(r"wiki_save")
     new_wf=Wikifier.load(r"wiki_save")
-    new_wf.print_data()
 ```
 
 > Wikifier update overwrote existing values: {"('', '', 'Burundi')": 'Q967'}

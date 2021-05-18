@@ -2,7 +2,12 @@ import logging
 t2wml_log=logging.getLogger("t2wml-api")
 t2wml_log.addHandler(logging.NullHandler())
 
-def basic_debug(func=None):
+def fake_basic_debug(func=None):
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper
+
+def real_basic_debug(func=None):
     def wrapper(*args, **kwargs):
         try:
             function_name = func.__func__.__qualname__
@@ -17,6 +22,8 @@ def basic_debug(func=None):
             t2wml_log.error(f"{function_name} raised {str(e)}")
             raise e
     return wrapper
+
+basic_debug = fake_basic_debug #makes switching between log and non-log version trivial
 
 def details_debug(func=None):
     def wrapper(*args, **kwargs):

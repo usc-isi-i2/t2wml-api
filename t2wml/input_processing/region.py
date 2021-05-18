@@ -3,6 +3,7 @@ from t2wml.input_processing.yaml_parsing import CodeParser
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.parsing.t2wml_parsing import iter_on_n, t2wml_parse, T2WMLCode, iter_on_n_for_code
 from t2wml.spreadsheets.conversions import cell_range_str_to_tuples, cell_str_to_tuple
+from t2wml.utils.debug_logging import basic_debug
 
 
 class Region:
@@ -18,6 +19,7 @@ class Region:
 
 
 class YamlRegion(CodeParser, Region):
+    @basic_debug
     def __init__(self, yaml_data, context=None):
         self.context= context or {}
         self.yaml_data=yaml_data

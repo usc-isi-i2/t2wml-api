@@ -4,6 +4,7 @@ from pandas import DataFrame
 from collections import defaultdict
 from t2wml.utils.t2wml_exceptions import ItemNotFoundException
 from t2wml.utils.bindings import bindings
+from t2wml.utils.debug_logging import basic_debug
 
 
 class ItemTable:
@@ -38,6 +39,7 @@ class ItemTable:
 
         raise ValueError("Not found")
 
+    @basic_debug
     def get_item(self, column:int, row:int, context:str='', sheet=None, value=None):
         if not sheet:
             sheet = bindings.excel_sheet
@@ -52,6 +54,7 @@ class ItemTable:
             return None  # currently this is what the rest of the API expects. could change later
         #   raise ItemNotFoundException("Item for cell "+to_excel(column, row)+"("+value+")"+"with context "+context+" not found")
 
+    @basic_debug
     def get_item_by_string(self, value: str, context:str=''):
         lookup = self.lookup_table.get(context)
         if not lookup:
@@ -73,6 +76,7 @@ class ItemTable:
                 return item, context, value
         return None, None, None
 
+    @basic_debug
     def update_table_from_dataframe(self, df: DataFrame):
             df = df.fillna('')
             df = df.replace(r'^\s+$', '', regex=True)
@@ -116,20 +120,11 @@ class Wikifier:
         self._data_frames = []
         self._item_table = ItemTable()
 
-    def print_data(self):
-        """prints a little summary of the contents of the wikifier
-        """
-        print("The wikifier contains {} wiki files, and a total of {} dataframes".format(
-            len(self.wiki_files), len(self._data_frames)))
-        if len(self.wiki_files):
-            print("The files are:")
-            for filename in self.wiki_files:
-                print(filename)
-
     @property
     def item_table(self):
         return self._item_table
 
+    @basic_debug
     def add_file(self, file_path: str):
         """add a wikifier file to the wikifier. loads the file and adds it to the item table.
         file must be a csv file, and must contain the columns 'row', 'column', 'value', 'context', 'item'
@@ -154,6 +149,7 @@ class Wikifier:
         self._data_frames.append(df)
         return overwritten
 
+    @basic_debug
     def add_dataframe(self, df: DataFrame):
         """Add a wikifier dataframe to the Wikifier item table
 
@@ -181,6 +177,7 @@ class Wikifier:
         self._data_frames.append(df)
         return overwritten
 
+    @basic_debug
     def save(self, filename: str):
         """save Wikifier to a json file
 
@@ -196,6 +193,7 @@ class Wikifier:
             f.write(output)
 
     @classmethod
+    @basic_debug
     def load(cls, filename:str):
         """load Wikifier from saved json file (created by the wikifier save method)
 

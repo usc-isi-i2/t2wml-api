@@ -4,6 +4,7 @@ from t2wml.parsing.classes import (CellExpression, ItemExpression,
 from t2wml.parsing.constants import char_dict
 from t2wml.parsing.template_functions import functions_dict
 from t2wml.parsing.cleaning_functions import cleaning_functions_dict
+from t2wml.utils.debug_logging import basic_debug
 
 
 eval_globals = dict()
@@ -28,6 +29,7 @@ class T2WMLCode:
         self.unmodified_str = unmodified_str
 
 
+@basic_debug
 def t2wml_parse(e_str, context={}):
     value = CellExpression()
     item = ItemExpression()

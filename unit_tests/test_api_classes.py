@@ -25,7 +25,6 @@ class ClassesTest(unittest.TestCase):
         wf.save(output_file)
         new_wf = Wikifier.load(output_file)
         item = new_wf.item_table.get_item_by_string('Burundi')
-        new_wf.print_data()
 
     def xtest_wikifier_service(self):
         # removing test until endpoint is not down anymore

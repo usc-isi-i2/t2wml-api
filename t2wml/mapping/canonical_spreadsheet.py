@@ -1,6 +1,8 @@
 import csv
 from io import StringIO
+from t2wml.utils.debug_logging import basic_debug
 from t2wml.wikification.utility_functions import get_provider
+
 
 def try_get_label(input):
     provider = get_provider()
@@ -15,6 +17,7 @@ def try_get_label(input):
             pass
     return input
 
+@basic_debug
 def get_cells_and_columns(statements, project=None):
     column_titles=["subject", "property", "value"]
 
@@ -48,7 +51,7 @@ def get_cells_and_columns(statements, project=None):
     return column_titles, dict_values
 
 
-
+@basic_debug
 def create_canonical_spreadsheet(statements, project=None):
     column_titles, dict_values = get_cells_and_columns(statements, project)
     

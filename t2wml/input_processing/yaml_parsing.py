@@ -1,7 +1,7 @@
-import sys
 import yaml
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.parsing.t2wml_parsing import T2WMLCode
+from t2wml.utils.debug_logging import basic_debug
 
 
 class ForwardSlashEscape(Exception):  # used for a little hack down below
@@ -86,6 +86,7 @@ class TemplateParser(CodeParser):
 
 
 class Template:
+    @basic_debug
     def __init__(self, dict_template, eval_template):
         self.dict_template = dict_template
         self.eval_template = eval_template

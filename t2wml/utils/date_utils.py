@@ -6,6 +6,7 @@ try:
     has_etk = True
 except (ImportError, OSError):
     has_etk = False
+from t2wml.utils.debug_logging import basic_debug
 
 VALID_PROPERTY_TYPES=["globecoordinate", "quantity", "time", "string", "monolingualtext",
                         "externalid", "wikibaseitem", "wikibaseproperty", "url"]
@@ -52,7 +53,7 @@ def translate_precision_to_integer(precision: str) -> int:
     return precision_map[precision.lower()]
 
 
-
+@basic_debug
 def parse_datetime(value, additional_formats=None, precisions=None):
     used_format=None
     additional_formats=additional_formats or []

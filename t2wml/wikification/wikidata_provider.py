@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from SPARQLWrapper import SPARQLWrapper, JSON
 from t2wml.settings import t2wml_settings
+from t2wml.utils.debug_logging import basic_debug
 
 
 class WikidataProvider(ABC):
@@ -68,6 +69,7 @@ class SparqlProvider(WikidataProvider):
             label=description=""
         return dict(data_type=data_type, label=label, description=description)
 
+    @basic_debug
     def get_property_type(self, wikidata_property: str):
         property_args = self.cache.get(wikidata_property, False)
         if not property_args:
@@ -99,6 +101,7 @@ class FallbackSparql(SparqlProvider):
     falling back to sparql queries (and then optionally saving query response to the main source)
     '''
 
+    @basic_debug
     def get_property_type(self, wikidata_property, *args, **kwargs):
         try:
             data_type = self.try_get_property_type(

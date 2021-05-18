@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+from t2wml.utils.debug_logging import basic_debug
 
 def post_process_data(data):
     data = data.fillna("")
@@ -18,6 +19,7 @@ class PandasLoader:
         self.is_excel = True if self.file_extension in [".xlsx", ".xls"] else False
         self.pd_args = dict(dtype=str, header=None)
 
+    @basic_debug
     def load_sheet(self, sheet_name):
         """
         returns a single sheet's data frame
@@ -39,6 +41,7 @@ class PandasLoader:
         return Path(self.file_path).name
 
 
+    @basic_debug
     def load_file(self):
         """
         returns a dictionary of sheet_names and their data frames
@@ -58,6 +61,7 @@ class PandasLoader:
             return {sheet_name: data}
 
 
+    @basic_debug
     def get_sheet_names(self):
         if self.is_excel:
             xl = pd.ExcelFile(self.file_path)

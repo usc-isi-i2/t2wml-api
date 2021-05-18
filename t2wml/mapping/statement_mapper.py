@@ -10,6 +10,7 @@ from t2wml.input_processing.clean_yaml_parsing import get_cleaned_dataframe
 from t2wml.input_processing.annotation_parsing import Annotation
 from t2wml.input_processing.utils import string_is_valid
 from t2wml.spreadsheets.conversions import to_excel
+from t2wml.utils.debug_logging import basic_debug
 
 class StatementMapper(ABC):
     """an abstract class for creating statementmapper classes. refer to the api documentation for more details.
@@ -25,6 +26,7 @@ class StatementMapper(ABC):
     def do_init(self, sheet, wikifier):
         pass
 
+    @basic_debug
     def get_statements(self, sheet, wikifier, start=0, end=None):
         self.do_init(sheet, wikifier)
         statements = {}

@@ -4,6 +4,7 @@ from t2wml.input_processing.utils import string_is_valid
 from t2wml.wikification.country_wikifier_cache import countries
 from t2wml.utils.date_utils import parse_datetime
 from t2wml.parsing.cleaning_functions import strict_make_numeric
+from t2wml.utils.debug_logging import basic_debug
 
 def get_types(cell_content):
     cell_content=str(cell_content).strip()
@@ -20,6 +21,7 @@ def get_types(cell_content):
     return is_country, is_numeric, is_date
 
 
+@basic_debug
 def annotation_suggester(sheet, selection, annotation_blocks_array):
     already_has_subject=False
     already_has_var=False
@@ -71,6 +73,7 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
 
 class HistogramSelection:
     @staticmethod
+    @basic_debug
     def block_finder(sheet):
         vertical_numbers=Counter()
         horizontal_numbers=Counter()

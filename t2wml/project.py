@@ -7,10 +7,12 @@ from shutil import copyfile
 from t2wml.spreadsheets.sheet import SpreadsheetFile
 from t2wml.utils.t2wml_exceptions import FileWithThatNameInProject, FileNotPresentInProject, InvalidProjectDirectory
 from t2wml.settings import DEFAULT_SPARQL_ENDPOINT
+from t2wml.utils.debug_logging import basic_debug
 
 
 
 class Project:
+    @basic_debug
     def __init__(self, directory, title=None, description="", url="",
                     data_files=None, yaml_files=None, wikifier_files=None, entity_files=None,
                     yaml_sheet_associations=None, annotations=None,
@@ -57,6 +59,7 @@ class Project:
     def dataset_id(self):
         return clean_id(self.title)
 
+    @basic_debug
     def _add_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False):
         if os.path.isabs(file_path):
             root=Path(self.directory)
@@ -183,6 +186,7 @@ class Project:
             self.annotations[data_path]={sheet_name:dict(val_arr=[annotation_path], selected=annotation_path)}
         return annotation_path
 
+    @basic_debug
     def _normalize_path(self, file_path):
         root=Path(self.directory)
         full_path=Path(file_path)
@@ -211,6 +215,7 @@ class Project:
                     return True
         return False
     
+    @basic_debug
     def delete_file_from_project(self, file_path, delete_from_fs=False):
         if not self.path_in_files(file_path):
             raise ValueError("The file you are trying to delete does not exist in project")
@@ -255,11 +260,7 @@ class Project:
             except Exception as e:
                 print(e)
                 
-
-
-
-        
-
+    @basic_debug
     def rename_file_in_project(self, old_name, new_name, rename_in_fs=False):
         old_name=self._normalize_path(old_name)
         new_name=self._normalize_path(new_name)
@@ -309,10 +310,7 @@ class Project:
             old_file_path=self.get_full_path(old_name)
             os.rename(old_file_path, new_file_path)
         
-
-    
-
-
+    @basic_debug
     def save(self):
         output_dict=dict(self.__dict__)
         output_dict.pop('directory')
@@ -323,6 +321,7 @@ class Project:
         return proj_file_path
 
     @classmethod
+    @basic_debug
     def load(cls, filepath):
         if os.path.isdir(filepath):
             filepath=os.path.join(filepath, "project.t2wml")

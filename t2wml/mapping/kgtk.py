@@ -8,6 +8,7 @@ from t2wml.utils.date_utils import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.wikification.utility_functions import get_property_type
 from t2wml.wikification.utility_functions import kgtk_to_dict
+from t2wml.utils.debug_logging import basic_debug
 
 class EmptyValueException(Exception):
     pass
@@ -162,7 +163,7 @@ def handle_additional_edges(project, statements):
             result_dict["node2;kgtk:symbol"] = value
     return tsv_data
 
-
+@basic_debug
 def create_kgtk(statements, file_path, sheet_name, project=None):
     file_name = Path(file_path).name
 
@@ -229,6 +230,7 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
     string_stream.close()
     return output
 
+@basic_debug
 def get_all_variables(project, statements, validate_for_datamart=False):
     tsv_data=[]
     tsv_data+=create_metadata_for_project(project)

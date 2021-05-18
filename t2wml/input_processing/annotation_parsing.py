@@ -1,4 +1,3 @@
-from collections import defaultdict
 import os
 import json
 from uuid import uuid4
@@ -10,6 +9,7 @@ import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
 from t2wml.mapping.datamart_edges import clean_id
+from t2wml.utils.debug_logging import basic_debug
 
 COST_MATRIX_DEFAULT = 10
 
@@ -207,6 +207,7 @@ class Block:
 
 
 class Annotation():
+    @basic_debug
     def __init__(self, annotation_blocks_array=None):
         self.annotations_array = self._preprocess_annotation(annotation_blocks_array or [])        
         self.data_annotations = []
@@ -470,6 +471,7 @@ class Annotation():
 
         return qualifier_string
 
+    @basic_debug
     def generate_yaml(self, sheet=None, item_table=None):
         if not self.data_annotations:
             return ["# cannot create yaml without a dependent variable\n"]
@@ -599,6 +601,7 @@ class AnnotationNodeGenerator:
     def get_Pnode(self, property):
         return f"P{self.project_id}-{clean_id(property)}"
 
+    @basic_debug
     def preload(self, sheet, wikifier):
 
 
