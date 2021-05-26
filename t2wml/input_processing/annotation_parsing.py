@@ -14,11 +14,11 @@ from t2wml.utils.debug_logging import basic_debug
 COST_MATRIX_DEFAULT = 10
 
 
-def get_Qnode(project_id, item):
-    return f"Q{project_id}-{clean_id(item)}"
+def get_Qnode(project, item):
+    return f"Q{project.dataset_id}-{clean_id(item)}"
     
-def get_Pnode(project_id, property):
-    return f"P{project_id}-{clean_id(property)}"
+def get_Pnode(project, property):
+    return f"P{project.dataset_id}-{clean_id(property)}"
 
 
 type_suggested_property_mapping={
@@ -591,10 +591,10 @@ class AnnotationNodeGenerator:
         return list(custom_properties), list(custom_items)
     
     def get_Qnode(self, item):
-        return get_Qnode(self.project_id, item)
+        return get_Qnode(self.project, item)
     
     def get_Pnode(self, property):
-        return get_Pnode(self.project_id, property)
+        return get_Pnode(self.project, property)
     
     @property
     def autogen_dir(self):
@@ -603,9 +603,6 @@ class AnnotationNodeGenerator:
             os.makedirs(auto, exist_ok=True)
         return auto
     
-    @property
-    def project_id(self):
-        return clean_id(self.project.title)
     
     @basic_debug
     def preload(self, sheet, wikifier):
