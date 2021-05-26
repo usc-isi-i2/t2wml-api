@@ -1,5 +1,9 @@
 T2WML API History
 ===================================
+Changes in version 0.4.2:
+------------------------
+Small refactors including adding things to api.py
+
 Changes in version 0.4.0:
 ------------------------
 A variety of stability and performance fixes
