@@ -646,7 +646,7 @@ class AnnotationNodeGenerator:
 
         if dataframe_rows:
             df=pd.DataFrame(dataframe_rows, columns=columns)
-            filepath=os.path.join(self.autogen_dir, "wikifier_"+sheet.data_file_name+"_"+sheet.name+".csv")
+            filepath=os.path.join(self.autogen_dir, "autogen_wikifier_"+sheet.data_file_name+".csv")
             if os.path.isfile(filepath):
                 #clear any clashes/duplicates
                 org_df=pd.read_csv(filepath)
@@ -662,7 +662,7 @@ class AnnotationNodeGenerator:
             self.project.add_wikifier_file(filepath, precedence=False)
                 
         #part two: entity creation
-        filepath=os.path.join(self.autogen_dir, "entities_"+sheet.data_file_name+"_"+sheet.name+".tsv")
+        filepath=os.path.join(self.autogen_dir, "autogen_entities_"+sheet.data_file_name+".tsv")
         if os.path.isfile(filepath):
             custom_nodes=kgtk_to_dict(filepath)
         else:
