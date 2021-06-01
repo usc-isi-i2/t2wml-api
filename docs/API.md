@@ -318,7 +318,7 @@ As well as 4 optional functions:
  `get_entity(self, property_id, *args, **kwargs):`
 return any fields (not just data_type) saved under the entity ID as a dictionary. It has a default implementation which just returns {"data_type":data_type} for providers where no other fields are saved
 
-`save_entry(self, entry_id, data_type, **kwargs)` : save property-type pair to whatever source is being used, if relevant. is called by add_entities_from_file, so an error will be raised there if it is not implemented. can also be used in `get_property_type` is the user so desires (for example, SparqlFallback will call this function whenever it had to make a sparql query). Must include **kwargs, user can store whatever additional fields they'd like there, or simply ignore.
+`save_entry(self, entry_id, data_type=None, **kwargs)` : save property-type pair to whatever source is being used, if relevant. is called by add_entities_from_file, so an error will be raised there if it is not implemented. can also be used in `get_property_type` is the user so desires (for example, SparqlFallback will call this function whenever it had to make a sparql query). Must include **kwargs, user can store whatever additional fields they'd like there, or simply ignore.
 
 `def __enter__(self)` : used exclusively with the utility function add_entities_from_file, if there is some setup work that should be done before bulk-adding properties
 
@@ -398,7 +398,7 @@ class DatabaseProvider(FallbackSparql):
     def __init__(self, sparql_endpoint):
         super().__init__(sparql_endpoint)
 
-    def save_entry(self, wd_id, data_type, label=None, description=None, **kwargs):
+    def save_entry(self, wd_id, data_type=None, label=None, description=None, **kwargs):
         return WikidataEntity.add_or_update(wd_id, data_type, label, description, do_session_commit=False)
 
     def try_get_property_type(self, wikidata_property, *args, **kwargs):
