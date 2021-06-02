@@ -48,7 +48,10 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
     elif is_date:
         role="qualifier"
         type="time"
-        children["property"]="P585"
+        children["property"]={"id": "P585", 
+                              "label":"point in time", 
+                              "description": "time and date something took place, existed or a statement was true",
+                              "data_type": "time"}
     
     elif is_numeric:
         if not already_has_var:
