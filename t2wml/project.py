@@ -49,7 +49,13 @@ class Project:
         if not self.entity_file.exists():
             with open(self.entity_file, 'w') as f:
                 f.write("{}")
-            
+    
+    @property
+    def autogen_dir(self):
+        auto= os.path.join(self.directory, "annotations", f"autogen-files-{self.dataset_id}")
+        if not os.path.exists(auto):
+            os.makedirs(auto, exist_ok=True)
+        return auto
     
     @property
     def entity_file(self):

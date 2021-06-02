@@ -531,8 +531,6 @@ class AnnotationNodeGenerator:
     def __init__(self, annotation, project):
         self.annotation=annotation
         self.project=project
-        if not os.path.isdir(self.autogen_dir):
-            os.mkdir(self.autogen_dir)
     
     def _get_units(self, region):
         unit=region.matches.get("unit")
@@ -555,20 +553,20 @@ class AnnotationNodeGenerator:
                 range_properties=set()
                 for row in range(range_property.row_args[0], range_property.row_args[1]+1):
                     for col in range(range_property.col_args[0], range_property.col_args[1]+1):
-                        range_properties.add((row, col, region.type))
-                return list(range_properties)
-            return []
+                        range_properties.add((row, col))
+                return list(range_properties), region.type
+            return [], None
 
     def get_custom_properties_and_qnodes(self):
-        custom_properties=set()
+        custom_properties=list()
         custom_items=set()
 
         data_region, subject_region, qualifier_regions=self.annotation.initialize()
 
         #check all properties
-        custom_properties.update(self._get_properties(data_region))
+        custom_properties.append(self._get_properties(data_region))
         for qualifier_region in qualifier_regions:
-            custom_properties.update(self._get_properties(qualifier_region))
+            custom_properties.append(self._get_properties(qualifier_region))
         
         #check all units
         custom_items.update(self._get_units(data_region))
@@ -588,119 +586,100 @@ class AnnotationNodeGenerator:
                     for col in range(block.col_args[0], block.col_args[1]+1):
                         custom_items.add((row, col))
         
-        return list(custom_properties), list(custom_items)
-    
-    def get_Qnode(self, item):
-        return get_Qnode(self.project, item)
-    
-    def get_Pnode(self, property):
-        return get_Pnode(self.project, property)
-    
-    @property
-    def autogen_dir(self):
-        auto= os.path.join(self.project.directory, "annotations", f"autogen-files-{self.project.dataset_id}")
-        if not os.path.exists(auto):
-            os.makedirs(auto, exist_ok=True)
-        return auto
-    
-    
+        return custom_properties, list(custom_items)
+        
     @basic_debug
     def preload(self, sheet, wikifier):
-
-
         properties, items = self.get_custom_properties_and_qnodes()
+        create_nodes(items, self.project, sheet, wikifier)
+        for property_indices, data_type in properties:
+            if property_indices:
+                create_nodes(property_indices, self.project, sheet, wikifier, True, data_type)
     
-       
-        item_table=wikifier.item_table
-        update_bindings(item_table=item_table, sheet=sheet)
 
-        columns=['row', 'column', 'value', 'context', 'item', 'file', 'sheet']
-        dataframe_rows=[]
-        item_entities=set()
-        property_entities=dict()
+def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type=None):    
+    item_table=wikifier.item_table
+    update_bindings(item_table=item_table, sheet=sheet)
+    
+    columns=['row', 'column', 'value', 'context', 'item', 'file', 'sheet']
+    dataframe_rows=[]
+    created=set()
 
-        #part one: wikification
-        for (row, col) in items:
-            item_string=sheet[row, col]
-            if item_string:
-                try:
-                    exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=item_string)                
-                    if not exists and item_string not in item_entities:
-                        raise ValueError
-                except:
-                    dataframe_rows.append(['', '', item_string, '', self.get_Qnode(item_string), sheet.data_file_name, sheet.name])
-                    item_entities.add(item_string)
-        
-        for (row, col, data_type) in properties:
-            property=sheet[row, col]
-            if property:
-                try:
-                    exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=property)
-                    if not exists and property not in property_entities:
-                        raise ValueError
-                except:
-                    pnode=self.get_Pnode(property)
-                    property_entities[property]=data_type
-                    dataframe_rows.append(['', '', property, '', pnode, sheet.data_file_name, sheet.name])
+    #part one: wikification
+    for (row, col) in indices:
+        label=sheet[row, col]
+        if label:
+            try:
+                exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=label)                
+                if not exists and label not in created:
+                    raise ValueError
+            except:
+                if is_property:
+                    id = get_Pnode(project, label)
+                else:
+                    id=get_Qnode(project, label)
 
-
-        if dataframe_rows:
-            df=pd.DataFrame(dataframe_rows, columns=columns)
-            filepath=os.path.join(self.autogen_dir, "autogen_wikifier_"+sheet.data_file_name+".csv")
-            if os.path.isfile(filepath):
-                #clear any clashes/duplicates
-                org_df=pd.read_csv(filepath)
-                if 'file' not in org_df:
-                    org_df['file']=''
-                if 'sheet' not in org_df:
-                    org_df['sheet']=''
-
-                df=pd.concat([org_df, df]).drop_duplicates(subset=['row', 'column', 'value', 'file', 'sheet'], keep='last').reset_index(drop=True)
-
-            df.to_csv(filepath, index=False, escapechar="")
-            wikifier.add_dataframe(df)
-            self.project.add_wikifier_file(filepath, precedence=False)
-                
-        #part two: entity creation
-        filepath=os.path.join(self.autogen_dir, "autogen_entities_"+sheet.data_file_name+".tsv")
+                dataframe_rows.append([row, col, label, '', id, sheet.data_file_name, sheet.name])
+                created.add((col, row, label))
+    
+    if dataframe_rows:
+        df=pd.DataFrame(dataframe_rows, columns=columns)
+        filepath=os.path.join(project.autogen_dir, "autogen_wikifier_"+sheet.data_file_name+".csv")
         if os.path.isfile(filepath):
-            custom_nodes=kgtk_to_dict(filepath)
-        else:
-            custom_nodes=dict()
+            #clear any clashes/duplicates
+            org_df=pd.read_csv(filepath)
+            if 'file' not in org_df:
+                org_df['file']=''
+            if 'sheet' not in org_df:
+                org_df['sheet']=''
 
-        
-        prov=get_provider()
-        with prov as p:
-            for item in item_entities:
-                node_id=self.get_Qnode(item)
+            df=pd.concat([org_df, df]).drop_duplicates(subset=['row', 'column', 'value', 'file', 'sheet'], keep='last').reset_index(drop=True)
+
+        df.to_csv(filepath, index=False, escapechar="")
+        wikifier.add_dataframe(df)
+        project.add_wikifier_file(filepath)
+    
+    #part two: entity creation
+    filepath=os.path.join(project.autogen_dir, "autogen_entities_"+sheet.data_file_name+".tsv")
+    if os.path.isfile(filepath):
+        custom_nodes=kgtk_to_dict(filepath)
+    else:
+        custom_nodes=dict()
+
+    
+    prov=get_provider()
+    with prov as p:
+        if not is_property:
+            for col, row, label in created:
+                node_id=get_Qnode(label)
                 if node_id not in custom_nodes: #only set to auto if creating fresh
-                    custom_nodes[node_id]={"label":item}
-            for property, data_type in property_entities.items():
-                if property:
-                    node_id = wikifier.item_table.get_item(col, row, sheet=sheet, value=property)
-                    if node_id==self.get_Pnode(property): #it's a custom property
-                        if node_id in custom_nodes: #just update data type
-                            custom_nodes[node_id]["data_type"]=data_type
-                        else:
-                            custom_nodes[node_id]=dict(data_type=data_type, 
-                                        label=property, 
-                                        description="")
-        prov.update_cache(custom_nodes)
-        
-        if custom_nodes:
-            dict_to_kgtk(custom_nodes, filepath)
-            self.project.add_entity_file(filepath, precedence=False)    
-        
-        self.project.save()
+                    custom_nodes[node_id]={"label":label}
+        else:
+            for col, row, label in created:
+                node_id = wikifier.item_table.get_item(col, row, sheet=sheet, value=label)
+                if node_id==get_Pnode(project, label): #it's a custom property
+                    if node_id in custom_nodes: #just update data type
+                        custom_nodes[node_id]["data_type"]=data_type
+                    else:
+                        custom_nodes[node_id]=dict(data_type=data_type, 
+                                    label=label, 
+                                    description="")
+    prov.update_cache(custom_nodes)
+    
+    if custom_nodes:
+        dict_to_kgtk(custom_nodes, filepath)
+        project.add_entity_file(filepath, precedence=False)    
+    
+    project.save()
     
 
-
-        
-        
-
-    
-        
-    
-    
+def create_nodes_from_selection(selection, project, sheet, wikifier, is_property=False, data_type=None):
+    #convenience function to create from selection
+    indices=[]
+    (col1, row1), (col2, row2) = selection
+    for col in range(col1, col2+1):
+        for row in range(row1, row2+1):
+            indices.append((col, row))
+    create_nodes(indices, project, sheet, wikifier, is_property=False, data_type=None)
 
 
