@@ -6,6 +6,12 @@ from t2wml.utils.date_utils import parse_datetime
 from t2wml.parsing.cleaning_functions import strict_make_numeric
 from t2wml.utils.debug_logging import basic_debug
 
+time_property_node = {"id": "P585", 
+                "label":"point in time", 
+                "description": "time and date something took place, existed or a statement was true",
+                "data_type": "time"}
+
+
 def get_types(cell_content):
     cell_content=str(cell_content).strip()
     is_country = cell_content in countries or cell_content.lower() in countries
@@ -48,10 +54,7 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
     elif is_date:
         role="qualifier"
         type="time"
-        children["property"]={"id": "P585", 
-                              "label":"point in time", 
-                              "description": "time and date something took place, existed or a statement was true",
-                              "data_type": "time"}
+        children["property"]=time_property_node
     
     elif is_numeric:
         if not already_has_var:
@@ -150,7 +153,7 @@ class HistogramSelection:
                     "selection":dict(x1=date_block[0][1]+1, y1=date_block[0][0]+1, x2= date_block[1][1]+1, y2=date_block[1][0]+1),
                     "role":"qualifier",
                     "type": "time",
-                    "property": "P585"
+                    "property": time_property_node
             })
 
         if country_block:
