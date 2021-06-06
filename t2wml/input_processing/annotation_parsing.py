@@ -651,7 +651,7 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
     with prov as p:
         if not is_property:
             for col, row, label in created:
-                node_id=get_Qnode(label)
+                node_id=get_Qnode(project, label)
                 if node_id not in custom_nodes: #only set to auto if creating fresh
                     custom_nodes[node_id]={"label":label}
         else:
