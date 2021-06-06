@@ -21,11 +21,6 @@ def get_Pnode(project, property):
     return f"P{project.dataset_id}-{clean_id(property)}"
 
 
-type_suggested_property_mapping={
-    #"quantity": "P1114",
-    "time": "P585",
-    #"monolingualtext": "P2561",
-}
 
 
 def normalize_rectangle(annotation):
@@ -91,6 +86,14 @@ class Block:
         self.cell_args = self.get_cell_args(self.selection)
         self.matches = {} #a dictionary of "unit", "property", etc which links to other blocks
     
+    def get_from_annotation(self, key, *args, **kwargs):
+        val = self.annotation.get(key, None)
+        try:
+            return val["id"] #if its a node
+        except:
+            return val
+
+
     def create_link(self, linked_block):
         linked_block.matches[self.role] = self
         self.annotation["link"] = linked_block.id
@@ -326,7 +329,7 @@ class Annotation():
                 match_targets.remove(target)
 
             # no assigning dynamic to what already has const
-            const_role=target.annotation.get(role, False)
+            const_role=target.get_from_annotation(role)
             if const_role:
                 match_targets.remove(target)
 
@@ -401,7 +404,7 @@ class Annotation():
             self._run_cost_matrix(self.unit_annotations, [self.data_annotations, self.qualifier_annotations])
             data_annotations=self.data_annotations[0] if self.data_annotations else []
             subject_annotations=self.subject_annotations[0] if self.subject_annotations else []
-            if subject_annotations and not data_annotations.annotation.get("subject"):
+            if subject_annotations and not data_annotations.get_from_annotation("subject"):
                 subject_annotations.create_link(data_annotations)
             self.has_been_initialized=True
             self.data_annotations=data_annotations
@@ -410,7 +413,7 @@ class Annotation():
         return self.data_annotations, self.subject_annotations, self.qualifier_annotations
 
     def get_optionals_and_property(self, region, use_q):
-        const_property=region.annotation.get("property", None)
+        const_property=region.get_from_annotation("property")
         if const_property:
             propertyLine=str(const_property)
         else:
@@ -493,7 +496,7 @@ class Annotation():
                 dataLine= "=value[$col, $row]"
 
         region = "range: {range_str}".format(range_str=data_region.range_str)
-        if data_region.annotation.get("subject"):
+        if data_region.get_from_annotation("subject"):
             mainSubjectLine="" #no need to do anything, will be added when adding fields
         elif subject_region:
             mainSubjectLine = "subject: "+subject_region.get_expression(data_region)
@@ -544,7 +547,7 @@ class AnnotationNodeGenerator:
 
 
     def _get_properties(self, region):
-        #const_property=region.annotation.get("property")
+        #const_property=region.annotation.get_from_annotation("property")
         #if const_property:
         #    return [ (const_property, region.type)]
         #else:
