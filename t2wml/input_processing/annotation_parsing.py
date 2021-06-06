@@ -679,7 +679,7 @@ def create_nodes_from_selection(selection, project, sheet, wikifier, is_property
     (col1, row1), (col2, row2) = selection
     for col in range(col1, col2+1):
         for row in range(row1, row2+1):
-            indices.append((col, row))
-    create_nodes(indices, project, sheet, wikifier, is_property=False, data_type=None)
+            indices.append((row, col))
+    create_nodes(indices, project, sheet, wikifier, is_property=is_property, data_type=data_type)
 
 
