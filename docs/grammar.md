@@ -227,13 +227,13 @@ Either or both could be a range: `value[A:D, 4]`, `value[A:D, 3:5]`
 
 And they can use the reserved values $col, $row, and $n: `value[A:$col, $row+$n]`
 
-`item[col, row]` retrieves the wikidata item(s) based on the cell contents for the cell/s indicated by col, row
+`item[col, row, (context)]` retrieves the wikidata item(s) based on the cell contents for the cell/s indicated by col, row (and optionally context)
 
-If the data cell contains the string "Burundi", for example, then item will retrieve the qnode "Q1000".
+Thus, if you have wikified a cell with the string "Burundi" to the node "Q1000", then the item expression will retrieve the qnode "Q1000".
 
 Be aware that when item[] values are being processed in boolean expressions, they are treated as the string representation of the qnode, ie, again "Q1000". Attempting to check whether item[col, row]=="Burundi" will fail, you need to check whether item[col, row]=="Q1000".
 
-In order for item to work the user must have uploaded a wikifier file.
+item only retrieves alues for cells that have been wikified.
 
 The valid col/row arguments are the same as for value. 
 
