@@ -2,8 +2,9 @@ import json
 import os
 import unittest
 from pathlib import Path
-from t2wml.api import KnowledgeGraph
+from t2wml.api import KnowledgeGraph, Sheet
 from t2wml.wikification.utility_functions import add_entities_from_file
+from t2wml.wikification.item_table import convert_old_wikifier_to_new
 
 repo_folder = Path(__file__).parents[2]
 unit_test_folder = os.path.join(
@@ -47,9 +48,11 @@ class TestHomicideData(JsonTest):
         yaml_name = sheet_name+".yaml"
         expected_result_name = sheet_name+".json"
         yaml_file = os.path.join(self.yaml_folder, yaml_name)
+        sheet=Sheet(self.data_file, sheet_name)
+        convert_old_wikifier_to_new(self.wikifier_file, sheet, self.wikifier_file+sheet_name+".csv")
 
         kg = KnowledgeGraph.generate_from_files(
-            self.data_file, sheet_name, yaml_file, self.wikifier_file)
+            self.data_file, sheet_name, yaml_file, self.wikifier_file+sheet_name+".csv")
         result = kg.get_output("json")
         result_dict = json.loads(result)
 
@@ -148,6 +151,8 @@ class TestBelgiumRegex(JsonTest):
     def test_regex(self):
         yaml_file = self.yaml_file
         sheet_name = "Belgium.csv"
+        sheet=Sheet(self.data_file, sheet_name)
+        convert_old_wikifier_to_new(self.wikifier_file, sheet, self.wikifier_file)
         kg = KnowledgeGraph.generate_from_files(
             self.data_file, sheet_name, yaml_file, self.wikifier_file)
         result = kg.get_output("json")
@@ -170,6 +175,8 @@ class TestErrorCatching(JsonTest):
     def test_error(self):
         yaml_file = self.yaml_file
         sheet_name = "input_1.csv"
+        sheet=Sheet(self.data_file, sheet_name)
+        convert_old_wikifier_to_new(self.wikifier_file, sheet, self.wikifier_file+sheet_name+".csv")
         kg = KnowledgeGraph.generate_from_files(
             self.data_file, sheet_name, yaml_file, self.wikifier_file)
         result = kg.get_output("json")
