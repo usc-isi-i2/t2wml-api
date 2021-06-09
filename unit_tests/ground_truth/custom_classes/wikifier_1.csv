@@ -1,8 +1,13 @@
-column,row,value,context,item
-,,Burundi,,Q967
-,,Comoros,,Q970
-,,Djibouti,,Q977
-,,SDG,,Q7649586
-,,GHD Estimate,,Q6039400
-,,Females,,Q6581072
-,,Males,,Q6581097
+,row,column,value,context,item,sheet,file
+0,2,0,Burundi,,Q967,Sheet1,Book1.xlsx
+1,2,2,Burundi,,Q967,Sheet1,Book1.xlsx
+2,3,0,Burundi,,Q967,Sheet1,Book1.xlsx
+3,3,2,Burundi,,Q967,Sheet1,Book1.xlsx
+4,4,0,Comoros,,Q970,Sheet1,Book1.xlsx
+5,4,2,Comoros,,Q970,Sheet1,Book1.xlsx
+6,5,0,Comoros,,Q970,Sheet1,Book1.xlsx
+7,5,2,Comoros,,Q970,Sheet1,Book1.xlsx
+8,6,0,Djibouti,,Q977,Sheet1,Book1.xlsx
+9,6,2,Djibouti,,Q977,Sheet1,Book1.xlsx
+10,7,0,Djibouti,,Q977,Sheet1,Book1.xlsx
+11,7,2,Djibouti,,Q977,Sheet1,Book1.xlsx

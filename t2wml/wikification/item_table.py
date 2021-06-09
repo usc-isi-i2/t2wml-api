@@ -7,7 +7,7 @@ from t2wml.utils.bindings import bindings
 from t2wml.utils.debug_logging import basic_debug
 
 
-class ItemTable:
+class OldItemTable:
     def __init__(self, lookup_table={}):
         self.lookup_table = defaultdict(dict, lookup_table)
 
@@ -114,6 +114,89 @@ class ItemTable:
             return overwritten
 
 
+class ItemTable:
+    def __init__(self, lookup_table={}):
+        self.lookup_table = defaultdict(dict, lookup_table)
+
+    def lookup_func(self, context, file, sheet, column, row, value):
+        lookup = self.lookup_table.get(context)
+        if not lookup:
+            raise ItemNotFoundException(
+                "Search for cell item failed. (No values defined for context: {})".format(context))
+
+        key = str((file, sheet, column, row, value))
+        try:
+            return lookup[key]
+        except KeyError:
+             raise ValueError("Not found")
+    
+    @basic_debug
+    def get_item(self, column:int, row:int, context:str='', sheet=None, value=None):
+        if not sheet:
+            sheet = bindings.excel_sheet
+        file=sheet.data_file_name
+        sheet_name=sheet.name
+        if value is None:
+            value = str(sheet[row, column])
+        try:
+            item = self.lookup_func(context, file, sheet_name, column, row, value)
+            return item
+        except ValueError:
+            return None  # currently this is what the rest of the API expects. could change later
+        #   raise ItemNotFoundException("Item for cell "+to_excel(column, row)+"("+value+")"+"with context "+context+" not found")
+
+    
+    def get_item_by_string(self, value: str, context:str=''):
+        raise ValueError("get_item_by_string has been deprecated, if you need to use the old item table use OldItemTable")
+    
+    def get_cell_info(self, column, row, sheet):
+        # used to serialize table
+        bindings.excel_sheet = sheet
+        for context in self.lookup_table:
+            value= bindings.excel_sheet[row, column]
+            item = self.get_item(column, row, context, sheet=sheet, value=value)
+            if item:
+                return item, context, value
+        return None, None, None
+    
+    @basic_debug
+    def update_table_from_dataframe(self, df: DataFrame):
+            df = df.fillna('')
+            df = df.replace(r'^\s+$', '', regex=True)
+            overwritten = {}
+            for entry in df.itertuples():
+                column = entry.column
+                row = entry.row
+                value = str(entry.value)
+                context = entry.context
+                item = entry.item
+                try:
+                    file = entry.file
+                    sheet= entry.sheet
+                except:
+                    raise ValueError("Missing file and sheet. If you are trying to use the old \
+                    ItemTable, you will need to use OldItemTable")
+
+                if (column=="" or row=="" or value=="" or file=="" or sheet==""):
+                    raise ValueError("All of the fields: column, row, file, sheet, value are required \
+                        if you meant to use the old item table, use OldItemTable")
+                if not item:
+                    raise ValueError("missing item id")
+
+
+                column = int(column)
+                row = int(row)
+                key = str((file, sheet, column, row, value))
+                if self.lookup_table[context].get(key):
+                    overwritten[key] = self.lookup_table[context][key]
+                self.lookup_table[context][key] = item
+
+            if len(overwritten):
+                print(f"Wikifier update overwrote {len(overwritten)} existing values")
+            return overwritten
+
+
+
 class Wikifier:
     def __init__(self):
         self.wiki_files = []
@@ -164,12 +247,12 @@ class Wikifier:
         Returns:
             dict: a dictionary describing which item definitions were already present and overwritten
         """
-        expected_columns = set(['row', 'column', 'value', 'context', 'item'])
+        expected_columns = set(['row', 'column', 'value', 'context', 'item', "sheet", "file"])
         columns = set(df.columns)
         missing_columns = expected_columns.difference(columns)
         if len(missing_columns):
             raise ValueError(
-                "Dataframe for wikifier must contain all 5 expected columns")
+                "Dataframe for wikifier must contain all 7 expected columns")
         try:
             overwritten = self.item_table.update_table_from_dataframe(df)
         except Exception as e:
@@ -212,3 +295,73 @@ class Wikifier:
         wikifier._data_frames = [pd.read_json(
             json_string) for json_string in wiki_args["dataframes"]]
         return wikifier
+
+
+
+def convert_old_wikifier_to_new(wikifier_file, sheet, out_file=None):
+    df = pd.read_csv(wikifier_file)
+    df = df.fillna('')
+    df = df.replace(r'^\s+$', '', regex=True)
+    new_rows=[]
+    columns=['row', 'column', 'value', 'context', 'item', "sheet", "file"]
+    for entry in df.itertuples():
+            column = entry.column
+            row = entry.row
+            value = str(entry.value)
+            context = entry.context or ""
+            item = entry.item
+            
+            if not item:
+                raise ValueError("missing item")
+            
+            if column:
+                column=int(column)
+            if row:
+                row=int(row)
+            
+            if column!="" and row!="" and value!="":
+                new_rows.append([row, column, value, context, item, sheet.name, sheet.data_file_name])
+                continue
+
+            if not value:
+                if (column=="" and row==""):
+                    raise ValueError("cannot leave row and column and value all unspecified")
+                try:
+                    value = sheet[row, column]
+                    new_rows.append([row, column, value, context, item, sheet.name, sheet.data_file_name])
+                except:
+                    print("row+col outside of sheet bounds, skipping")
+                continue
+            
+            if (column=="" and row==""):
+                for r in range(sheet.row_len):
+                    for c in range(sheet.col_len):
+                        if sheet[r, c] == value:
+                            new_rows.append([r, c, value, context, item, sheet.name, sheet.data_file_name])
+                continue
+            
+            if row!="":
+                for c in range(sheet.col_len):
+                    if sheet[row, c] ==  value:
+                        new_rows.append([row, c, value, context, item, sheet.name, sheet.data_file_name])
+                continue
+
+            if column!="":
+                for r in range(sheet.row_len):
+                    if sheet[r, column] ==  value:
+                        new_rows.append([r, column, value, context, item, sheet.name, sheet.data_file_name])
+                continue
+
+            
+
+
+    new_df = pd.DataFrame(new_rows, columns=columns)
+    if out_file:
+        new_df.to_csv(out_file, index=False)
+    return new_df
+        
+
+        
+    
+
+

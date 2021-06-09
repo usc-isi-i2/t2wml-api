@@ -627,20 +627,9 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
     
     if dataframe_rows:
         df=pd.DataFrame(dataframe_rows, columns=columns)
-        filepath=os.path.join(project.autogen_dir, "autogen_wikifier_"+sheet.data_file_name+".csv")
-        if os.path.isfile(filepath):
-            #clear any clashes/duplicates
-            org_df=pd.read_csv(filepath)
-            if 'file' not in org_df:
-                org_df['file']=''
-            if 'sheet' not in org_df:
-                org_df['sheet']=''
-
-            df=pd.concat([org_df, df]).drop_duplicates(subset=['row', 'column', 'value', 'file', 'sheet'], keep='last').reset_index(drop=True)
-
-        df.to_csv(filepath, index=False, escapechar="")
+        project.add_df_to_wikifier_file(sheet.data_file_path, df)
         wikifier.add_dataframe(df)
-        project.add_wikifier_file(filepath)
+        
     
     #part two: entity creation
     filepath=os.path.join(project.autogen_dir, "autogen_entities_"+sheet.data_file_name+".tsv")

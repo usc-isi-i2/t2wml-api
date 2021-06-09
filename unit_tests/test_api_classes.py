@@ -1,4 +1,8 @@
 import os
+from t2wml.wikification.wikidata_provider import DictionaryProvider
+import pandas as pd
+from t2wml.api import Sheet
+from t2wml.wikification.item_table import convert_old_wikifier_to_new
 from t2wml.utils.t2wml_exceptions import FileNotPresentInProject
 import unittest
 from pathlib import Path
@@ -12,32 +16,25 @@ unit_test_folder = os.path.join(
 class ClassesTest(unittest.TestCase):
     def test_wikifier(self):
         import pandas as pd
-        from t2wml.api import Wikifier
+        from t2wml.api import Wikifier, Sheet
         test_folder = os.path.join(unit_test_folder, "error-catching")
         wikifier_file = os.path.join(test_folder, "wikifier_1.csv")
+        sheet = Sheet(os.path.join(test_folder, "input_1.csv"), "input_1.csv")
+        #convert_old_wikifier_to_new(wikifier_file, sheet, wikifier_file)
+
         output_file = os.path.join(test_folder, "test_save_wf")
 
         wf = Wikifier()
         wf.add_file(wikifier_file)
-        df = pd.DataFrame.from_dict({"column": [''], "row": [''],
-                                     "value": 'Burundi', "item": ['Q99'], "context": ['']})
+        df = pd.DataFrame.from_dict({"column": ['0'], "row": ['5'],
+                                     "value": 'Comoros', "item": ['Q99'], "context": [''], 
+                                     "file":["input_1.csv"], "sheet":["input_1.csv"]})
         wf.add_dataframe(df)
         wf.save(output_file)
         new_wf = Wikifier.load(output_file)
-        item = new_wf.item_table.get_item_by_string('Burundi')
+        assert new_wf.item_table.get_item(0, 3, sheet=sheet) == "Q967"
+        assert new_wf.item_table.get_item(0, 5, sheet=sheet) == "Q99"
 
-    def xtest_wikifier_service(self):
-        # removing test until endpoint is not down anymore
-        from t2wml.api import Wikifier, WikifierService, Sheet
-        test_folder = os.path.join(unit_test_folder, "error-catching")
-        data_file = os.path.join(test_folder, "input_1.csv")
-        region = "A4:C8"
-        sheet = Sheet(data_file, "input_1.csv")
-        ws = WikifierService()
-        df, problem_cells = ws.wikify_region(region, sheet)
-        wf = Wikifier()
-        wf.add_dataframe(df)
-        wf.item_table.get_item(0, 5, sheet=sheet)
 
     def test_custom_statement_mapper(self):
         from t2wml.mapping.statement_mapper import StatementMapper
@@ -57,7 +54,7 @@ class ClassesTest(unittest.TestCase):
                 error = {}
                 statement = {}
                 try:
-                    item = wikifier.item_table.get_item(col-1, row)
+                    item = wikifier.item_table.get_item(col-1, row, sheet=sheet)
                     statement["subject"] = item
                 except Exception as e:
                     error["subject"] = str(e)
@@ -76,9 +73,11 @@ class ClassesTest(unittest.TestCase):
         data_file = os.path.join(test_folder, "Book1.xlsx")
         sheet_name = "Sheet1"
         wikifier_file = os.path.join(test_folder, "wikifier_1.csv")
+        
 
         ym = SimpleSheetMapper([1, 3], [2, 3, 4, 5, 6, 7])
         sh = Sheet(data_file, sheet_name)
+        #convert_old_wikifier_to_new(wikifier_file, sh, wikifier_file)
         wf = Wikifier()
         wf.add_file(wikifier_file)
         kg = KnowledgeGraph.generate(ym, sh, wf)
@@ -91,19 +90,24 @@ class ClassesTest(unittest.TestCase):
         w_file = os.path.join(test_folder, "wikifier_1.csv")
 
         sheet = Sheet(data_file, "input_1.csv")
+        #convert_old_wikifier_to_new(w_file, sheet, w_file)
         ym = YamlMapper(yaml_file)
         wf = Wikifier()
         wf.add_file(w_file)
         kg = KnowledgeGraph.generate(ym, sheet, wf)
 
 class ProjectTest(unittest.TestCase):
-    def test_project_single(self):
+    def test_project_asingle(self):
         from t2wml.api import Project
         project_folder=os.path.join(unit_test_folder, "homicide")
         sp=Project(project_folder)
         sp.add_data_file("homicide_report_total_and_sex.xlsx")
         sp.add_entity_file("homicide_properties.tsv")
-        sp.add_wikifier_file("wikifier_general.csv")
+        wikifier_file = os.path.join(project_folder, "unit_wikifier_general.csv")
+        sh = Sheet(os.path.join(project_folder, "homicide_report_total_and_sex.xlsx"), "table-1a")
+        #convert_old_wikifier_to_new(wikifier_file, sh, wikifier_file)
+        df = pd.read_csv(wikifier_file)
+        sp.add_df_to_wikifier_file("homicide_report_total_and_sex.xlsx", df)
         yaml_file=sp.add_yaml_file(os.path.join("t2wml","table-1a.yaml"))
         sp.associate_yaml_with_sheet(yaml_file, "homicide_report_total_and_sex.xlsx", "table-1a")
         save_file=sp.save()
@@ -120,7 +124,9 @@ class ProjectTest(unittest.TestCase):
         sp=Project(project_folder)
         data_file1=sp.add_data_file("homicide_report_total_and_sex.xlsx")
         sp.add_entity_file("homicide_properties.tsv")
-        sp.add_wikifier_file("wikifier_general.csv")
+        wikifier_file = os.path.join(project_folder, "wikifier_general.csv")
+        df = pd.read_csv(wikifier_file)
+        sp.add_df_to_wikifier_file("homicide_report_total_and_sex.xlsx", df)
         for file_name in os.listdir(yaml_folder):
             yaml_file=os.path.join("t2wml", file_name)
             sheet_name=file_name.split(".")[0]
@@ -133,7 +139,6 @@ class ProjectTest(unittest.TestCase):
         properties_file = os.path.join(test_folder, "kgtk_properties.tsv")
         sp.add_entity_file(properties_file, copy_from_elsewhere=True, overwrite=True)
         data_file2 = sp.add_data_file(os.path.join(test_folder, "oecd.xlsx"), copy_from_elsewhere=True, overwrite=True)
-        wikifier_filepath1 = os.path.join(test_folder, "country-wikifier.csv")
         yaml_filepath = sp.add_yaml_file(os.path.join(test_folder, "oecd.yaml"), copy_from_elsewhere=True, overwrite=True)
         spreadsheet_file=SpreadsheetFile(os.path.join(project_folder, "oecd.xlsx"))
         for sheet_name in spreadsheet_file:
@@ -145,17 +150,26 @@ class ProjectTest(unittest.TestCase):
         
 class SheetsWithCachingTest(unittest.TestCase):
     def test_with_caching(self):
-        from t2wml.api import t2wml_settings, SpreadsheetFile, create_output_from_files
+        from t2wml.api import t2wml_settings, Sheet, create_output_from_files
+        from t2wml.api import t2wml_settings
+        from t2wml.wikification.utility_functions import kgtk_to_dict
+        prop_dict=kgtk_to_dict(os.path.join(unit_test_folder, "homicide", "homicide_properties.tsv"))
+        t2wml_settings.wikidata_provider.update_cache(prop_dict)
         cache_folder=os.path.join(unit_test_folder, "tmp")
         if not os.path.exists(cache_folder):
             os.mkdir(cache_folder)
         t2wml_settings.cache_data_files_folder=cache_folder
         data_file_path=os.path.join(unit_test_folder, "homicide", "homicide_report_total_and_sex.xlsx")
+        wikifier_filepath=os.path.join(unit_test_folder, "homicide", "unit_wikifier_general.csv")
         sheet_name="table-1a"
+        sheet=Sheet(data_file_path, sheet_name)
+        convert_old_wikifier_to_new(wikifier_filepath, sheet, wikifier_filepath)
         yaml_file_path=os.path.join(unit_test_folder, "homicide", "t2wml", "table-1a.yaml")
-        wikifier_filepath=os.path.join(unit_test_folder, "homicide", "wikifier_general.csv")
+
         output_filepath=os.path.join(unit_test_folder, "homicide", "results", "table-1a.tsv")
         output=create_output_from_files(data_file_path, sheet_name, yaml_file_path, wikifier_filepath, output_format="tsv")
+        #with open(output_filepath, 'w') as f:
+        #    f.write(output)
         with open(output_filepath, 'r') as f:
             expected=f.read()
         assert output==expected

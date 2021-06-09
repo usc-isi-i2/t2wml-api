@@ -1,5 +1,7 @@
 # The T2WML API: A programmatic way of using T2WML
 
+last updated Jun 06 2021 - version 0.4.3
+
 * [Examples of using the API](#examples)
 * [Convenience Functions](#convenience)
 * [The Project Class](#project)
@@ -146,7 +148,7 @@ Adding wikification information is order-sensitive, because later additions will
 A wikifier can be saved to a file with the function `save(filename)` and then loaded from that file with `load(filename)`
 The wikifier keeps track of the filepaths of any files added with add_file, and keeps a list of all of its dataframes (those loaded from a file and those loaded directly). 
 
-Internally, the wikifier creates an ItemTable, for looking up items by string or by cell, and is used extensively in creating statements.
+Internally, the wikifier creates an ItemTable, for looking up an item attached to a cell, and is used extensively in creating statements.
 
 Example code:
 
@@ -279,7 +281,7 @@ class SimpleSheetMapper(StatementMapper):
         error={}
         statement={}
         try:
-            item=wikifier.item_table.get_item(col-1, row)
+            item=wikifier.item_table.get_item(col-1, row, sheet=sheet)
             statement["subject"]=item
         except Exception as e:
             error["subject"]=str(e)

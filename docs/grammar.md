@@ -227,13 +227,13 @@ Either or both could be a range: `value[A:D, 4]`, `value[A:D, 3:5]`
 
 And they can use the reserved values $col, $row, and $n: `value[A:$col, $row+$n]`
 
-`item[col, row]` retrieves the wikidata item(s) based on the cell contents for the cell/s indicated by col, row
+`item[col, row, (context)]` retrieves the wikidata item(s) based on the cell contents for the cell/s indicated by col, row (and optionally context)
 
-If the data cell contains the string "Burundi", for example, then item will retrieve the qnode "Q1000".
+Thus, if you have wikified a cell with the string "Burundi" to the node "Q1000", then the item expression will retrieve the qnode "Q1000".
 
 Be aware that when item[] values are being processed in boolean expressions, they are treated as the string representation of the qnode, ie, again "Q1000". Attempting to check whether item[col, row]=="Burundi" will fail, you need to check whether item[col, row]=="Q1000".
 
-In order for item to work the user must have uploaded a wikifier file.
+item only retrieves alues for cells that have been wikified.
 
 The valid col/row arguments are the same as for value. 
 
@@ -329,19 +329,6 @@ The regex function uses Python's [re.search() function](https://docs.python.org/
 <span id="other"></span>
 
 Functions which do not behave like boolean functions or like string modifiers.
-
-`get_item(input(, context))`
-
-get_item receives an input which can be resolved to a string (for example, a value, the output of any string modifer, or just a string).
-
-It optionally receives a context-- if no context is provided, the default context (`"__NO_CONTEXT__"`) is used.
-
-It then looks up this string in the item table. If the string is not present in the item table it will return an error. Otherwise, it returns the item from the item table.
-
-Obviously the preferred way to get an item from a string is to use the wikifier. `get_item` was created for situations where simply grabbing the string from a cell was not sufficient, for example, if it is necessary to use a regex on the cell to get the needed string.
-
-example: `subject: '=get_item(regex(value[B, 2], "profile: (.*) \d{4}", 1))'`
-
 
 `concat(*args)`
 
