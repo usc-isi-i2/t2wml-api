@@ -7,7 +7,7 @@ from t2wml.mapping.statement_mapper import YamlMapper, StatementMapper, Annotati
 from t2wml.wikification.wikifier_service import WikifierService
 from t2wml.wikification.wikidata_provider import SparqlProvider, DictionaryProvider, WikidataProvider
 from t2wml.knowledge_graph import KnowledgeGraph, create_output_from_files
-from t2wml.project import Project, ProjectWithSavedState
+from t2wml.project import Project
 from t2wml.input_processing.annotation_parsing import Annotation, AnnotationNodeGenerator, get_Pnode, get_Qnode
 from t2wml.input_processing.annotation_suggesting import block_finder, annotation_suggester
 

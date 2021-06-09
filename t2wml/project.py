@@ -1,3 +1,4 @@
+from t2wml.wikification.item_table import convert_old_wikifier_to_new
 from t2wml.mapping.datamart_edges import clean_id
 import yaml
 import os
@@ -15,7 +16,7 @@ from t2wml.utils.debug_logging import basic_debug
 class Project:
     @basic_debug
     def __init__(self, directory, title=None, description="", url="",
-                    data_files=None, yaml_files=None, entity_files=None,
+                    data_files=None, yaml_files=None, entity_files=None, wikifier_files=None,
                     yaml_sheet_associations=None, annotations=None,
                     sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False, handle_calendar="leave",
                     cache_id=None,
@@ -51,6 +52,12 @@ class Project:
 
         if not os.path.isdir(os.path.join(self.directory, "wikifiers")):
             os.mkdir(os.path.join(self.directory, "wikifiers"))
+        
+        if wikifier_files:
+            warnings.warn("wikifier files are being removed from project", DeprecationWarning)
+            for wf in wikifier_files:
+                wf_path = self.get_full_path(wf)
+                self.add_old_style_wikifier_to_project(wf_path)
 
     
     @property
@@ -207,18 +214,21 @@ class Project:
     
     def get_wikifier_file(self, data_file_path):
         data_file_path=self._normalize_path(data_file_path)
-        wikifier_name=data_file_path.replace(".", "") + ".csv"
+        wikifier_name=clean_id(data_file_path) + ".csv"
         wikifier_file_path=os.path.join(self.directory, "wikifiers", wikifier_name)
         if os.path.exists(wikifier_file_path):
             return wikifier_file_path, True
         return wikifier_file_path, False
     
-    def add_df_to_wikifier_file(self, data_file_path, df):
-        wikifier_file_path=self.get_wikifier_file(data_file_path)
-        if os.path.isfile(wikifier_file_path):
+    def add_df_to_wikifier_file(self, data_file_path, df, overwrite_existing=False):
+        wikifier_file_path, exists=self.get_wikifier_file(data_file_path)
+        if exists:
             #clear any clashes/duplicates
             org_df=pd.read_csv(wikifier_file_path)
-            df=pd.concat([org_df, df]).drop_duplicates(subset=['row', 'column', 'value', 'file', 'sheet'], keep='last').reset_index(drop=True)
+            keep='first'
+            if overwrite_existing:
+                keep='last'
+            df=pd.concat([org_df, df]).drop_duplicates(subset=['row', 'column', 'value', 'file', 'sheet'], keep=keep).reset_index(drop=True)
 
         df.to_csv(wikifier_file_path, index=False, escapechar="")
 
@@ -356,3 +366,13 @@ class Project:
             raise ValueError("Was not able to initialize project from the yaml file: "+str(e))
         return proj
 
+
+    def add_old_style_wikifier_to_project(self, wikifier_file):
+        for datafile in self.data_files:
+            sf = SpreadsheetFile(self.get_full_path(datafile))
+            for sheet_name in sf:
+                sheet=sf[sheet_name]
+                wikifier_file_path, exists = self.get_wikifier_file(datafile)
+                if not exists:
+                    dataframe = convert_old_wikifier_to_new(wikifier_file, sheet, wikifier_file_path)
+                    self.add_df_to_wikifier_file(datafile, dataframe)

@@ -305,47 +305,54 @@ def convert_old_wikifier_to_new(wikifier_file, sheet, out_file=None):
     new_rows=[]
     columns=['row', 'column', 'value', 'context', 'item', "sheet", "file"]
     for entry in df.itertuples():
-        column = entry.column
-        row = entry.row
-        value = str(entry.value)
-        context = entry.context or ""
-        item = entry.item
-        
-        if not item:
-            raise ValueError("missing item")
-        
-        if column!="" and row!="" and value!="":
-            new_rows.append([row, column, value, context, item, sheet.name, sheet.data_file_name])
-            continue
-
-        if not value:
-            if (column=="" and row==""):
-                raise ValueError("cannot leave row and column and value all unspecified")
-            try:
-                value = sheet[row, column]
+            column = entry.column
+            row = entry.row
+            value = str(entry.value)
+            context = entry.context or ""
+            item = entry.item
+            
+            if not item:
+                raise ValueError("missing item")
+            
+            if column:
+                column=int(column)
+            if row:
+                row=int(row)
+            
+            if column!="" and row!="" and value!="":
                 new_rows.append([row, column, value, context, item, sheet.name, sheet.data_file_name])
-            except:
-                print("row+col outside of sheet bounds, skipping")
-            continue
-        
-        if (column=="" and row==""):
-            for r in range(sheet.row_len):
-                for c in range(sheet.col_len):
-                    if sheet[r, c] == value:
-                        new_rows.append([r, c, value, context, item, sheet.name, sheet.data_file_name])
-            continue
-        
-        if row!="":
-            for c in range(sheet.col_len):
-                if sheet[row, c] ==  value:
-                    new_rows.append([row, c, value, context, item, sheet.name, sheet.data_file_name])
-            continue
+                continue
 
-        if column!="":
-            for r in range(sheet.row_len):
-                if sheet[r, column] ==  value:
-                    new_rows.append([r, column, value, context, item, sheet.name, sheet.data_file_name])
-            continue
+            if not value:
+                if (column=="" and row==""):
+                    raise ValueError("cannot leave row and column and value all unspecified")
+                try:
+                    value = sheet[row, column]
+                    new_rows.append([row, column, value, context, item, sheet.name, sheet.data_file_name])
+                except:
+                    print("row+col outside of sheet bounds, skipping")
+                continue
+            
+            if (column=="" and row==""):
+                for r in range(sheet.row_len):
+                    for c in range(sheet.col_len):
+                        if sheet[r, c] == value:
+                            new_rows.append([r, c, value, context, item, sheet.name, sheet.data_file_name])
+                continue
+            
+            if row!="":
+                for c in range(sheet.col_len):
+                    if sheet[row, c] ==  value:
+                        new_rows.append([row, c, value, context, item, sheet.name, sheet.data_file_name])
+                continue
+
+            if column!="":
+                for r in range(sheet.row_len):
+                    if sheet[r, column] ==  value:
+                        new_rows.append([r, column, value, context, item, sheet.name, sheet.data_file_name])
+                continue
+
+            
 
 
     new_df = pd.DataFrame(new_rows, columns=columns)
