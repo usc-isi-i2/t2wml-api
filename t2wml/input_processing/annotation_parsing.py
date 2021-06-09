@@ -136,7 +136,7 @@ class Block:
         return True
 
     def __repr__(self):
-        return self.range_str + "::" + str(self.property_alignment)
+        return self.range_str + "::" +  str(self.role)
 
     def __str__(self):
         return self.__repr__()
