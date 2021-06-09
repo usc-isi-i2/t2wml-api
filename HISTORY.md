@@ -1,5 +1,11 @@
 T2WML API History
 ===================================
+Changes in version 0.4.3:
+------------------------
+* some changes to suggestion format
+* annotation can accept a node dictionary or a node id string
+* changes to autonode creation
+
 Changes in version 0.4.2:
 ------------------------
 Small refactors including adding things to api.py
