@@ -5,7 +5,7 @@ statementMapping:
       skip_cells:
         - =value[$col, $row] == " .."
   template:
-    subject: '=get_item(regex(value[B, 2], "profile: (.*) \d{4}", 1))' 
+    subject: 'Q31' 
     property: P1082
     value: =replace_regex(value[$col, $row], "[^\d.-]", "")
     qualifier:

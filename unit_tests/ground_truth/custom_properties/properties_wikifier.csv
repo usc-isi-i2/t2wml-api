@@ -1,19 +1,19 @@
-,row,column,value,context,item,sheet,file
-0,5,1,GDP per capita,property,POECD-002,oecd.csv,oecd.csv
-1,6,1,Gross national income (GNI) per capita,property,POECD-003,oecd.csv,oecd.csv
-2,7,1,Household disposable income,property,POECD-004,oecd.csv,oecd.csv
-3,9,1,Real GDP growth,property,POECD-005,oecd.csv,oecd.csv
-4,10,1,Net saving rate in household disposable income,property,POECD-006,oecd.csv,oecd.csv
-5,11,1,Gross fixed capital formation,property,POECD-007,oecd.csv,oecd.csv
-6,5,1,GDP per capita,variable,QOECD-002,oecd.csv,oecd.csv
-7,6,1,Gross national income (GNI) per capita,variable,QOECD-003,oecd.csv,oecd.csv
-8,7,1,Household disposable income,variable,QOECD-004,oecd.csv,oecd.csv
-9,9,1,Real GDP growth,variable,QOECD-005,oecd.csv,oecd.csv
-10,10,1,Net saving rate in household disposable income,variable,QOECD-006,oecd.csv,oecd.csv
-11,11,1,Gross fixed capital formation,variable,QOECD-007,oecd.csv,oecd.csv
-12,5,2,USD current PPPs,unit,QOECD-U002,oecd.csv,oecd.csv
-13,6,2,USD current PPPs,unit,QOECD-U002,oecd.csv,oecd.csv
-14,7,2,Annual growth %,unit,QOECD-U003,oecd.csv,oecd.csv
-15,9,2,Annual growth %,unit,QOECD-U003,oecd.csv,oecd.csv
-16,11,2,Annual growth %,unit,QOECD-U003,oecd.csv,oecd.csv
-17,10,2,%,unit,Q11229,oecd.csv,oecd.csv
+row,column,value,context,item,sheet,file
+5,1,GDP per capita,property,POECD-002,oecd.csv,oecd.csv
+6,1,Gross national income (GNI) per capita,property,POECD-003,oecd.csv,oecd.csv
+7,1,Household disposable income,property,POECD-004,oecd.csv,oecd.csv
+9,1,Real GDP growth,property,POECD-005,oecd.csv,oecd.csv
+10,1,Net saving rate in household disposable income,property,POECD-006,oecd.csv,oecd.csv
+11,1,Gross fixed capital formation,property,POECD-007,oecd.csv,oecd.csv
+5,1,GDP per capita,variable,QOECD-002,oecd.csv,oecd.csv
+6,1,Gross national income (GNI) per capita,variable,QOECD-003,oecd.csv,oecd.csv
+7,1,Household disposable income,variable,QOECD-004,oecd.csv,oecd.csv
+9,1,Real GDP growth,variable,QOECD-005,oecd.csv,oecd.csv
+10,1,Net saving rate in household disposable income,variable,QOECD-006,oecd.csv,oecd.csv
+11,1,Gross fixed capital formation,variable,QOECD-007,oecd.csv,oecd.csv
+5,2,USD current PPPs,unit,QOECD-U002,oecd.csv,oecd.csv
+6,2,USD current PPPs,unit,QOECD-U002,oecd.csv,oecd.csv
+7,2,Annual growth %,unit,QOECD-U003,oecd.csv,oecd.csv
+9,2,Annual growth %,unit,QOECD-U003,oecd.csv,oecd.csv
+11,2,Annual growth %,unit,QOECD-U003,oecd.csv,oecd.csv
+10,2,%,unit,Q11229,oecd.csv,oecd.csv

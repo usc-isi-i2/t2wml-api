@@ -1,26 +1,8 @@
-,row,column,value,context,item,sheet,file
-0,3,0,Burundi,,Q967,table-1a,homicide_report_total_and_sex.xlsx
-1,4,0,Burundi,,Q967,table-1a,homicide_report_total_and_sex.xlsx
-2,15,1,Burundi,,Q967,table-1a,homicide_report_total_and_sex.xlsx
-3,5,0,Comoros,,Q970,table-1a,homicide_report_total_and_sex.xlsx
-4,6,0,Comoros,,Q970,table-1a,homicide_report_total_and_sex.xlsx
-5,16,1,Comoros,,Q970,table-1a,homicide_report_total_and_sex.xlsx
-6,7,0,Djibouti,,Q977,table-1a,homicide_report_total_and_sex.xlsx
-7,8,0,Djibouti,,Q977,table-1a,homicide_report_total_and_sex.xlsx
-8,17,1,Djibouti,,Q977,table-1a,homicide_report_total_and_sex.xlsx
-9,3,1,SDG,,Q7649586,table-1a,homicide_report_total_and_sex.xlsx
-10,4,1,SDG,,Q7649586,table-1a,homicide_report_total_and_sex.xlsx
-11,13,1,SDG,,Q7649586,table-1a,homicide_report_total_and_sex.xlsx
-12,5,1,GHD Estimate,,Q6039400,table-1a,homicide_report_total_and_sex.xlsx
-13,6,1,GHD Estimate,,Q6039400,table-1a,homicide_report_total_and_sex.xlsx
-14,7,1,GHD Estimate,,Q6039400,table-1a,homicide_report_total_and_sex.xlsx
-15,8,1,GHD Estimate,,Q6039400,table-1a,homicide_report_total_and_sex.xlsx
-16,14,1,GHD Estimate,,Q6039400,table-1a,homicide_report_total_and_sex.xlsx
-17,3,2,Females,,Q6581072,table-1a,homicide_report_total_and_sex.xlsx
-18,5,2,Females,,Q6581072,table-1a,homicide_report_total_and_sex.xlsx
-19,7,2,Females,,Q6581072,table-1a,homicide_report_total_and_sex.xlsx
-20,18,1,Females,,Q6581072,table-1a,homicide_report_total_and_sex.xlsx
-21,4,2,Males,,Q6581097,table-1a,homicide_report_total_and_sex.xlsx
-22,6,2,Males,,Q6581097,table-1a,homicide_report_total_and_sex.xlsx
-23,8,2,Males,,Q6581097,table-1a,homicide_report_total_and_sex.xlsx
-24,19,1,Males,,Q6581097,table-1a,homicide_report_total_and_sex.xlsx
+column,row,value,context,item
+,,Burundi,,Q967
+,,Comoros,,Q970
+,,Djibouti,,Q977
+,,SDG,,Q7649586
+,,GHD Estimate,,Q6039400
+,,Females,,Q6581072
+,,Males,,Q6581097

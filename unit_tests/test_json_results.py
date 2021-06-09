@@ -49,8 +49,6 @@ class TestHomicideData(JsonTest):
         expected_result_name = sheet_name+".json"
         yaml_file = os.path.join(self.yaml_folder, yaml_name)
         sheet=Sheet(self.data_file, sheet_name)
-        convert_old_wikifier_to_new(self.wikifier_file, sheet, self.wikifier_file+sheet_name+".csv")
-
         kg = KnowledgeGraph.generate_from_files(
             self.data_file, sheet_name, yaml_file, self.wikifier_file+sheet_name+".csv")
         result = kg.get_output("json")
@@ -136,32 +134,6 @@ class TestHomicideData(JsonTest):
         sheet_name = "table-10e"
         self.run_test_on_sheet(sheet_name)
 
-
-class TestBelgiumRegex(JsonTest):
-    def setUp(self):
-        self.data_file = os.path.join(
-            unit_test_folder, "belgium-regex", "Belgium.csv")
-        self.wikifier_file = os.path.join(
-            unit_test_folder, "belgium-regex", "wikifier.csv")
-        self.yaml_file = os.path.join(
-            unit_test_folder, "belgium-regex", "Belgium.yaml")
-        self.expected_result_dir = os.path.join(
-            unit_test_folder, "belgium-regex")
-
-    def test_regex(self):
-        yaml_file = self.yaml_file
-        sheet_name = "Belgium.csv"
-        sheet=Sheet(self.data_file, sheet_name)
-        convert_old_wikifier_to_new(self.wikifier_file, sheet, self.wikifier_file)
-        kg = KnowledgeGraph.generate_from_files(
-            self.data_file, sheet_name, yaml_file, self.wikifier_file)
-        result = kg.get_output("json")
-        result_dict = json.loads(result)
-        expected_result_name = "results.json"
-        with open(os.path.join(self.expected_result_dir, expected_result_name), 'r') as f:
-            expected_result = json.load(f)
-
-        self.validate_results(result_dict, expected_result)
 
 
 class TestErrorCatching(JsonTest):

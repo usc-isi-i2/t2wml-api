@@ -357,7 +357,7 @@ def convert_old_wikifier_to_new(wikifier_file, sheet, out_file=None):
 
     new_df = pd.DataFrame(new_rows, columns=columns)
     if out_file:
-        new_df.to_csv(out_file)
+        new_df.to_csv(out_file, index=False)
     return new_df
         
 

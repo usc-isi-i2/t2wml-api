@@ -129,13 +129,6 @@ def concat(*args):
     return r
 
 
-def get_item(input, context=''):
-    value = bindings.item_table.get_item_by_string(str(input), context)
-    if isinstance(input, ReturnClass):
-        return ReturnClass(input.col, input.row, value)
-    return value
-
-
 def t_var_sheet_end():
     return bindings.excel_sheet.row_len
 
@@ -158,8 +151,7 @@ functions_dict = dict(
     extract_date=extract_date,
     regex=regex,
     concat=concat,
-    get_item=get_item,
     t_var_sheet_end=t_var_sheet_end,
     t_var_sheet_name=t_var_sheet_name,
     t_var_sheet_file_name=t_var_sheet_file_name
-)
+)  
