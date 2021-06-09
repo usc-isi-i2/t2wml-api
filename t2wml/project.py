@@ -14,11 +14,10 @@ from t2wml.utils.debug_logging import basic_debug
 class Project:
     @basic_debug
     def __init__(self, directory, title=None, description="", url="",
-                    data_files=None, yaml_files=None, wikifier_files=None, entity_files=None,
+                    data_files=None, yaml_files=None,
                     yaml_sheet_associations=None, annotations=None,
                     sparql_endpoint=DEFAULT_SPARQL_ENDPOINT, warn_for_empty_cells=False, handle_calendar="leave",
-                    cache_id=None, 
-                    _saved_state=None, #deprecated but i don't want a trillion warnings
+                    cache_id=None,
                     **kwargs    
                 ):
         if kwargs:
@@ -37,8 +36,6 @@ class Project:
         self.annotations=annotations or {}
 
         self.yaml_files=yaml_files or []
-        self.wikifier_files=wikifier_files or []
-        self.entity_files=entity_files or []
 
         self.sparql_endpoint=sparql_endpoint
         self.warn_for_empty_cells=warn_for_empty_cells
@@ -49,6 +46,10 @@ class Project:
         if not self.entity_file.exists():
             with open(self.entity_file, 'w') as f:
                 f.write("{}")
+
+        if not os.path.isdir(os.path.join(self.directory, "wikifiers")):
+            os.mkdir(os.path.join(self.directory, "wikifiers"))
+
     
     @property
     def autogen_dir(self):
@@ -149,33 +150,6 @@ class Project:
         else:
             self.yaml_sheet_associations[data_path]={sheet_name:dict(val_arr=[yaml_path], selected=yaml_path)}
     
-    def add_wikifier_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False, precedence=True):
-        file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
-        if file_path in self.wikifier_files:
-            pass #print("This file is already present in the project's wikifier files")
-            self.wikifier_files.remove(file_path)
-        
-        if precedence:
-            self.wikifier_files.append(file_path)
-        else:
-            self.wikifier_files= [file_path]+self.wikifier_files
-        return file_path
-    
-    def add_specific_wikifier_file(self, wiki_path, data_path, sheet_name="NO_SHEET", 
-                                   copy_from_elsewhere=False, overwrite=False, rename=False):
-        raise NotImplementedError("Specific wikifiers are not currently supported")
-
-    def add_entity_file(self, file_path, copy_from_elsewhere=False, overwrite=False, rename=False, precedence=True):
-        file_path=self._add_file(file_path, copy_from_elsewhere, overwrite, rename)
-        if file_path in self.entity_files:
-            pass #print("This file is already present in the project's entity files")
-            self.entity_files.remove(file_path)
-        if precedence:
-            self.entity_files.append(file_path)
-        else:
-            self.entity_files= [file_path]+self.entity_files
-        return file_path
-    
     def add_annotation_file(self, annotation_path, data_path, sheet_name, copy_from_elsewhere=False, overwrite=False, rename=False):
         annotation_path=self._add_file(annotation_path, copy_from_elsewhere, overwrite, rename)
         data_path=self._normalize_path(data_path)
@@ -211,15 +185,19 @@ class Project:
             return True
         if file_path in self.yaml_files:
             return True
-        if file_path in self.wikifier_files:
-            return True
-        if file_path in self.entity_files:
-            return True
         for key, data_file in self.annotations.items():
             for s_key, sheet in data_file.items():
                 if file_path in sheet["val_arr"]:
                     return True
         return False
+    
+    def get_wikifier_file(self, data_file_path):
+        data_file_path=self._normalize_path(data_file_path)
+        wikifier_name=data_file_path.replace(".", "") + ".csv"
+        wikifier_file_path=os.path.join(self.directory, "wikifiers", wikifier_name)
+        if os.path.exists(wikifier_file_path):
+            return wikifier_file_path, True
+        return wikifier_file_path, False
     
     @basic_debug
     def delete_file_from_project(self, file_path, delete_from_fs=False):
@@ -227,17 +205,14 @@ class Project:
             raise ValueError("The file you are trying to delete does not exist in project")
             
         del_val=self._normalize_path(file_path)
+        wikifier_file_path, wikifier_file_exists = "", False
         
-
         if del_val in self.data_files: #handle data files completely separately from everything else
             self.data_files.pop(del_val)
             self.annotations.pop(del_val, None)
             self.yaml_sheet_associations.pop(del_val, None)
-        
-        elif del_val in self.entity_files: 
-            self.entity_files.remove(del_val)    
-        elif del_val in self.wikifier_files: 
-            self.wikifier_files.remove(del_val)  
+            wikifier_file_path, wikifier_file_exists = self.get_wikifier_file(del_val)
+
         else: #annotations and yamls
             if del_val in self.yaml_files: 
                 self.yaml_files.remove(del_val)  
@@ -265,6 +240,12 @@ class Project:
                 os.remove(del_path)
             except Exception as e:
                 print(e)
+            if wikifier_file_exists:
+                try:
+                    os.remove(wikifier_file_path)
+                except Exception as e:
+                    print(e)
+
                 
     @basic_debug
     def rename_file_in_project(self, old_name, new_name, rename_in_fs=False):
@@ -276,7 +257,9 @@ class Project:
         new_file_path=self.get_full_path(new_name)
         if os.path.isfile(new_file_path):
             raise ValueError("The new name you have provided already exists in the project directory")
-            
+
+        old_wikifier_file_path, wikifier_file_exists = "", False
+
         if old_name in self.data_files: #handle data files completely separately from everything else
             old_csv_name=Path(old_name).stem
             new_csv_name=Path(new_name).stem
@@ -293,10 +276,9 @@ class Project:
                             except KeyError: #.data_files
                                 edit_dict[new_name]["selected"]=new_csv_name
                                 edit_dict[new_name]["val_arr"]=[new_csv_name]
+            old_wikifier_file_path, wikifier_file_exists = self.get_wikifier_file(old_name)
         
         else:
-            self.entity_files=[new_name if x==old_name else x for x in self.entity_files]
-            self.wikifier_files=[new_name if x==old_name else x for x in self.wikifier_files]
             self.yaml_files=[new_name if x==old_name else x for x in self.yaml_files]
 
             for edit_dict in [self.annotations, self.yaml_sheet_associations]:
@@ -315,6 +297,10 @@ class Project:
             os.makedirs(full_folder_path, exist_ok=True)
             old_file_path=self.get_full_path(old_name)
             os.rename(old_file_path, new_file_path)
+            if wikifier_file_exists:
+                new_wikifier_file_path, exists = self.get_wikifier_file(new_file_path)
+                os.rename(old_wikifier_file_path, new_wikifier_file_path)
+
         
     @basic_debug
     def save(self):
@@ -344,136 +330,4 @@ class Project:
         except Exception as e:
             raise ValueError("Was not able to initialize project from the yaml file: "+str(e))
         return proj
-
-
-
-class ProjectWithSavedState(Project):
-    def __init__(self, directory, _saved_state=None, **kwargs):
-        super().__init__(directory, **kwargs)
-        if _saved_state is None or _saved_state["current_data_file"] is None:
-            self.get_default_saved_state()
-        else:
-            self._saved_state=_saved_state
-            
-    @property
-    def current_data_file(self):
-        return self._saved_state["current_data_file"]
-    
-    @current_data_file.setter
-    def current_data_file(self, new_value):
-        if new_value in self.data_files:
-            self._saved_state["current_data_file"]=new_value
-        else:
-            raise FileNotPresentInProject("Can't set current data file to file not present in project")
-    
-    @property
-    def current_sheet(self):
-        return self.data_files[self.current_data_file]["selected"]
-    
-    @current_sheet.setter
-    def current_sheet(self, new_value):
-        if new_value in self.data_files[self.current_data_file]["val_arr"]:
-            self.data_files[self.current_data_file]["selected"]=new_value
-        else:
-            raise FileNotPresentInProject("Can't set current sheet to sheet not present in current data file")
-
-        try:
-            self.current_yaml=self.yaml_sheet_associations[self.current_data_file][self.current_sheet][-1]
-        except (KeyError, IndexError):
-            self.current_yaml=None
-
-    @property
-    def current_yaml(self):
-        try:
-            current_yaml = self.yaml_sheet_associations[self.current_data_file][self.current_sheet].get("selected", None)
-        except:
-            return None
-        if not current_yaml:
-            try:
-                current_yaml=self.yaml_sheet_associations[self.current_data_file][self.current_sheet][-1]
-            except IndexError:
-                current_yaml=None
-        return current_yaml
-    
-    @current_yaml.setter
-    def current_yaml(self, new_value):
-        if new_value is None:
-            return
-        if new_value in self.yaml_sheet_associations[self.current_data_file][self.current_sheet]["val_arr"]:
-            self.yaml_sheet_associations[self.current_data_file][self.current_sheet]["selected"]=new_value
-        else:
-            raise FileNotPresentInProject("Can't set current yaml to a yaml not associated with the current sheet")
-    
-    @property
-    def current_annotation(self):
-        try:
-            current_annotation = self.annotations[self.current_data_file][self.current_sheet].get("selected", None)
-        except:
-            return None
-        if not current_annotation:
-            try:
-                current_annotation=self.yaml_sheet_associations[self.current_data_file][self.current_sheet][-1]
-            except IndexError:
-                current_annotation=None
-        return current_annotation
-    
-    @current_annotation.setter
-    def current_annotation(self, new_value):
-        if new_value is None:
-            return
-        if new_value in self.annotations[self.current_data_file][self.current_sheet]["val_arr"]:
-            self.annotations[self.current_data_file][self.current_sheet]["selected"]=new_value
-        else:
-            raise FileNotPresentInProject("Can't set current yaml to a yaml not associated with the current sheet")
-    
-
-    @property
-    def current_wikifiers(self):
-        return self._saved_state["current_wikifiers"]
-    
-    @current_wikifiers.setter
-    def current_wikifiers(self, new_value):
-        for value in new_value:
-            if value not in self.wikifier_files:
-                raise FileNotPresentInProject("Current wikifiers must only contain wikifiers added to the project")
-        self._saved_state["current_wikifiers"]=new_value
-    
-    def get_default_saved_state(self):
-        self._saved_state={}
-        if self.data_files:
-            self.current_data_file=list(self.data_files.keys())[-1] #default to most recently added file 
-        else:
-            self._saved_state=dict(current_data_file=None, current_yaml=None)
-        if self.wikifier_files:
-            self.current_wikifiers=[self.wikifier_files[-1]] #for now, default to last
-        else:
-            self._saved_state["current_wikifiers"]=None
-    
-    def update_saved_state(self, current_data_file=None, current_sheet=None, current_yaml=None, current_wikifiers=None, current_annotation=None):
-        if current_data_file:
-            self.current_data_file=self._normalize_path(current_data_file)
-
-        if current_sheet:
-            self.current_sheet=current_sheet
-                
-        if current_yaml:
-            self.current_yaml=self._normalize_path(current_yaml)
-        
-        if current_annotation:
-            self.current_annotation=self._normalize_path(current_annotation)
-        
-        if current_wikifiers:
-            self.current_wikifiers=[self._normalize_path(wf) for wf in current_wikifiers]
-        
-        self.update_current_saved_state()
-    
-    def update_current_saved_state(self):
-        self._saved_state=dict(
-            current_data_file=self.current_data_file,
-            current_sheet=self.current_sheet,
-            current_yaml=self.current_yaml,
-            current_annotation=self.current_annotation,
-            current_wikifiers=self.current_wikifiers
-        )
-
 
