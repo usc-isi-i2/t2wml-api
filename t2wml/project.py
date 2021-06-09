@@ -228,9 +228,10 @@ class Project:
             keep='first'
             if overwrite_existing:
                 keep='last'
-            df=pd.concat([org_df, df]).drop_duplicates(subset=['row', 'column', 'value', 'file', 'sheet'], keep=keep).reset_index(drop=True)
-
+            combined_df = pd.concat([org_df, df])
+            df=combined_df.drop_duplicates(subset=['row', 'column', 'value', 'file', 'sheet', 'context'], keep=keep).reset_index(drop=True)
         df.to_csv(wikifier_file_path, index=False, escapechar="")
+        return df
 
     @basic_debug
     def delete_file_from_project(self, file_path, delete_from_fs=False):
@@ -370,9 +371,8 @@ class Project:
     def add_old_style_wikifier_to_project(self, wikifier_file):
         for datafile in self.data_files:
             sf = SpreadsheetFile(self.get_full_path(datafile))
+            wikifier_file_path, exists = self.get_wikifier_file(datafile)
             for sheet_name in sf:
                 sheet=sf[sheet_name]
-                wikifier_file_path, exists = self.get_wikifier_file(datafile)
-                if not exists:
-                    dataframe = convert_old_wikifier_to_new(wikifier_file, sheet, wikifier_file_path)
-                    self.add_df_to_wikifier_file(datafile, dataframe)
+                dataframe = convert_old_wikifier_to_new(wikifier_file, sheet)
+                self.add_df_to_wikifier_file(datafile, dataframe)
