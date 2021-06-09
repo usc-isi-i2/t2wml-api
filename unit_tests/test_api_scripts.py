@@ -55,7 +55,7 @@ class TestScripts(unittest.TestCase):
             output_filename = os.path.join(
                 output_folder, Path(file_name).stem+".tsv")
             create_output_from_files(data_filepath, csv_sheet, yaml_filepath,
-                                    wikifier_filepath,     output_filename, output_format="kgtk")
+                                    wikifier_filepath, output_filename, output_format="kgtk")
 
     def test_docs_sheet_loop_script(self):
         import os
