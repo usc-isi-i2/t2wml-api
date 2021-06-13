@@ -56,8 +56,10 @@ class Project:
         if wikifier_files:
             warnings.warn("wikifier files are being removed from project", DeprecationWarning)
             for wf in wikifier_files:
+                print(f"switching {wf} to compatible version")
                 wf_path = self.get_full_path(wf)
                 self.add_old_style_wikifier_to_project(wf_path)
+            self.save()
 
     
     @property
