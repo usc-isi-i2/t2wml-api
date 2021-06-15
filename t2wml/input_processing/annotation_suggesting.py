@@ -14,6 +14,8 @@ time_property_node = {"id": "P585",
 
 def get_types(cell_content):
     cell_content=str(cell_content).strip()
+    if not cell_content:
+        return False, False, False
     is_country = cell_content in countries or cell_content.lower() in countries
     if strict_make_numeric(cell_content) != "" and cell_content[0] not in ["P", "Q"]:
         is_numeric=True
@@ -38,8 +40,19 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
             already_has_var=True
 
     (x1, y1), (x2, y2) = (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
-    first_cell=sheet[y1, x1]
-    is_country, is_numeric, is_date=get_types(first_cell)
+    is_country, is_numeric, is_date= False, False, False
+    cells=[]
+    cells.append(sheet[y1, x1])
+    cells.append(sheet[y2, x2])
+    if y1!=y2:
+        cells.append(sheet[floor((y2-y1)/2), x1])
+    if x1!=x2:
+        cells.append(sheet[y1, floor((x2-x1)/2)])
+    for cell in cells:
+        new_is_country, new_is_numeric, new_is_date=get_types(cell)
+        is_country = is_country or new_is_country
+        is_numeric = is_numeric or new_is_numeric
+        is_date = is_date or new_is_date
 
     children={}
     type=None
