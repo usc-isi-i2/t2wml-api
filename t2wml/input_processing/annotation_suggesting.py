@@ -14,8 +14,6 @@ time_property_node = {"id": "P585",
 
 def get_types(cell_content):
     cell_content=str(cell_content).strip()
-    if not cell_content:
-        return False, False, False
     is_country = cell_content in countries or cell_content.lower() in countries
     if strict_make_numeric(cell_content) != "" and cell_content[0] not in ["P", "Q"]:
         is_numeric=True
@@ -49,6 +47,9 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
     if x1!=x2:
         cells.append(sheet[y1, floor((x2-x1)/2)])
     for cell in cells:
+        cell=str(cell).strip()
+        if not cell:
+            continue
         result_tuple = get_types(cell)
         for i, b_result in enumerate(result_tuple):
             if b_result:
