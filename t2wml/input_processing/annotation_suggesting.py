@@ -40,7 +40,7 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
             already_has_var=True
 
     (x1, y1), (x2, y2) = (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
-    is_country, is_numeric, is_date= False, False, False
+    totals = [0,0,0]
     cells=[]
     cells.append(sheet[y1, x1])
     cells.append(sheet[y2, x2])
@@ -49,10 +49,19 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
     if x1!=x2:
         cells.append(sheet[y1, floor((x2-x1)/2)])
     for cell in cells:
-        new_is_country, new_is_numeric, new_is_date=get_types(cell)
-        is_country = is_country or new_is_country
-        is_numeric = is_numeric or new_is_numeric
-        is_date = is_date or new_is_date
+        result_tuple = get_types(cell)
+        for i, b_result in enumerate(result_tuple):
+            if b_result:
+                totals[i]+=1
+    for i in range(len(totals)):
+        totals[i] = totals[i]/len(cells)
+        totals[i] = True if totals[i]>=0.5 else False
+    totals=tuple(totals)
+    is_country, is_numeric, is_date = totals
+
+
+
+
 
     children={}
     type=None
