@@ -1,5 +1,13 @@
 T2WML API History
 ===================================
+Changes in version 0.5.0:
+------------------------
+* complete overhaul of wikification, extremely not backwards compatible (those with scripts can use OldItemTable if they need)
+* remove wikifier_files from project
+* tweak: raise error if clean_id returns empty string
+* improve suggestion heuristic to check multiple cells and average them
+* fix bug where suggestion heuristic treated empty cells as dates
+
 Changes in version 0.4.3:
 ------------------------
 * some changes to suggestion format
