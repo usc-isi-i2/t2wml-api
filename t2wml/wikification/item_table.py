@@ -110,7 +110,7 @@ class OldItemTable:
                 self.lookup_table[context][key] = item
 
             if len(overwritten):
-                print(f"Wikifier update overwrote {len(overwritten)} existing values")
+                pass #print(f"Wikifier update overwrote {len(overwritten)} existing values")
             return overwritten
 
 
@@ -192,7 +192,7 @@ class ItemTable:
                 self.lookup_table[context][key] = item
 
             if len(overwritten):
-                print(f"Wikifier update overwrote {len(overwritten)} existing values")
+                pass #print(f"Wikifier update overwrote {len(overwritten)} existing values")
             return overwritten
 
 
@@ -330,7 +330,7 @@ def convert_old_wikifier_to_new(wikifier_file, sheet, out_file=None):
                     value = sheet[row, column]
                     new_rows.append([row, column, value, context, item, sheet.name, sheet.data_file_name])
                 except:
-                    print("row+col outside of sheet bounds, skipping")
+                    pass #print("row+col outside of sheet bounds, skipping")
                 continue
             
             if (column=="" and row==""):

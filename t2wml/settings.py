@@ -17,7 +17,7 @@ class T2WMLSettings:
             if os.path.isdir(self.cache_data_files_folder):
                 return True
             else:
-                print("Cache folder in settings does not exist")
+                pass #print("Cache folder in settings does not exist")
         return False
 
     def update_from_dict(self, **kwargs):

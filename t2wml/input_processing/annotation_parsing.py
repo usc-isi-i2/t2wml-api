@@ -297,7 +297,7 @@ class Annotation():
                 if "selections" in block:
                     block["selection"]=block["selections"][0]
                     block.pop("selections")
-                    print("Deprecation warning: Switch from selections to selection")
+                    #print("Deprecation warning: Switch from selections to selection")
                 else:
                     raise InvalidAnnotationException("Each annotation entry must contain a field 'selection'")
             normalize_rectangle(block)

@@ -56,7 +56,7 @@ class Project:
         if wikifier_files:
             warnings.warn("wikifier files are being removed from project", DeprecationWarning)
             for wf in wikifier_files:
-                print(f"switching {wf} to compatible version")
+                #print(f"switching {wf} to compatible version")
                 wf_path = self.get_full_path(wf)
                 self.add_old_style_wikifier_to_project(wf_path)
             self.save()
@@ -276,12 +276,12 @@ class Project:
                 del_path=self.get_full_path(del_val)
                 os.remove(del_path)
             except Exception as e:
-                print(e)
+                pass #print(e)
             if wikifier_file_exists:
                 try:
                     os.remove(wikifier_file_path)
                 except Exception as e:
-                    print(e)
+                    pass #print(e)
 
                 
     @basic_debug

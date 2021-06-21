@@ -1,5 +1,9 @@
 T2WML API History
 ===================================
+Changes in version 0.5.1:
+------------------------
+* remove every scrap of a print statement
+
 Changes in version 0.5.0:
 ------------------------
 * complete overhaul of wikification, extremely not backwards compatible (those with scripts can use OldItemTable if they need)
