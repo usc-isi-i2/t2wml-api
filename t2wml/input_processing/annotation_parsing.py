@@ -645,7 +645,7 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
             for col, row, label in created:
                 node_id=get_Qnode(project, label)
                 if node_id not in custom_nodes: #only set to auto if creating fresh
-                    custom_nodes[node_id]={"label":label}
+                    custom_nodes[node_id]={"label":label.strip()}
         else:
             for col, row, label in created:
                 node_id = wikifier.item_table.get_item(col, row, sheet=sheet, value=label)
