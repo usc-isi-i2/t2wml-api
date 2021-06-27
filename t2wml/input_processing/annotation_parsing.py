@@ -616,6 +616,10 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
                 exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=label)                
                 if not exists and label not in created:
                     raise ValueError
+                if is_property and exists[0]!="P":
+                    raise ValueError
+                if not is_property and exists[0]!="Q":
+                    raise ValueError
             except:
                 if is_property:
                     id = get_Pnode(project, label)
