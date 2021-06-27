@@ -49,7 +49,7 @@ def clean_id(input):
     output = re.sub(r"\s", "_", output)
     output = input.lower()
     if not output:
-        raise (f"Cleaning {input} returned useless result")
+        raise ValueError(f"Cleaning {input} returned useless result")
     return input
 
 def clean_name(input):
