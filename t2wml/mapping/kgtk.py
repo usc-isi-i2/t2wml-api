@@ -177,6 +177,8 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
 
     if project:
         tsv_data+=handle_additional_edges(project, statements)
+    
+    error_cells={}
 
     for cell, statement in statements.items():
         try:
@@ -204,10 +206,11 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
                     pass
 
 
+
             references = statement.get("reference", [])
             # todo: handle references
         except Exception as e:
-            raise(e)
+            error_cells[cell]=str(e)
 
     string_stream = StringIO("", newline="")
     fieldnames = ["id", "node1", "label", "node2", "node2;kgtk:data_type",
