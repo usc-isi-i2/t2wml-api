@@ -192,8 +192,8 @@ class Block:
                 self.cell_args[0][0]) + ", " + str(self.cell_args[0][1]+1)
             return return_string.format(indexer=cell_str)
 
-        row_var = ", $qrow-$n" if use_q else ", $row-$n"
-        col_var = "$qcol-$n, " if use_q else "$col-$n, "
+        row_var = ", $qrow" if use_q else ", $row"
+        col_var = "$qcol, " if use_q else "$col, "
 
         if self.get_alignment_orientation(relative_value_args) == "row":
             col = column_index_to_letter(self.cell_args[0][0])
