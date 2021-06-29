@@ -45,6 +45,12 @@ class SparqlProvider(WikidataProvider):
         self.cache = {}
 
     def query_wikidata_for_property_type(self, wikidata_property):
+        try:
+            int(wikidata_property[1:])
+        except:
+            return dict(data_type = "Property Not Found",
+                        label="",
+                        description="")
         query = """SELECT ?label ?desc ?type
                 WHERE 
                 {{
