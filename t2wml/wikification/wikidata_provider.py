@@ -43,14 +43,20 @@ class SparqlProvider(WikidataProvider):
             sparql_endpoint = t2wml_settings.sparql_endpoint
         self.sparql_endpoint = sparql_endpoint
         self.cache = {}
+        self.failed_sparql_queries=set()
 
     def query_wikidata_for_property_type(self, wikidata_property):
+        failure_dict=dict(data_type = "Property Not Found",
+                        label="",
+                        description="")
         try:
             int(wikidata_property[1:])
         except:
-            return dict(data_type = "Property Not Found",
-                        label="",
-                        description="")
+            return failure_dict
+        
+        if wikidata_property in self.failed_sparql_queries:
+            return failure_dict
+        
         query = """SELECT ?label ?desc ?type
                 WHERE 
                 {{
@@ -71,8 +77,8 @@ class SparqlProvider(WikidataProvider):
             label=results_0["label"]["value"]
             description=results_0["desc"]["value"]
         except IndexError:
-            data_type = "Property Not Found"
-            label=description=""
+            self.failed_sparql_queries.add(wikidata_property)
+            return failure_dict
         return dict(data_type=data_type, label=label, description=description)
 
     @basic_debug
