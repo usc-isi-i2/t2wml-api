@@ -61,6 +61,7 @@ def validate_id(node_id):
 def kgtk_to_dict(file_path):
     #if label is P2010050001 (datamart tag), the key is tags and a list is generated
     input_dict=defaultdict(dict)
+    input_dict["filepath"]=dict(node1="", node2="", value=file_path)
     with open(file_path, 'r', encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter="\t")
         for row_dict in reader:
@@ -80,6 +81,7 @@ def kgtk_to_dict(file_path):
 def dict_to_kgtk(in_dict, out_path):
     tsv_dict_columns=["id", "node1", "label", "node2"]
     tsv_dict_arr=[]
+    in_dict.pop("filepath", None)
     for node1, node_dict in in_dict.items():
         for label, value in node_dict.items():
             if label=="tags":
