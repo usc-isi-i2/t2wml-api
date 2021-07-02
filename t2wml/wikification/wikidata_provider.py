@@ -14,7 +14,7 @@ class WikidataProvider(ABC):
         property_type=self.get_property_type(id)
         return {"data_type":property_type}
 
-    def save_entry(self, id, data_type=None, *args, **kwargs):
+    def save_entry(self, node_id, data_type=None, *args, **kwargs):
         pass
 
     def update_cache(self, update_dict):
@@ -96,12 +96,12 @@ class SparqlProvider(WikidataProvider):
         property_type=self.get_property_type(id) #trigger caching so we can just check cache
         return self.cache[id]
 
-    def save_entry(self, id=None, data_type=None, label=None, description=None, *args, **kwargs):
-        self.cache[id] = {"data_type":data_type}
+    def save_entry(self, node_id=None, data_type=None, label=None, description=None, *args, **kwargs):
+        self.cache[node_id] = {"data_type":data_type}
         if label:
-            self.cache[id]["label"]=label
+            self.cache[node_id]["label"]=label
         if description:
-            self.cache[id]["description"]=label
+            self.cache[node_id]["description"]=label
     
     def update_cache(self, update_dict):
         self.cache.update(update_dict)
@@ -150,9 +150,9 @@ class KGTKFileProvider():
         except KeyError:
             raise ValueError("Property "+wikidata_property+" not found")
 
-    def save_entry(self, id, data_type=None, *args, **kwargs):
-        self.properties[id]=dict(kwargs)
-        self.properties[id]["data_type"]=data_type
+    def save_entry(self, node_id, data_type=None, *args, **kwargs):
+        self.properties[node_id]=dict(kwargs)
+        self.properties[node_id]["data_type"]=data_type
 
     def __enter__(self):
         return self
