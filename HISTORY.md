@@ -1,5 +1,16 @@
 T2WML API History
 ===================================
+Changes in version 0.5.2:
+------------------------
+* strip start/end whitespace from auto-generated node labels
+* when auto-creating nodes, check if changed from property to qnode or vice versa
+* bug fix to exception raised when label resolves to empty string
+* stop using -$n in auto-generated blocks
+* when generating kgtk output, skip cells with problem (instead of erroring out)
+* do not send custom properties to sparql query service
+* return filepath when getting entities from kgtk file
+
+
 Changes in version 0.5.1:
 ------------------------
 * remove every scrap of a print statement
