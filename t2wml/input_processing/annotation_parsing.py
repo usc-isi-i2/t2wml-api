@@ -178,7 +178,7 @@ class Block:
             return min(diff1, diff2)
         return COST_MATRIX_DEFAULT
 
-    def get_expression(self, relative_value_args, use_q=False):
+    def get_expression(self, relative_value_args, use_q=False, sheet=None):
         if self.use_item:
             return_string = "=item[{indexer}]"
         else:
@@ -191,9 +191,26 @@ class Block:
             cell_str = column_index_to_letter(
                 self.cell_args[0][0]) + ", " + str(self.cell_args[0][1]+1)
             return return_string.format(indexer=cell_str)
+        
+        dollar_n=""
+        if sheet:
+            if not self.is_2D:
+                (x1, y1), (x2, y2) = self.cell_args
+                cells = sheet.data.iloc[y1:y2+1, x1:x2+1]
+                cells = cells.to_numpy().flatten().tolist()
+                sample_length = min(10, len(cells))
+                empty=0
+                for i in range(sample_length):
+                    if not cells[i]:
+                        empty+=1
+                if empty >= sample_length * 0.49:
+                    dollar_n="-$n"
 
-        row_var = ", $qrow" if use_q else ", $row"
-        col_var = "$qcol, " if use_q else "$col, "
+
+
+
+        row_var = f", $qrow{dollar_n}" if use_q else f", $row{dollar_n}"
+        col_var = f"$qcol{dollar_n}," if use_q else f"$col{dollar_n}, "
 
         if self.get_alignment_orientation(relative_value_args) == "row":
             col = column_index_to_letter(self.cell_args[0][0])
@@ -412,7 +429,7 @@ class Annotation():
             return data_annotations, subject_annotations, self.qualifier_annotations
         return self.data_annotations, self.subject_annotations, self.qualifier_annotations
 
-    def get_optionals_and_property(self, region, use_q):
+    def get_optionals_and_property(self, region, use_q, sheet=None):
         const_property=region.get_from_annotation("property")
         if const_property:
             propertyLine=str(const_property)
@@ -421,13 +438,13 @@ class Annotation():
             if property is None:
                 propertyLine = "#TODO-- no property alignment found"
             else:
-                propertyLine = property.get_expression(region, use_q)
+                propertyLine = property.get_expression(region, use_q, sheet=sheet)
 
         optionalsLines = ""
         unit = region.matches.get("unit", None)
         if unit is not None:
             optionalsLines += YamlFormatter.get_optionals_string(
-                "unit: " + unit.get_expression(region, use_q)+"\n", use_q)
+                "unit: " + unit.get_expression(region, use_q, sheet=sheet)+"\n", use_q)
         for key in region.annotation:
             if key in ["changed", "id", "title", "links", "link"]: 
                 continue
@@ -442,7 +459,7 @@ class Annotation():
 
         return propertyLine, optionalsLines
 
-    def _get_qualifier_yaml(self, qualifier_region, data_region):
+    def _get_qualifier_yaml(self, qualifier_region, data_region, sheet=None):
         propertyLine, optionalsLines = self.get_optionals_and_property(
             qualifier_region, use_q=True)
         region = None
@@ -474,7 +491,7 @@ class Annotation():
                 region = YamlFormatter.get_qualifier_region_string(
                     left, right, top, bottom)
         else:
-            valueLine = qualifier_region.get_expression(data_region)
+            valueLine = qualifier_region.get_expression(data_region, sheet=sheet)
 
         qualifier_string = YamlFormatter.get_qualifier_string(
             propertyLine, optionalsLines, valueLine, region)
@@ -499,12 +516,12 @@ class Annotation():
         if data_region.get_from_annotation("subject"):
             mainSubjectLine="" #no need to do anything, will be added when adding fields
         elif subject_region:
-            mainSubjectLine = "subject: "+subject_region.get_expression(data_region)
+            mainSubjectLine = "subject: "+subject_region.get_expression(data_region, sheet=sheet)
         else: 
             mainSubjectLine = "subject: #subject region not specified"
 
         propertyLine, optionalsLines = self.get_optionals_and_property(
-            data_region, use_q=False)
+            data_region, use_q=False, sheet=sheet)
 
         if len(qualifier_regions):
             qualifierLines = "qualifier:"
