@@ -201,7 +201,7 @@ class Block:
                 sample_length = min(10, len(cells))
                 empty=0
                 for i in range(sample_length):
-                    if not cells[i]:
+                    if not cells[i] and cells[i]!=0:
                         empty+=1
                 if empty >= sample_length * 0.49:
                     dollar_n="-$n"
