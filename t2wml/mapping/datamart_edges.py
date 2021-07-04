@@ -47,7 +47,7 @@ def clean_id(input):
     output=input.strip()
     output = re.sub(r'[^A-Za-z0-9\s]+', '', output)
     output = re.sub(r"\s", "_", output)
-    output = input.lower()
+    output = output.lower()
     if not output:
         raise ValueError(f"Cleaning {input} returned useless result")
     return output
