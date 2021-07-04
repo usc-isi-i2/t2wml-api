@@ -50,7 +50,7 @@ def clean_id(input):
     output = input.lower()
     if not output:
         raise ValueError(f"Cleaning {input} returned useless result")
-    return input
+    return output
 
 def clean_name(input):
     input = input.strip()
