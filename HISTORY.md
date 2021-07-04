@@ -1,5 +1,10 @@
 T2WML API History
 ===================================
+Changes in version 0.5.5:
+------------------------
+* critical bug fix in cleaning id
+
+
 Changes in version 0.5.4:
 ------------------------
 * additional fixes to -$n behavior
