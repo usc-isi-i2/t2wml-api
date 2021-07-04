@@ -1,5 +1,9 @@
 T2WML API History
 ===================================
+Changes in version 0.5.4:
+------------------------
+* additional fixes to -$n behavior
+
 Changes in version 0.5.3:
 ------------------------
 * conditionally use -$n in blocks that are 50% or more blank spaces
