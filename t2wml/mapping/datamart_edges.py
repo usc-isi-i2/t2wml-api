@@ -44,8 +44,9 @@ def clean_id(input):
     remove non alphanumeric characters and lowercase
     replace whitespace by _ (underscore)
     '''
-    output=input.strip()
+    output = str(input)
     output = re.sub(r'[^A-Za-z0-9\s]+', '', output)
+    output = output.strip()
     output = re.sub(r"\s", "_", output)
     output = output.lower()
     if not output:

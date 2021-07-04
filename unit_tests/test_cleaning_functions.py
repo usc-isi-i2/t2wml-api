@@ -12,7 +12,7 @@ t2wml_settings.cache_data_files_folder=None
 
 class TestScripts(unittest.TestCase):
     def test_Clean_id(self):
-        assert clean_id("My very happy LOVELY... yoga class? לחדגילדחג") == "my_very_happy_lovely_yoga_class_"
+        assert clean_id("My very happy LOVELY... yoga class? לחדגילדחג") == "my_very_happy_lovely_yoga_class"
     def test_ftfy(self):
         assert ftfy("schÃ¶n")=="schön"
 
