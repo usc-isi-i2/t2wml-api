@@ -1,5 +1,10 @@
 T2WML API History
 ===================================
+Changes in version 0.5.3:
+------------------------
+* conditionally use -$n in blocks that are 50% or more blank spaces
+* bug fix when adding entities
+
 Changes in version 0.5.2:
 ------------------------
 * strip start/end whitespace from auto-generated node labels
