@@ -527,7 +527,7 @@ class Annotation():
             qualifierLines = "qualifier:"
             for qualifier in qualifier_regions:
                 qualifierLines += self._get_qualifier_yaml(
-                    qualifier, data_region)
+                    qualifier, data_region, sheet=sheet)
         else:
             qualifierLines = ""
 
