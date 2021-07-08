@@ -70,11 +70,14 @@ def kgtk_to_dict(file_path):
             label = row_dict["label"]
             value = row_dict["node2"]
             if label == "P2010050001":
-                key, val = value.split(":", 1)
-                try:
-                    input_dict[node1]["tags"][key]=val
-                except KeyError:
-                    input_dict[node1]["tags"]={key:val}
+                if ":" in value:
+                    key, val = value.split(":", 1)
+                    try:
+                        input_dict[node1]["tags"][key]=val
+                    except KeyError:
+                        input_dict[node1]["tags"]={key:val}
+                else: 
+                    print("malformed tag: ", value)
 
             else:
                 input_dict[node1][label]=value
