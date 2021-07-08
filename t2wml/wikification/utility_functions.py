@@ -71,7 +71,11 @@ def kgtk_to_dict(file_path):
             value = row_dict["node2"]
             if label == "P2010050001":
                 key, val = value.split(":", 1)
-                input_dict[node1]["tags"][key]=value
+                try:
+                    input_dict[node1]["tags"][key]=value
+                except KeyError:
+                    input_dict[node1]["tags"]={key:value}
+
             else:
                 input_dict[node1][label]=value
     return dict(input_dict)
