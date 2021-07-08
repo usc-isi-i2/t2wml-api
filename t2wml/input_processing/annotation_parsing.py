@@ -114,6 +114,8 @@ class Block:
     def range_str(self):
         cell1 = cell_tuple_to_str(*self.cell_args[0])
         cell2 = cell_tuple_to_str(*self.cell_args[1])
+        if self.role=="dependentVar":
+            return cell1 + ":" + cell2
         if cell1 == cell2:
             return cell1
         else:
