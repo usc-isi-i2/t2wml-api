@@ -634,18 +634,22 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
             try:
                 exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=label)                
                 if not exists and label not in created:
-                    raise ValueError
-                if is_property and exists[0]!="P":
-                    raise ValueError
+                    raise KeyError
+                if is_property:
+                    if exists[0]!="P":
+                        raise KeyError
+                    int(exists[1:]) #will raise error for custom properties, which may need data_type updated
                 if not is_property and exists[0]!="Q":
-                    raise ValueError
-            except:
+                    raise KeyError
+            except KeyError:
                 if is_property:
                     id = get_Pnode(project, label)
                 else:
                     id=get_Qnode(project, label)
 
                 dataframe_rows.append([row, col, label, '', id, sheet.data_file_name, sheet.name])
+                created.add((col, row, label))
+            except ValueError:
                 created.add((col, row, label))
     
     if dataframe_rows:
