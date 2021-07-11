@@ -73,9 +73,9 @@ def kgtk_to_dict(file_path):
                 if ":" in value:
                     key, val = value.split(":", 1)
                     try:
-                        input_dict[node1][label]["tags"][key]=val
+                        input_dict[node1]["tags"][key]=val
                     except KeyError:
-                        input_dict[node1][label]["tags"]={key:val}
+                        input_dict[node1]["tags"]={key:val}
                 else: 
                     print("malformed tag: ", value)
 
