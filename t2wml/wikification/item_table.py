@@ -128,7 +128,7 @@ class ItemTable:
         try:
             return lookup[key]
         except KeyError:
-             raise ValueError("Not found")
+             raise ItemNotFoundException("Not found")
     
     @basic_debug
     def get_item(self, column:int, row:int, context:str='', sheet=None, value=None):
@@ -141,7 +141,7 @@ class ItemTable:
         try:
             item = self.lookup_func(context, file, sheet_name, column, row, value)
             return item
-        except ValueError:
+        except ItemNotFoundException:
             return None  # currently this is what the rest of the API expects. could change later
         #   raise ItemNotFoundException("Item for cell "+to_excel(column, row)+"("+value+")"+"with context "+context+" not found")
 
