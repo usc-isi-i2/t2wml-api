@@ -651,6 +651,17 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
                 created.add((col, row, label))
             except ValueError:
                 created.add((col, row, label))
+            except Exception as e:
+                if e.code == 404: # ItemNotFoundException
+                    if is_property:
+                        id = get_Pnode(project, label)
+                    else:
+                        id=get_Qnode(project, label)
+
+                    dataframe_rows.append([row, col, label, '', id, sheet.data_file_name, sheet.name])
+                    created.add((col, row, label))
+                else:
+                    raise e
     
     if dataframe_rows:
         df=pd.DataFrame(dataframe_rows, columns=columns)
