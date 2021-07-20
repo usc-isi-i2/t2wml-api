@@ -62,7 +62,6 @@ def kgtk_to_dict(file_path):
     #if label is P2010050001 (datamart tag), the key is tags and a dict is generated
     input_dict=defaultdict(dict)
     input_dict["filepath"]=dict(node1="", node2="", value=file_path)
-    input_dict["tags"]=dict()
     with open(file_path, 'r', encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter="\t")
         for row_dict in reader:
