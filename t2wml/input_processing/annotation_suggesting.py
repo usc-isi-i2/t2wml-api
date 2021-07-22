@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import Counter, defaultdict
 from math import floor
 from t2wml.input_processing.utils import string_is_valid
 from t2wml.wikification.country_wikifier_cache import countries
@@ -101,9 +101,22 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
 
 
 class HistogramSelection:
-    @staticmethod
-    @basic_debug
-    def block_finder(sheet):
+    def __init__(self, sheet):
+        self.sheet=sheet
+
+        if sheet.row_len>300:
+            self.truncate_rows= True
+            half = floor(sheet.row_len * 0.5)
+            rows = [*range(0, 100), *range(half-50, half+50), *range(sheet.row_len-100, sheet.row_len)]
+        else:
+            self.truncate_rows = False
+            rows = [*range(sheet.row_len)]
+        
+        self.rows=rows
+    
+    def block_finder(self):
+        sheet=self.sheet
+
         vertical_numbers=Counter()
         horizontal_numbers=Counter()
         horizontal_dates=Counter()
@@ -115,7 +128,8 @@ class HistogramSelection:
         dates=set()
         countries=set()
 
-        for row in range(sheet.row_len):
+
+        for row in self.rows:
             for col in range(sheet.col_len):
                 content = sheet[row, col]
                 if not string_is_valid(content):
@@ -144,21 +158,19 @@ class HistogramSelection:
                     horizontal_numbers[row]+=1
                     numbers.add((row, col))
         
-        date_index, date_is_vertical= HistogramSelection.get_most_common(horizontal_dates, vertical_dates)
-        date_count=horizontal_dates[date_index]
-        country_index, country_is_vertical= HistogramSelection.get_most_common(horizontal_countries, vertical_countries)
-        country_count=horizontal_dates[country_index]
+        date_index, date_is_vertical, date_count= self.get_most_common(horizontal_dates, vertical_dates)
+        country_index, country_is_vertical, country_count = self.get_most_common(horizontal_countries, vertical_countries)
 
-        date_block=HistogramSelection.get_1d_block(sheet, date_index, date_is_vertical, date_count, dates, blanks)
-        country_block=HistogramSelection.get_1d_block(sheet, country_index, country_is_vertical, country_count, countries, blanks)
-        number_block=HistogramSelection.get_2d_block(sheet, horizontal_numbers, vertical_numbers, numbers, blanks, [date_block, country_block])
-        
-        date_block=HistogramSelection.normalize_to_selection(date_block, number_block)
-        country_block=HistogramSelection.normalize_to_selection(country_block, number_block)
+        date_block=self.get_1d_block(date_index, date_is_vertical, date_count, dates, blanks)
+        country_block=self.get_1d_block(country_index, country_is_vertical, country_count, countries, blanks)
+        number_block=self.get_2d_block(horizontal_numbers, vertical_numbers, numbers, blanks, [date_block, country_block])
+        date_block=self.normalize_to_selection(date_block, number_block)
+        country_block=self.normalize_to_selection(country_block, number_block)
 
-        return HistogramSelection._create_annotations(date_block, country_block, number_block)
+
+        return self._create_annotations(date_block, country_block, number_block)
         
-    def normalize_to_selection(selection, normalize_against):
+    def normalize_to_selection(self, selection, normalize_against):
         if not normalize_against or not selection:
             return selection
         (nr1, nc1), (nr2, nc2) = normalize_against
@@ -169,7 +181,7 @@ class HistogramSelection:
             return (nr1, c1),(nr2, c2)
         return selection
     
-    def _create_annotations(date_block, country_block, number_block):
+    def _create_annotations(self, date_block, country_block, number_block):
         annotations=[]
         if date_block:
             annotations.append({
@@ -194,7 +206,7 @@ class HistogramSelection:
 
         return annotations
 
-    def get_most_common(horizontal, vertical):
+    def get_most_common(self, horizontal, vertical):
         if horizontal:
             h_index, h_count = horizontal.most_common(1)[0]
         else:
@@ -204,83 +216,99 @@ class HistogramSelection:
         else:
             v_count=0
         if v_count==h_count==0:
-            return None, None
+            return None, None, 0
         if h_count>v_count:
-            return h_index, False
-        return v_index, True
+            return h_index, False, h_count
+        return v_index, True, v_count
     
-    def get_1d_block(sheet, index, is_vertical, count, block_set, blank_set):
+    def get_1d_block(self, index, is_vertical, count, block_set, blank_set):
+        sheet = self.sheet
         if index is None:
             return None
-        threshold= max(floor(0.1 * count), 1)
-        contig_dict={}
-        if is_vertical:
-            column=index
-            start_row=0
-            while start_row<sheet.row_len:
-                total=0
-                for initial_row in range(start_row, sheet.row_len):
-                    if (initial_row, column) in block_set:
-                        break
-                
-                row=initial_row
-                while row < sheet.row_len:
-                    bad_skips=0
-                    while not ((row, column) in block_set):
-                        if not ((row, column) in blank_set):
-                            bad_skips+=1
-                            if bad_skips>threshold:
-                                break
+        
+        if self.truncate_rows and is_vertical:
+            column = index
+            for initial_row in range(0, sheet.row_len):
+                if (initial_row, column) in block_set:
+                    break
+            for final_row in range(sheet.row_len, initial_row, -1):
+                if (final_row, column) in block_set:
+                    break
+            return ((initial_row, column), (final_row, column))
+
+            
+        else:
+            threshold= max(floor(0.1 * count), 1)
+            contig_dict={}
+            if is_vertical:
+                column=index
+                start_row=0
+                while start_row<sheet.row_len:
+                    total=0
+                    for initial_row in range(start_row, sheet.row_len):
+                        if (initial_row, column) in block_set:
+                            break
+                    
+                    row=initial_row
+                    while row < sheet.row_len:
+                        bad_skips=0
+                        while not ((row, column) in block_set):
+                            if not ((row, column) in blank_set):
+                                bad_skips+=1
+                                if bad_skips>threshold:
+                                    break
+                            row+=1
+
+                        if bad_skips>threshold:
+                            break
                         row+=1
+                        total+=1
+                    
+                    #remove blanks and invalids
+                    final_row=row
+                    for final_row in range(row, 0, -1):
+                        if (final_row, column) in block_set:
+                            break
+                        total-=1
+                    contig_dict[((initial_row, column), (final_row, column))] = total
+                    start_row=row+1
+                return max(contig_dict, key=lambda p: contig_dict[p])
 
-                    if bad_skips>threshold:
-                        break
-                    row+=1
-                    total+=1
-                
-                #remove blanks and invalids
-                final_row=row
-                for final_row in range(row, 0, -1):
-                    if (final_row, column) in block_set:
-                        break
-                    total-=1
-                contig_dict[((initial_row, column), (final_row, column))] = total
-                start_row=row+1
-            return max(contig_dict, key=lambda p: contig_dict[p])
+            else:        #horizontal:
+                row=index
+                start_column=0
+                while start_column<sheet.col_len:
+                    total=0
+                    for initial_column in range(start_column, sheet.col_len):
+                        if (row, initial_column) in block_set:
+                            break
 
-        else:        #horizontal:
-            row=index
-            start_column=0
-            while start_column<sheet.col_len:
-                total=0
-                for initial_column in range(start_column, sheet.col_len):
-                    if (row, initial_column) in block_set:
-                        break
-
-                col=initial_column
-                while row < sheet.row_len:
-                    bad_skips=0
-                    while not ((row, col) in block_set):
-                        if not ((row, col) in blank_set):
-                            bad_skips+=1
-                            if bad_skips>threshold:
-                                break
+                    col=initial_column
+                    while row < sheet.row_len:
+                        bad_skips=0
+                        while not ((row, col) in block_set):
+                            if not ((row, col) in blank_set):
+                                bad_skips+=1
+                                if bad_skips>threshold:
+                                    break
+                            col+=1
+                        if bad_skips>threshold:
+                            break
                         col+=1
-                    if bad_skips>threshold:
-                        break
-                    col+=1
-                    total+=1
+                        total+=1
 
-                for final_column in range(col, 0, -1):
-                    total-=1
-                    if (row, final_column) in block_set:
-                        break
-                contig_dict[((row, initial_column), (row, final_column))] = total
-                start_column=col+1
+                    for final_column in range(col, 0, -1):
+                        total-=1
+                        if (row, final_column) in block_set:
+                            break
+                    contig_dict[((row, initial_column), (row, final_column))] = total
+                    start_column=col+1
 
-            return max(contig_dict, key=lambda p: contig_dict[p])
+                return max(contig_dict, key=lambda p: contig_dict[p])
+        
 
-    def get_2d_block(sheet, horizontal_count, vertical_count, block_set, blank_set, blocks_to_avoid):
+    def get_2d_block(self, horizontal_count, vertical_count, block_set, blank_set, blocks_to_avoid):
+        sheet=self.sheet
         for block in blocks_to_avoid:
             if block:
                 (start_r, start_c), (end_r, end_c) = block
@@ -305,9 +333,10 @@ class HistogramSelection:
         start_column=max(contiguous_columns, key=lambda p: contiguous_columns[p]["count"])
         end_column=contiguous_columns[start_column]["finish"]
         v_index, v_count = vertical_count.most_common(1)[0]
-        ((initial_row, column), (final_row, column))=HistogramSelection.get_1d_block(sheet, start_column, True, v_count, block_set, blank_set)
+        ((initial_row, column), (final_row, column))=self.get_1d_block(start_column, True, v_count, block_set, blank_set)
         return (initial_row, start_column), (final_row, end_column)
             
 
 def block_finder(sheet): #convenience function
-    return HistogramSelection.block_finder(sheet)
+    h=HistogramSelection(sheet)
+    return h.block_finder()
