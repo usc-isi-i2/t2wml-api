@@ -4,7 +4,7 @@ from uuid import uuid4
 import pandas as pd
 from t2wml.utils.bindings import update_bindings
 from t2wml.wikification.utility_functions import get_provider, dict_to_kgtk, kgtk_to_dict, add_entities_from_file
-from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
+from t2wml.utils.t2wml_exceptions import InvalidAnnotationException, ItemNotFoundException
 import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
@@ -641,7 +641,7 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
                     int(exists[1:]) #will raise error for custom properties, which may need data_type updated
                 if not is_property and exists[0]!="Q":
                     raise KeyError
-            except KeyError:
+            except (KeyError,ItemNotFoundException) :
                 if is_property:
                     id = get_Pnode(project, label)
                 else:
