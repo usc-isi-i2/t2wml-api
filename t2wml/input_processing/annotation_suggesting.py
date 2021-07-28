@@ -14,6 +14,7 @@ time_property_node = {"id": "P585",
 
 def get_types(cell_content):
     cell_content=str(cell_content).strip()
+    country_cell_content = " ".join(str(cell_content).lower().strip().split()).replace("&", "and").replace("-", " ").replace(".", " ").replace(",", " ")
     is_country = cell_content in countries or cell_content.lower() in countries or cell_content.lower() in causx_only_countries
     if strict_make_numeric(cell_content) != "" and cell_content[0] not in ["P", "Q"]:
         is_numeric=True
