@@ -103,7 +103,7 @@ def regex(input, pattern, i=1):
 
 
 def concat(*args):
-    # concatenate a list of expression, e.g., concat(value(D/$row), “, “, value(F/$row))
+    # concatenate a list of expression, e.g., concat(value(D, $row), “, “, value(F, $row))
     # ranges are concatenated in row-major order
     # the last argument is the separator
     # this is not a string modifier function. it does not change values in place, it creates a new return object

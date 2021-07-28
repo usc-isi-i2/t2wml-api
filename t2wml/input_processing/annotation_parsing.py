@@ -466,6 +466,20 @@ class Annotation():
             qualifier_region, use_q=True)
         region = None
 
+        if qualifier_region.type=='time':
+            if qualifier_region.is_2D:
+                num_cols=abs(qualifier_region.col_args[1]-qualifier_region.col_args[0])+1
+                if num_cols == 2 or num_cols == 3:
+                    first_col = column_index_to_letter(qualifier_region.col_args[0])
+                    middle_col = f"value[{column_index_to_letter(qualifier_region.col_args[0]+1)}, $row]," if num_cols==3 else ""
+                    last_col = column_index_to_letter(qualifier_region.col_args[1])
+                    valueLine = f"=concat(value[{first_col}, $row], {middle_col} value[{last_col}, $row], '/')"
+
+                    qualifier_string = YamlFormatter.get_qualifier_string(propertyLine, optionalsLines, valueLine, region)
+                    return qualifier_string
+
+
+
         if qualifier_region.is_2D:
             if qualifier_region.use_item:
                 valueLine = "=item[$qcol, $qrow]"
