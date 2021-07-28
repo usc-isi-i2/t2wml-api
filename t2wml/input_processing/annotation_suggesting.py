@@ -1,7 +1,7 @@
 from collections import Counter, defaultdict
 from math import floor
 from t2wml.input_processing.utils import string_is_valid
-from t2wml.wikification.country_wikifier_cache import countries
+from t2wml.wikification.country_wikifier_cache import countries, causx_only_countries
 from t2wml.utils.date_utils import parse_datetime
 from t2wml.parsing.cleaning_functions import strict_make_numeric
 from t2wml.utils.debug_logging import basic_debug
@@ -14,7 +14,7 @@ time_property_node = {"id": "P585",
 
 def get_types(cell_content):
     cell_content=str(cell_content).strip()
-    is_country = cell_content in countries or cell_content.lower() in countries
+    is_country = cell_content in countries or cell_content.lower() in countries or cell_content.lower() in causx_only_countries:
     if strict_make_numeric(cell_content) != "" and cell_content[0] not in ["P", "Q"]:
         is_numeric=True
     else:

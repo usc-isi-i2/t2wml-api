@@ -1990,3 +1990,16 @@ countries = {
     "Palestinian National Authority": "Q219060",
     "NATO": "Q7184"
 }
+
+causx_only_countries = set(['africa eastern and southern', 'africa western and central', 
+'central europe and the baltics', "côte d'ivoire", 'caribbean small states', 'curaçao', 
+'east asia & pacific (excluding high income)', 'early-demographic dividend', 'east asia & pacific', 
+'europe & central asia (excluding high income)', 'fragile and conflict affected situations', 
+'high income', 'ibrd only', 'ida & ibrd total', 'ida total', 'ida blend', 'ida only', 'low income', 
+'lower middle income', 'low & middle income', 'late-demographic dividend', 
+'middle east & north africa', 'middle income', 'middle east & north africa (excluding high income)', 
+'oecd members', 'other small states', 'pre-demographic dividend', 'pacific island small states', 
+'post-demographic dividend', 'sub-saharan africa (excluding high income)', 'small states', 
+'são tomé and principe', 'east asia & pacific (ida & ibrd)', 'europe & central asia (ida & ibrd)', 
+'latin america & caribbean (ida & ibrd)', 'middle east & north africa (ida & ibrd)', 
+'sub-saharan africa (ida & ibrd)', 'upper middle income'])
