@@ -870,6 +870,7 @@ countries = {
  "democratic republic of são tomé and príncipe": "Q1039",
  "são tomé og príncipe": "Q1039",
  "sao tome and principe": "Q1039",
+ 'são tomé and principe':  "Q1039",
  "st": "Q1039",
  "🇸🇹": "Q1039",
  "stp": "Q1039",
@@ -1463,6 +1464,7 @@ countries = {
  "taiwan china": "Q865",
  "taiwan": "Q865",
  "cote d'ivoire": "Q1008",
+ "côte d'ivoire": "Q1008",
  "cameroon": "Q1009",
  "congo dem rep": "Q974",
  "congo democratic republic": "Q974",
@@ -1475,6 +1477,7 @@ countries = {
  "costa rica": "Q800",
  "cuba": "Q241",
  "curacao": "Q25279",
+ "curaçao": "Q25279",
  "cayman islands": "Q5785",
  "cyprus": "Q229",
  "northern cyprus": "Q23681",
@@ -1996,12 +1999,13 @@ countries = {
  "organisation of eastern caribbean states": "Q392770",
  "ivory coast": "Q1008",
  "palestinian national authority": "Q219060",
- "nato": "Q7184"
+ "nato": "Q7184",
+ 'caribbean small states': "Q664609", #based on causx
 }
 
 
 causx_only_countries = set(['africa eastern and southern', 'africa western and central', 
-'central europe and the baltics', "côte d'ivoire", 'caribbean small states', 'curaçao', 
+'central europe and the baltics',  
 'east asia and pacific (excluding high income)', 'early demographic dividend', 'east asia and pacific', 
 'europe and central asia (excluding high income)', 'fragile and conflict affected situations', 
 'high income', 'ibrd only', 'ida and ibrd total', 'ida total', 'ida blend', 'ida only', 'low income', 
@@ -2009,6 +2013,6 @@ causx_only_countries = set(['africa eastern and southern', 'africa western and c
 'middle east and north africa', 'middle income', 'middle east and north africa (excluding high income)', 
 'oecd members', 'other small states', 'pre demographic dividend', 'pacific island small states', 
 'post demographic dividend', 'sub saharan africa (excluding high income)', 'small states', 
-'são tomé and principe', 'east asia and pacific (ida and ibrd)', 'europe and central asia (ida and ibrd)', 
+'east asia and pacific (ida and ibrd)', 'europe and central asia (ida and ibrd)', 
 'latin america and caribbean (ida and ibrd)', 'middle east and north africa (ida and ibrd)', 
 'sub saharan africa (ida and ibrd)', 'upper middle income'])
