@@ -3,9 +3,6 @@ import pandas as pd
 from t2wml.utils.debug_logging import basic_debug
 
 def post_process_data(data):
-    return data
-    #the below code was added to enable yaml conditional ==, in particular for issue #111
-    #however, it creates performance issues on large files and may no longer be needed
     data = data.fillna("")
     data = data.replace(r'^\s+$', "", regex=True)
     return data
