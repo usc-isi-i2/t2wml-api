@@ -35,6 +35,10 @@ def starts_with(input, section):
 def ends_with(input, section):
     return str(input).endswith(section)
 
+@boolean_modifer
+def is_empty(input):
+    return str(input).replace(r'^\s+$', "") == ""
+
 
 @boolean_modifer
 def instance_of(input, qnode):
@@ -145,6 +149,7 @@ functions_dict = dict(
     contains=contains,
     starts_with=starts_with,
     ends_with=ends_with,
+    is_empty = is_empty,
     instance_of=instance_of,
     split_index=split_index,
     substring=substring,
