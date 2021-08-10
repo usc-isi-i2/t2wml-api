@@ -27,6 +27,8 @@ class T2WMLCode:
         self.is_variable = "t_var" in code_str
         self.code_str = code_str
         self.unmodified_str = unmodified_str
+    def __str__(self):
+        return self.unmodified_str
 
 
 @basic_debug
