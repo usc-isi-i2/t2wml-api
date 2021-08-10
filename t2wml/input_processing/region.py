@@ -82,14 +82,13 @@ class YamlRegion(CodeParser, Region):
 
     def parse_region_expression(self, statement, context={}):
         context.update(self.context)
-        try:
-            if isinstance(statement, T2WMLCode):
+        if isinstance(statement, T2WMLCode):
                 try:
                     return iter_on_n_for_code(statement, context)
                 except Exception as e:
                     raise T2WMLExceptions.ErrorInYAMLFileException(
                         "Failed to parse: "+statement.unmodified_str+ "(" + str(e) + ")")
-
+        try:
             statement=str(statement)
             if self.is_code_string(statement):
                 statement = self.fix_code_string(statement)
