@@ -1,3 +1,5 @@
+from collections import defaultdict
+from hashlib import sha256
 from t2wml.utils.bindings import bindings
 from t2wml.input_processing.yaml_parsing import CodeParser
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
@@ -5,16 +7,23 @@ from t2wml.parsing.t2wml_parsing import iter_on_n, t2wml_parse, T2WMLCode, iter_
 from t2wml.spreadsheets.conversions import cell_range_str_to_tuples, cell_str_to_tuple
 from t2wml.utils.debug_logging import basic_debug
 
+region_cache = {"cache":{}}
+
 
 class Region:
-    def __init__(self, index_pairs):
-        if len(index_pairs) == 0:
+    def __init__(self, index_dict):
+        '''
+        uses 1-indexed indices
+        index_dict: keys are row indexes, values are arrays of column indexes
+        '''
+        if len(index_dict) == 0:
             raise ValueError("Defined region does not include any cells")
-        self.index_pairs = index_pairs
+        self.index_dict=index_dict
 
     def __iter__(self):
-        for pair in self.index_pairs:
-            yield pair
+        for row in self.index_dict:
+            for col in self.index_dict[row]:
+                yield col, row
 
 
 
@@ -23,11 +32,20 @@ class YamlRegion(CodeParser, Region):
     def __init__(self, yaml_data, context=None):
         self.context= context or {}
         self.yaml_data=yaml_data
-        self.range_args = self.get_range_arguments(yaml_data)
-        self.check_range_boundaries(self.range_args)
-        self.columns, self.rows, self.cells = self.get_select_arguments(yaml_data)
-        self.skip_cols, self.skip_rows, self.skip_cells = self.get_skip_arguments(yaml_data)
-        self.index_pairs= self.build_pairs()
+        yaml_hash = sha256(str(yaml_data).encode('utf-8')).hexdigest()
+        cache = region_cache["cache"].get(yaml_hash)
+        if cache:
+            self.index_dict = cache
+        else:
+            self.range_args = self.get_range_arguments(yaml_data)
+            self.check_range_boundaries(self.range_args)
+            self.columns, self.rows, self.cells = self.get_select_arguments(yaml_data)
+            self.skip_cols, self.skip_rows, self.skip_cells = self.get_skip_arguments(yaml_data)
+            self.row_set=set()
+            self.col_Set=set()
+            self.index_dict= self.build_pairs()
+            region_cache["cache"]={yaml_hash:self.index_dict}
+
 
     def check_range_boundaries(self, region):
         if region['t_var_left'] > region['t_var_right']:
@@ -183,7 +201,7 @@ class YamlRegion(CodeParser, Region):
         return skip_columns, skip_rows, skip_cells
 
     def build_pairs(self):
-        index_pairs=[]
+        index_dict=defaultdict(list)
         #if we only specified cells, not any of the range args, don't build a range for pairs
         range_args=set(['range', 'top', 'bottom', 'right', 'left', 'columns', 'rows'])
         if len(range_args.intersection(self.yaml_data)):
@@ -208,20 +226,18 @@ class YamlRegion(CodeParser, Region):
 
             skip_cells=set(self.skip_cells)
             for row in self.rows:
-                for column in self.columns:
-                    if (column, row) not in skip_cells:
-                            index_pairs.append((column, row))
-            
+                for col in self.columns:
+                    if (col, row) not in skip_cells:
+                        index_dict[row].append(col)
+
         for (col, row) in self.cells:
-            index_pairs.append((col, row))
+            index_dict[row].append(col)
 
         
-
-        
-        if len(index_pairs)<1:
+        if len(index_dict)<1:
              raise T2WMLExceptions.ErrorInYAMLFileException("No data cells specified")
 
-        return index_pairs
+        return index_dict
     
     def get_code_replacement(self, input_str):
         fixed = self.fix_code_string(input_str)

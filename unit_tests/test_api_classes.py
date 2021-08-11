@@ -45,7 +45,7 @@ class ClassesTest(unittest.TestCase):
                 self.cols = cols
                 self.rows = rows
 
-            def iterator(self):
+            def iterator(self, start_index=0, end_index=None):
                 for col in self.cols:
                     for row in self.rows:
                         yield(col, row)

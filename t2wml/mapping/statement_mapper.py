@@ -20,14 +20,14 @@ class StatementMapper(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def iterator(self):
+    def iterator(self, start_index=0, end_index=None):
         raise NotImplementedError
 
     def do_init(self, sheet, wikifier):
         pass
 
     @basic_debug
-    def get_statements(self, sheet, wikifier, start=0, end=None):
+    def get_statements(self, sheet, wikifier, start_index=0, end_index=None):
         self.do_init(sheet, wikifier)
         statements = {}
         cell_errors = {}
@@ -36,12 +36,8 @@ class StatementMapper(ABC):
             "sheet_name": sheet.name,
         }
 
-        i=0
 
-        for col, row in self.iterator():
-            i+=1
-            if i<start:
-                continue
+        for col, row in self.iterator(start_index, end_index):
             errors=[]
             if string_is_valid(str(bindings.excel_sheet[row-1, col-1])):
                 cell = to_excel(col-1, row-1)
@@ -60,8 +56,7 @@ class StatementMapper(ABC):
                                                        level="Major")]
                 if errors:
                     cell_errors[cell] = [error.__dict__ if isinstance(error, StatementError) else error for error in errors ]
-            if i == end:
-                break
+
         return statements, cell_errors, metadata
 
 
@@ -87,10 +82,14 @@ class YamlMapper(StatementMapper):
             context=context, **self.template.eval_template)
         return statement.serialize(), statement.errors
 
-    def iterator(self):
+    def iterator(self, start_index=0, end_index=None):
         region=YamlRegion(self.yaml_data['statementMapping']['region'])
-        for col, row in region:
-            yield col, row
+        if end_index is None:
+            end_index=max(region.index_dict)-1
+        for row in range(start_index+1, end_index+2): #switch to 1-indexed...
+            if row in region.index_dict:
+                for col in region.index_dict[row]:
+                    yield col, row
 
     @property
     def template(self):

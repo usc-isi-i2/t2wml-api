@@ -10,10 +10,6 @@ def post_process_data(data):
     data = data.replace(r'^\s+$', "", regex=True)
     return data
 
-def load_pickle(pickle_path):
-    data = pd.read_pickle(pickle_path)
-    return post_process_data(data)
-
 class PandasLoader:
     # a wrapper to centralize and make uniform any loading of data files/sheets from pandas
     def __init__(self, file_path):

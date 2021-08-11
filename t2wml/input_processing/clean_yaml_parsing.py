@@ -1,7 +1,3 @@
-import os
-from pathlib import Path
-from hashlib import sha256
-from t2wml.spreadsheets.utilities import load_pickle
 from t2wml.input_processing.region import YamlRegion
 from t2wml.settings import t2wml_settings
 from t2wml.utils.t2wml_exceptions import ErrorInYAMLFileException
@@ -54,7 +50,6 @@ class DFCleaner:
         df=sheet.data.copy(deep=True)
         for instruction in parsing_instructions:
             region = instruction["region"]
-            cells= set(region.index_pairs)
             parsed_func=instruction["parsed_func"]
             for col, row in region:
                 col=col-1
