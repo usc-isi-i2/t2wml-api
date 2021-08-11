@@ -6,9 +6,6 @@ from t2wml.spreadsheets.sheet import SpreadsheetFile
 from t2wml.parsing.cleaning_functions import *
 from t2wml.mapping.datamart_edges import clean_id
 from t2wml.input_processing.clean_yaml_parsing import get_cleaned_dataframe
-from t2wml.settings import t2wml_settings
-
-t2wml_settings.cache_data_files_folder=None
 
 class TestScripts(unittest.TestCase):
     def test_Clean_id(self):
@@ -86,7 +83,6 @@ class TestScripts(unittest.TestCase):
 
 class TestDataFrame(unittest.TestCase):
     def test_yaml(self):
-        t2wml_settings.cache_data_files_folder=None
         repo_folder = Path(__file__).parents[2]
         test_folder = os.path.join(
             repo_folder, "t2wml-api", "unit_tests", "ground_truth", "cleaning")

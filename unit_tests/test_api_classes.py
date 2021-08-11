@@ -148,32 +148,6 @@ class ProjectTest(unittest.TestCase):
 
 
         
-class SheetsWithCachingTest(unittest.TestCase):
-    def test_with_caching(self):
-        from t2wml.api import t2wml_settings, Sheet, create_output_from_files
-        from t2wml.api import t2wml_settings
-        from t2wml.wikification.utility_functions import kgtk_to_dict
-        prop_dict=kgtk_to_dict(os.path.join(unit_test_folder, "homicide", "homicide_properties.tsv"))
-        t2wml_settings.wikidata_provider.update_cache(prop_dict)
-        cache_folder=os.path.join(unit_test_folder, "tmp")
-        if not os.path.exists(cache_folder):
-            os.mkdir(cache_folder)
-        t2wml_settings.cache_data_files_folder=cache_folder
-        data_file_path=os.path.join(unit_test_folder, "homicide", "homicide_report_total_and_sex.xlsx")
-        wikifier_filepath=os.path.join(unit_test_folder, "homicide", "unit_wikifier_general.csv")
-        sheet_name="table-1a"
-        sheet=Sheet(data_file_path, sheet_name)
-        convert_old_wikifier_to_new(wikifier_filepath, sheet, wikifier_filepath)
-        yaml_file_path=os.path.join(unit_test_folder, "homicide", "t2wml", "table-1a.yaml")
-
-        output_filepath=os.path.join(unit_test_folder, "homicide", "results", "table-1a.tsv")
-        output=create_output_from_files(data_file_path, sheet_name, yaml_file_path, wikifier_filepath, output_format="tsv")
-        #with open(output_filepath, 'w') as f:
-        #    f.write(output)
-        with open(output_filepath, 'r') as f:
-            expected=f.read()
-        assert output==expected
-            
 
 
         
