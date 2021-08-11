@@ -3,6 +3,9 @@ import pandas as pd
 from t2wml.utils.debug_logging import basic_debug
 
 def post_process_data(data):
+    return data
+    #the below code was added to enable yaml conditional ==, in particular for issue #111
+    #however, it creates performance issues on large files and may no longer be needed
     data = data.fillna("")
     data = data.replace(r'^\s+$', "", regex=True)
     return data
@@ -17,7 +20,7 @@ class PandasLoader:
         self.file_path = file_path
         self.file_extension = Path(file_path).suffix.lower()
         self.is_excel = True if self.file_extension in [".xlsx", ".xls"] else False
-        self.pd_args = dict(dtype=str, header=None)
+        self.pd_args = dict(dtype=str, header=None, na_filter=False)
 
     @basic_debug
     def load_sheet(self, sheet_name):

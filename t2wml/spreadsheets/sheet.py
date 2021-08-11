@@ -1,20 +1,12 @@
 from pathlib import Path
 import pandas as pd
 import json
-from t2wml.settings import t2wml_settings
 from t2wml.spreadsheets.utilities import PandasLoader, post_process_data
-from t2wml.spreadsheets.caching import PickleCacher, FakeCacher
 from t2wml.spreadsheets.conversions import to_excel
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from collections.abc import Mapping
 from io import StringIO
 from t2wml.utils.debug_logging import basic_debug
-
-def get_cache_class():
-    cache_class = FakeCacher
-    if t2wml_settings.cache_data_files:
-        cache_class = PickleCacher
-    return cache_class
 
 
 class SpreadsheetFile(Mapping):
@@ -67,9 +59,7 @@ class Sheet:
         if data is not None:
             self.raw_data = data
         else:
-            cache_class = get_cache_class()
-            sc = cache_class(data_file_path, sheet_name)
-            self.raw_data = sc.get_sheet()
+            self.raw_data = PandasLoader(self.data_file_path).load_sheet(self.name)
     
     @property
     def data(self):
@@ -119,6 +109,7 @@ class Sheet:
 
     @classmethod
     def load_sheet_from_csv_string(cls, csv_string, data_file_path="", sheet_name="", **pandas_options):
+        #convenience method, especially for tests
         df=pd.read_csv(StringIO(csv_string), **pandas_options)
         df=post_process_data(df)
         return cls(data_file_path=data_file_path, sheet_name=sheet_name, data=df)

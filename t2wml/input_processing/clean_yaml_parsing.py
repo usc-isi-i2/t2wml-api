@@ -1,14 +1,11 @@
 import os
 from pathlib import Path
 from hashlib import sha256
-import pandas as pd
-import numpy as np
 from t2wml.spreadsheets.utilities import load_pickle
 from t2wml.input_processing.region import YamlRegion
 from t2wml.settings import t2wml_settings
 from t2wml.utils.t2wml_exceptions import ErrorInYAMLFileException
 from t2wml.parsing.cleaning_functions import cleaning_functions_dict
-from t2wml.spreadsheets.caching import pickle_folder
 from t2wml.utils.bindings import update_bindings
 
 def create_lambda(function_name, *args, **kwargs):
@@ -68,22 +65,8 @@ class DFCleaner:
         return df
 
 
-def get_cleaned_dataframe(sheet, yaml_instructions):
-    if t2wml_settings.cache_data_files:
-        yaml_hash = sha256(str(yaml_instructions).encode('utf-8'))
-        pickle_dir=pickle_folder(sheet.data_file_path) / yaml_hash.hexdigest()
-        pickle_file=pickle_dir / (Path(sheet.data_file_path).stem+"_"+sheet.name+"_cleaned.pkl")
-        #1: check for fresh pickled version of df
-        if os.path.isfile(pickle_file):
-            if os.path.getmtime(pickle_file) > os.path.getmtime(sheet.data_file_path):
-                df=load_pickle(pickle_file)
-                return df
-        else:
-            sc=DFCleaner(yaml_instructions, sheet)
-            Path.mkdir(pickle_dir, parents=True, exist_ok=True)
-            sc.df.to_pickle(pickle_file)
-            return sc.df
-            
+def get_cleaned_dataframe(sheet, yaml_instructions):         
+    #TODO: handle caching somehow?   
     sc=DFCleaner(yaml_instructions, sheet)
     return sc.df
 
