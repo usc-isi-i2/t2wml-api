@@ -5,14 +5,14 @@ statementMapping:
       top: 6
       bottom: 16
       skip_rows:
-        - =is_empty(value[A:B, $row]) and not is_empty(value[C:D, $row])
+        - =value[A:B, $row] == "" and value[C:D, $row] != ""
   template:
     subject: =item[A, $row]
     property: P100024 # murder
     value: =value[$col, $row]
     qualifier:
       - property: P585 #point in time
-        value: =is_empty(value[A:B, $row-$n]) and not is_empty(value[C:D, $row-$n]) -> value[$col, $row-$n]
+        value: =value[A:B, $row-$n] == "" and value[C:D, $row-$n] != "" -> value[$col, $row-$n]
         calendar: Q1985727
         precision: year
         time_zone: 0

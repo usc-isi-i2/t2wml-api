@@ -5,7 +5,7 @@ statementMapping:
       top: 5
       bottom: 24
       skip_rows:
-        - =is_empty(value[A:D, $row])
+        - =value[A:D, $row] == ""
   template:
     subject: =item[B, $row-$n]
     property: P100024 # murder

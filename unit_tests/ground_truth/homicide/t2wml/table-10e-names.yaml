@@ -8,7 +8,7 @@ statementMapping:
       # multiple rows named years. % symbol assigns a name to the row
       # one could also specify % years[B:D] to name a range of cells
       skip_rows:
-        - =is_empty(value[A:B, $row]) and not is_empty(value[C:D, $row]) % years
+        - =value[A:B, $row] == "" and value[C:D, $row] != "" % years
   template:
     subject: =item[A, $row]
     property: P100024 # murder

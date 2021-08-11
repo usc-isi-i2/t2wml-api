@@ -24,7 +24,7 @@ def string_modifier(func):
             if where not in [start, end, start_and_end, everywhere]:
                 raise ValueError("Invalid argument for where: "+where)
 
-        if input is not None and str(input)!="nan":  # if value is None, don't modify
+        if input is not None:  # if value is None, don't modify
             if isinstance(input, RangeClass):  # handle ranges separately:
                 for i, val in enumerate(input):
                     if val:
@@ -220,8 +220,6 @@ def make_ascii(input, translate=False):
 
 @string_modifier
 def fill_empty(input, replacement):
-    if str(input) in ["", "#na", "nan"]:
-        return replacement
     if "".join(input.split())=="":
         return replacement
     return input
