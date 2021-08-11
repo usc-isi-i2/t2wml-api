@@ -6,18 +6,41 @@ from t2wml.settings import t2wml_settings
 from t2wml.parsing.classes import ReturnClass, RangeClass
 from t2wml.parsing.cleaning_functions import string_modifier
 
+
+def boolean_expression(func):
+    def wrapper(input, *args, **kwargs):
+        if isinstance(input, RangeClass):  # handle ranges separately, using "and" logic
+                for val in input:
+                    flag = func(val, *args, **kwargs)
+                    if flag == False:
+                        return False
+                return True
+        return func(input, *args, **kwargs)
+    return wrapper
+
+
+@boolean_expression
+def is_empty(input):
+    if input is None:
+        return True
+    if str(input) in ["", "#na", "nan"]:
+        return True
+    return str(input).replace(r'^\s+$', "") == ""
+
 def boolean_modifer(func):
     def wrapper(input, *args, **kwargs):
-        if input:  # if value is not None
-            if isinstance(input, RangeClass):  # handle ranges separately:
-                for i, val in enumerate(input):
-                    if val:
-                        flag = func(input[i], *args, **kwargs)
-                        if flag == True:
-                            return True
-                return False
-            return func(input, *args, **kwargs)
-        return False
+        if isinstance(input, RangeClass):  # handle ranges separately, using "or" logic
+            for i, val in enumerate(input):
+                if not is_empty(val): #return false for Nan, empty string, None, etc
+                    flag = func(input[i], *args, **kwargs)
+                    if flag == True: 
+                        return True
+            return False
+
+        if is_empty(str(input)): #return false for Nan, empty string, None, etc
+            return False
+        
+        return func(input, *args, **kwargs)
     return wrapper
 
 
@@ -34,11 +57,6 @@ def starts_with(input, section):
 @boolean_modifer
 def ends_with(input, section):
     return str(input).endswith(section)
-
-@boolean_modifer
-def is_empty(input):
-    return str(input).replace(r'^\s+$', "") == ""
-
 
 @boolean_modifer
 def instance_of(input, qnode):
@@ -117,13 +135,14 @@ def concat(*args):
     for arg in args:
         if isinstance(arg, RangeClass):
             for thing in arg:
-                if thing: #skip empty values
+                if thing and str(thing)!="nan": #skip empty values
                     return_str += str(thing)
                     return_str += sep
         else:
-            if arg:  # skip empty values:
-                return_str += str(arg)
-                return_str += sep
+            if str(arg)=="nan": #don't append nans
+                continue
+            return_str += str(arg)
+            return_str += sep
 
     # remove the last sep
     length = len(sep)

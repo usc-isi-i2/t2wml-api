@@ -52,7 +52,7 @@ def iter_on_n(expression, context={}, upper_limit=None):
             context_dir = {"t_var_n": n}
             context_dir.update(context)
             return_value = t2wml_parse(expression, context_dir)
-            if return_value:
+            if return_value and str(return_value)!="nan":
                 return return_value
         except IndexError:
             break

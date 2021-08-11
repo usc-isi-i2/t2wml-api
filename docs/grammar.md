@@ -255,7 +255,7 @@ Not every nesting order makes sense.
 
 A boolean expression- created with a function or operator- returns a True/False value.
 
-A boolean equation is inidcated with the arrow (`->`) operator. It returns some value, based on when a boolean expression returns True. The left side argument is the boolean expression, and the right side argument is what is returned as soon as the expression is evaluated to True. (one therefore would normally have the boolean expression contain at least one of the iterables $row, $col, or $n)
+A boolean equation is indicated with the arrow (`->`) operator. It returns some value, based on when a boolean expression returns True. The left side argument is the boolean expression, and the right side argument is what is returned as soon as the expression is evaluated to True. (one therefore would normally have the boolean expression contain at least one of the iterables $row, $col, or $n)
 
 `contains(value[A, $row], "human")` is a boolean expression. 
 
@@ -275,6 +275,8 @@ T2WML supports two boolean operators, `==` and `!=` for equal and not equal, res
 It is important to note that when applied to a *range*, these operators use "and" logic.
 
 `value[A:D, $row] == "Burundi"` will only return true when all of the columns A through D in the row equal "Burundi". Similarly, `value[A:D, $row] != "Burundi"` will only return true if none of them equal "Burundi".
+
+The convenience function, is_empty, is meant to replace `==""` and also acts like an operator, ie using "and" logic
 
 ##### Boolean functions
 <span id="boolfunc"></span>
