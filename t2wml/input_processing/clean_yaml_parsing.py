@@ -1,8 +1,6 @@
 import os
 from pathlib import Path
 from hashlib import sha256
-import pandas as pd
-import numpy as np
 from t2wml.spreadsheets.utilities import load_pickle
 from t2wml.input_processing.region import YamlRegion
 from t2wml.settings import t2wml_settings

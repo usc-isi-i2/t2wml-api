@@ -119,6 +119,7 @@ class Sheet:
 
     @classmethod
     def load_sheet_from_csv_string(cls, csv_string, data_file_path="", sheet_name="", **pandas_options):
+        #convenience method, especially for tests
         df=pd.read_csv(StringIO(csv_string), **pandas_options)
         df=post_process_data(df)
         return cls(data_file_path=data_file_path, sheet_name=sheet_name, data=df)
