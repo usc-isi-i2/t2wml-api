@@ -1,5 +1,23 @@
 T2WML API History
 ===================================
+
+Changes in version 0.6.0:
+------------------------
+* treat multi-column date blocks as concatenated dates
+* remove post-processing of pandas data for multi-factor speedup of loading large spreadsheets 
+* get rid of spreadsheet cache handling in api
+* changes tags to dictionary by id rather than array
+* speed up suggest_block algorithm for datasets with more than 300 rows by sampling top and bottom
+* change iterator in statement mapper to accept start and end index, add option for "count" as well
+* cache index_dict instead of recalculating each time.
+* update country_wikifier_cache:
+    - add more countries
+    - standardize (lowercase, replace punctuation) 
+    - add causx only countries for suggesting blocks
+* bug fixes:
+    - annotation parsing: fix bug with range strings
+
+
 Changes in version 0.5.6:
 ------------------------
 * critical bug fix in cleaning id
