@@ -27,7 +27,7 @@ class StatementMapper(ABC):
         pass
 
     @basic_debug
-    def get_statements(self, sheet, wikifier, start_index=0, end_index=None):
+    def get_statements(self, sheet, wikifier, start_index=0, end_index=None, count=None):
         self.do_init(sheet, wikifier)
         statements = {}
         cell_errors = {}
@@ -36,7 +36,7 @@ class StatementMapper(ABC):
             "sheet_name": sheet.name,
         }
 
-
+        i=0
         for col, row in self.iterator(start_index, end_index):
             errors=[]
             if string_is_valid(str(bindings.excel_sheet[row-1, col-1])):
@@ -56,7 +56,9 @@ class StatementMapper(ABC):
                                                        level="Major")]
                 if errors:
                     cell_errors[cell] = [error.__dict__ if isinstance(error, StatementError) else error for error in errors ]
-
+            if i == count:
+                break
+            i+=1
         return statements, cell_errors, metadata
 
 

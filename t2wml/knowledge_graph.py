@@ -52,7 +52,7 @@ class KnowledgeGraph:
         statement, errors = statement_mapper.get_cell_statement(sheet, wikifier, col, row, do_init=True)
 
     @classmethod
-    def generate(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier, start=0, end=None):
+    def generate(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier, start=0, end=None, count=None):
         """create a KnowledgeGraph instance from API classes
 
         Args:
@@ -63,7 +63,7 @@ class KnowledgeGraph:
         Returns:
             KnowledgeGraph: an initialized KnowledgeGraph instance
         """
-        statements, errors, metadata = statement_mapper.get_statements(sheet, wikifier, start, end)
+        statements, errors, metadata = statement_mapper.get_statements(sheet, wikifier, start, end, count)
         return cls(statements, errors, metadata, sheet)
 
     @classmethod
