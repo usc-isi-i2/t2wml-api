@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from t2wml.wikification.utility_functions import add_entities_from_file
 from t2wml.api import KnowledgeGraph, Sheet
-from t2wml.wikification.item_table import convert_old_wikifier_to_new
+#from t2wml.wikification.item_table import convert_old_wikifier_to_new
 
 repo_folder = Path(__file__).parents[2]
 unit_test_folder = os.path.join(
@@ -29,7 +29,7 @@ class TestBelgiumRegex(unittest.TestCase):
         yaml_file = self.yaml_file
         sheet_name = "Belgium.csv"
         sheet=Sheet(self.data_file, sheet_name)
-        convert_old_wikifier_to_new(self.wikifier_file, sheet, self.wikifier_file)
+        #convert_old_wikifier_to_new(self.wikifier_file, sheet, self.wikifier_file)
 
         kg = KnowledgeGraph.generate_from_files(
             self.data_file, sheet_name, yaml_file, self.wikifier_file)
@@ -69,7 +69,7 @@ class TestOECDWithCustomProperties(unittest.TestCase):
         add_props = add_entities_from_file(self.custom_properties_file)
         assert len(add_props["failed"]) == 0
         sheet=Sheet(self.data_file, sheet_name)
-        convert_old_wikifier_to_new(self.wikifier_file, sheet, self.wikifier_file)
+        #convert_old_wikifier_to_new(self.wikifier_file, sheet, self.wikifier_file)
         
         kg = KnowledgeGraph.generate_from_files(
             self.data_file, sheet_name, yaml_file, self.wikifier_file)

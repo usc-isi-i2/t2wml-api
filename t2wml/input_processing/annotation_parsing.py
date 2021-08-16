@@ -668,7 +668,7 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
     
     if dataframe_rows:
         df=pd.DataFrame(dataframe_rows, columns=columns)
-        project.add_df_to_wikifier_file(sheet.data_file_path, df)
+        project.add_df_to_wikifier_file(sheet, df)
         wikifier.add_dataframe(df)
         
     

@@ -1,4 +1,4 @@
-from t2wml.wikification.item_table import convert_old_wikifier_to_new
+from t2wml.wikification.item_table import Wikifier, convert_old_df_to_dict, convert_old_wikifier_to_new
 from t2wml.mapping.datamart_edges import clean_id
 import yaml
 import os
@@ -214,26 +214,26 @@ class Project:
                     return True
         return False
     
-    def get_wikifier_file(self, data_file_path):
-        data_file_path=self._normalize_path(data_file_path)
-        wikifier_name=clean_id(data_file_path) + ".csv"
+    def get_wikifier_file(self, sheet):
+        data_file_path=self._normalize_path(sheet.data_file_path)
+        wikifier_name=clean_id(data_file_path) +"_"+sheet.name+ ".json"
         wikifier_file_path=os.path.join(self.directory, "wikifiers", wikifier_name)
         if os.path.exists(wikifier_file_path):
             return wikifier_file_path, True
         return wikifier_file_path, False
     
-    def add_df_to_wikifier_file(self, data_file_path, df, overwrite_existing=False):
-        wikifier_file_path, exists=self.get_wikifier_file(data_file_path)
+    def add_dict_to_wikifier_file(self, sheet, wiki_dict, overwrite_existing=True):
+        wikifier_file_path, exists=self.get_wikifier_file(sheet)
         if exists:
-            #clear any clashes/duplicates
-            org_df=pd.read_csv(wikifier_file_path)
-            keep='first'
-            if overwrite_existing:
-                keep='last'
-            combined_df = pd.concat([org_df, df])
-            df=combined_df.drop_duplicates(subset=['row', 'column', 'value', 'file', 'sheet', 'context'], keep=keep).reset_index(drop=True)
-        df.to_csv(wikifier_file_path, index=False, escapechar="")
-        return df
+            wikifier = Wikifier.load_from_file(wikifier_file_path)
+        else:
+            wikifier = Wikifier(filepath=wikifier_file_path)
+        wikifier.update_from_dict(wiki_dict, overwrite_existing)
+        wikifier.save_to_file(wikifier_file_path)
+    
+    def add_df_to_wikifier_file(self, sheet, df, overwrite_existing=True):
+        wiki_dict = convert_old_df_to_dict(df)
+        self.add_dict_to_wikifier_file(sheet, wiki_dict, overwrite_existing)
 
     @basic_debug
     def delete_file_from_project(self, file_path, delete_from_fs=False):

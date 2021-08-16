@@ -2,7 +2,7 @@ import os
 from t2wml.wikification.wikidata_provider import DictionaryProvider
 import pandas as pd
 from t2wml.api import Sheet
-from t2wml.wikification.item_table import convert_old_wikifier_to_new
+#from t2wml.wikification.item_table import convert_old_wikifier_to_new
 from t2wml.utils.t2wml_exceptions import FileNotPresentInProject
 import unittest
 from pathlib import Path
