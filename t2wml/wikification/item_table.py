@@ -42,23 +42,29 @@ class Wikifier:
     def item_table(self):
         return ItemTable(self.lookup_table)
 
-    def delete_wikification(self, range, value, context:str=''):
-        (row1, col1), (row2, col2) = range
+    def delete_wikification(self, selection, value=None, context:str='', sheet=None):
+        [[col1, row1], [col2, row2]] = selection #the range is 0-indexed [[col, row], [col, row]]
+        if value is None and sheet is None:
+            raise ValueError("for deletion, must specify value or sheet")
+        if value is not None:
+            sheet=None
         for row in range(row1, row2+1):
             for col in range(col1, col2+1):
-                self.lookup_table.pop(str(col, row, value, context), None)
+                if sheet:
+                    value = sheet[row, col]
+                self.lookup_table.pop(str((col, row, value, context)), None)
     
-    def add_wikification(self, item, range, value, context:str='', replace=True):
-        (row1, col1), (row2, col2) = range
+    def add_wikification(self, item, selection, value, context:str='', replace=True):
+        (row1, col1), (row2, col2) = selection
         for row in range(row1, row2+1):
             for col in range(col1, col2+1):
                 if replace:
-                    self.lookup_table[str(col, row, value, context)] = item
+                    self.lookup_table[str((col, row, value, context))] = item
                 else:
                     try:
-                        self.lookup_table[str(col, row, value, context)]
+                        self.lookup_table[str((col, row, value, context))]
                     except KeyError:
-                        self.lookup_table[str(col, row, value, context)] = item
+                        self.lookup_table[str((col, row, value, context))] = item
     
 
     def update_from_dict(self, wiki_dict, replace=False):
