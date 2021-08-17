@@ -229,7 +229,7 @@ class Project:
         else:
             wikifier = Wikifier(filepath=wikifier_file_path)
         wikifier.update_from_dict(wiki_dict, overwrite_existing)
-        wikifier.save_to_file(wikifier_file_path)
+        wikifier.save(wikifier_file_path)
     
     def add_df_to_wikifier_file(self, sheet, df, overwrite_existing=True):
         wiki_dict = convert_old_df_to_dict(df)
@@ -377,4 +377,4 @@ class Project:
             for sheet_name in sf:
                 sheet=sf[sheet_name]
                 dataframe = convert_old_wikifier_to_new(wikifier_file, sheet)
-                self.add_df_to_wikifier_file(datafile, dataframe)
+                self.add_df_to_wikifier_file(sheet, dataframe)

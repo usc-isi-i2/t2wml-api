@@ -156,7 +156,7 @@ class CellRange(RangeClass):
         self.row_args = row_args
         data = data_sheet[row_args, col_args]
         ndim = data.ndim
-        data = data.to_numpy().tolist()
+        data = data.tolist()
         if ndim == 1:
             data = [data]
         self.data = data

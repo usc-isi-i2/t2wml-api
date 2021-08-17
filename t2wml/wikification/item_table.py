@@ -81,6 +81,9 @@ class Wikifier:
         wiki_dict=convert_old_df_to_dict(df)
         self.update_from_dict(wiki_dict)
 
+    def add_file(self, filepath): #TODO: replace?
+        df = pd.read_csv(filepath)
+        self.add_dataframe(df)
 
 
 
@@ -168,6 +171,8 @@ def convert_old_df_to_dict(df):
         row = entry.row
         value = str(entry.value)
         context = entry.context or ""
+        if str(context) == "nan":
+            context=""
         item = entry.item
         wiki_dict[str((column, row, value, context))] = item
     return wiki_dict

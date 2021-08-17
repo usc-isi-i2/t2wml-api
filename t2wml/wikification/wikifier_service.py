@@ -42,7 +42,7 @@ class WikifierService:
 
         sheet_data = sheet[start_row:end_row]
         flattened_sheet_data = sheet[start_row:end_row,
-                                     start_col:end_col].to_numpy().flatten()
+                                     start_col:end_col].flatten()
 
         data = self._call_wikify_service(sheet_data, payload)
 
