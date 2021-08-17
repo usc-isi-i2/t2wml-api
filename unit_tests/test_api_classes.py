@@ -29,9 +29,9 @@ class ClassesTest(unittest.TestCase):
         df = pd.DataFrame.from_dict({"column": ['0'], "row": ['5'],
                                      "value": 'Comoros', "item": ['Q99'], "context": [''], 
                                      "file":["input_1.csv"], "sheet":["input_1.csv"]})
-        wf.add_dataframe(df)
-        wf.save(output_file)
-        new_wf = Wikifier.load(output_file)
+        wf.add_dataframe(df, replace=True)
+        wf.save_to_file(output_file)
+        new_wf = Wikifier.load_from_file(output_file)
         assert new_wf.item_table.get_item(0, 3, sheet=sheet) == "Q967"
         assert new_wf.item_table.get_item(0, 5, sheet=sheet) == "Q99"
 

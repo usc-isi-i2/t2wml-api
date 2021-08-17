@@ -67,7 +67,7 @@ class Wikifier:
                         self.lookup_table[str((col, row, value, context))] = item
     
 
-    def update_from_dict(self, wiki_dict, replace=False):
+    def update_from_dict(self, wiki_dict, replace=True):
         for key in wiki_dict:
             if replace:
                 self.lookup_table[key]=wiki_dict[key]
@@ -77,13 +77,13 @@ class Wikifier:
                 except KeyError:
                     self.lookup_table[key]=wiki_dict[key]
     
-    def add_dataframe(self, df): #TODO: replace all instances
+    def add_dataframe(self, df, replace=True): #TODO: replace all instances
         wiki_dict=convert_old_df_to_dict(df)
-        self.update_from_dict(wiki_dict)
+        self.update_from_dict(wiki_dict, replace)
 
-    def add_file(self, filepath): #TODO: replace?
+    def add_file(self, filepath, replace=True): #TODO: replace?
         df = pd.read_csv(filepath)
-        self.add_dataframe(df)
+        self.add_dataframe(df, replace)
 
 
 
@@ -167,8 +167,8 @@ def convert_old_wikifier_to_new(wikifier_file, sheet):
 def convert_old_df_to_dict(df):
     wiki_dict={}
     for entry in df.itertuples():
-        column = entry.column
-        row = entry.row
+        column = int(entry.column)
+        row = int(entry.row)
         value = str(entry.value)
         context = entry.context or ""
         if str(context) == "nan":
