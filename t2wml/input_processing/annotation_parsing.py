@@ -2,6 +2,7 @@ import os
 import json
 from uuid import uuid4
 import pandas as pd
+from math import dist
 from t2wml.utils.bindings import update_bindings
 from t2wml.wikification.utility_functions import get_provider, dict_to_kgtk, kgtk_to_dict, add_entities_from_file
 from t2wml.utils.t2wml_exceptions import InvalidAnnotationException, ItemNotFoundException
@@ -20,6 +21,32 @@ def get_Qnode(project, item):
 def get_Pnode(project, property):
     return f"P{project.dataset_id}-{clean_id(property)}"
 
+
+def rect_distance(rect1, rect2):
+    ((x1, y1), (x1b, y1b)) = rect1
+    ((x2, y2), (x2b, y2b)) = rect2
+    left = x2b < x1
+    right = x1b < x2
+    bottom = y2b < y1
+    top = y1b < y2
+    if top and left:
+        return dist((x1, y1b), (x2b, y2))
+    elif left and bottom:
+        return dist((x1, y1), (x2b, y2b))
+    elif bottom and right:
+        return dist((x1b, y1), (x2, y2b))
+    elif right and top:
+        return dist((x1b, y1b), (x2, y2))
+    elif left:
+        return x1 - x2b
+    elif right:
+        return x2 - x1b
+    elif bottom:
+        return y1 - y2b
+    elif top:
+        return y2 - y1b
+    else:             # rectangles intersect
+        return 0
 
 
 
@@ -83,7 +110,6 @@ class Block:
         self.type = annotation.get("type", "")
         self.id=annotation["id"]
         self.userlink=annotation.get("userlink", None)
-        self.cell_args = self.get_cell_args(self.selection)
         self.matches = {} #a dictionary of "unit", "property", etc which links to other blocks
     
     def get_from_annotation(self, key, *args, **kwargs):
@@ -98,7 +124,9 @@ class Block:
         linked_block.matches[self.role] = self
         self.annotation["link"] = linked_block.id
 
-    def get_cell_args(self, selection):
+    @property
+    def cell_args(self):
+        selection=self.selection
         return (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
 
     @property
@@ -164,10 +192,11 @@ class Block:
 
     def get_alignment_value(self, relative_args):
         if self.get_alignment_orientation(relative_args)=="col":
-            return 1
+            return rect_distance(self.cell_args, relative_args.cell_args)
         if self.get_alignment_orientation(relative_args)=="row":
-            return 2
-        return COST_MATRIX_DEFAULT
+            return rect_distance(self.cell_args, relative_args.cell_args)
+        misaligned_penalty = 5
+        return misaligned_penalty * rect_distance(self.cell_args, relative_args.cell_args)
         # TODO: add costs for imperfect alignments
         if self.get_alignment_orientation(relative_args)=="row":
             diff1 = abs(self.col_args[0] - relative_args.col_args[0])
