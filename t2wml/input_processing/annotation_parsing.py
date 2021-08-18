@@ -2,7 +2,6 @@ import os
 import json
 from uuid import uuid4
 import pandas as pd
-from math import dist
 from t2wml.utils.bindings import update_bindings
 from t2wml.wikification.utility_functions import get_provider, dict_to_kgtk, kgtk_to_dict, add_entities_from_file
 from t2wml.utils.t2wml_exceptions import InvalidAnnotationException, ItemNotFoundException
@@ -11,6 +10,16 @@ from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
 from t2wml.mapping.datamart_edges import clean_id
 from t2wml.utils.debug_logging import basic_debug
+import math
+
+try:
+    from math import dist
+except:
+    def dist(point1, point2):
+        (x1,y1) = point1
+        (x2,y2) = point2
+        distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+        return distance
 
 COST_MATRIX_DEFAULT = 10
 
@@ -196,7 +205,8 @@ class Block:
         if self.get_alignment_orientation(relative_args)=="row":
             return rect_distance(self.cell_args, relative_args.cell_args)
         misaligned_penalty = 5
-        return misaligned_penalty * rect_distance(self.cell_args, relative_args.cell_args)
+        val = misaligned_penalty * rect_distance(self.cell_args, relative_args.cell_args)
+        return val
         # TODO: add costs for imperfect alignments
         if self.get_alignment_orientation(relative_args)=="row":
             diff1 = abs(self.col_args[0] - relative_args.col_args[0])
