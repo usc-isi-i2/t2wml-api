@@ -1,20 +1,29 @@
 import json
+from collections import defaultdict
 import pandas as pd
 from t2wml.utils.t2wml_exceptions import ItemNotFoundException
 from t2wml.utils.bindings import bindings
 from t2wml.utils.debug_logging import basic_debug
 
 
+
+
 class ItemTable:
     def __init__(self, lookup_table = None):
-        self.lookup_table = lookup_table or {}
+        lookup_table = lookup_table or {}
+        self.lookup_table = defaultdict(dict, lookup_table)
 
     def lookup_func(self, context, column, row, value):
-        key = str((column, row, value, context))
+        lookup = self.lookup_table.get(context)
+        if not lookup:
+            raise ItemNotFoundException(
+                "Search for cell item failed. (No values defined for context: {})".format(context))
+
+        key = (column, row, value)
         try:
-            return self.lookup_table[key]
+            return lookup[key]
         except KeyError:
-             raise ItemNotFoundException("Not found")
+             raise ItemNotFoundException(str(key)+ " not found")
 
     def get_item(self, column:int, row:int, context:str='', sheet=None, value=None):
         if not sheet:
@@ -27,20 +36,24 @@ class ItemTable:
         except ItemNotFoundException:
             return None  # currently this is what the rest of the API expects. could change later
 
-    def get_cell_info(self, col, row, sheet): #this will be replaced soon
-        value = str(sheet[row, col])
-        item = self.get_item(col, row, '', value=value)
-        return item, '', value
+    def get_cell_info(self, column, row, sheet):
+        # used to serialize table
+        value = str(sheet[row, column])
+        for context in self.lookup_table:
+            item = self.get_item(column, row, context, sheet=sheet, value=value)
+            if item:
+                return item, context, value
+        return None, None, None
 
 
 class Wikifier:
     def __init__(self, lookup_table = None, filepath = None):
-        self.lookup_table = lookup_table or {}
+        self.item_table = ItemTable(lookup_table)
         self.filepath= filepath
     
     @property
-    def item_table(self):
-        return ItemTable(self.lookup_table)
+    def lookup_table(self):
+        return self.item_table.lookup_table
 
     def delete_wikification(self, selection, value=None, context:str='', sheet=None):
         [[col1, row1], [col2, row2]] = selection #the range is 0-indexed [[col, row], [col, row]]
@@ -52,30 +65,27 @@ class Wikifier:
             for col in range(col1, col2+1):
                 if sheet:
                     value = sheet[row, col]
-                self.lookup_table.pop(str((col, row, value, context)), None)
+                self.lookup_table.get(context).pop((col, row, value), None)
+    
+    def add_or_replace(self, replace, context, col, row, value, item):
+        if not replace:
+            if (col, row, value) in self.lookup_table.get(context, {}):
+                return
+        self.lookup_table[context][(col, row, value)] = item
+
+
     
     def add_wikification(self, item, selection, value, context:str='', replace=True):
         (row1, col1), (row2, col2) = selection
         for row in range(row1, row2+1):
             for col in range(col1, col2+1):
-                if replace:
-                    self.lookup_table[str((col, row, value, context))] = item
-                else:
-                    try:
-                        self.lookup_table[str((col, row, value, context))]
-                    except KeyError:
-                        self.lookup_table[str((col, row, value, context))] = item
+                self.add_or_replace(replace, context, col, row, value, item)
     
 
     def update_from_dict(self, wiki_dict, replace=True):
-        for key in wiki_dict:
-            if replace:
-                self.lookup_table[key]=wiki_dict[key]
-            else:
-                try: 
-                    self.lookup_table[key]
-                except KeyError:
-                    self.lookup_table[key]=wiki_dict[key]
+        for context in wiki_dict:
+            for (col, row, value), item in wiki_dict[context].items():
+                self.add_or_replace(replace, context, col, row, value, item)
     
     def add_dataframe(self, df, replace=True): #TODO: replace all instances
         wiki_dict=convert_old_df_to_dict(df)
@@ -85,12 +95,17 @@ class Wikifier:
         df = pd.read_csv(filepath)
         self.add_dataframe(df, replace)
 
-
-
     @classmethod
     def load_from_file(cls, filepath):
         with open(filepath, 'r', encoding="utf-8") as f:
-            lookup_table = json.load(f)
+            itemized_dict = json.load(f)
+            lookup_table=dict()
+            for context in itemized_dict:
+                try:
+                    arr = itemized_dict[context]
+                    lookup_table[context]={tuple(entry[0]): entry[1] for entry in arr}
+                except Exception as e:
+                    raise e
         return cls(lookup_table, filepath)
     
     def save_to_file(self, filepath=None):
@@ -99,7 +114,8 @@ class Wikifier:
         if not filepath:
             return
         with open(filepath, 'w', encoding="utf-8") as f:
-            f.write(json.dumps(self.lookup_table))
+            itemized_dict = {key: list(self.lookup_table[key].items()) for key in self.lookup_table}
+            f.write(json.dumps(itemized_dict))
 
 
 def convert_old_wikifier_to_new(wikifier_file, sheet):
@@ -165,7 +181,7 @@ def convert_old_wikifier_to_new(wikifier_file, sheet):
         
     
 def convert_old_df_to_dict(df):
-    wiki_dict={}
+    wiki_dict=defaultdict(dict)
     for entry in df.itertuples():
         column = int(entry.column)
         row = int(entry.row)
@@ -174,6 +190,6 @@ def convert_old_df_to_dict(df):
         if str(context) == "nan":
             context=""
         item = entry.item
-        wiki_dict[str((column, row, value, context))] = item
+        wiki_dict[context][(column, row, value)] = item
     return wiki_dict
 

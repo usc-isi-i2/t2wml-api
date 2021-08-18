@@ -373,8 +373,7 @@ class Project:
     def add_old_style_wikifier_to_project(self, wikifier_file):
         for datafile in self.data_files:
             sf = SpreadsheetFile(self.get_full_path(datafile))
-            wikifier_file_path, exists = self.get_wikifier_file(datafile)
             for sheet_name in sf:
                 sheet=sf[sheet_name]
-                dataframe = convert_old_wikifier_to_new(wikifier_file, sheet)
-                self.add_df_to_wikifier_file(sheet, dataframe)
+                wiki_dict = convert_old_wikifier_to_new(wikifier_file, sheet)
+                self.add_dict_to_wikifier_file(sheet, wiki_dict, overwrite_existing=True)
