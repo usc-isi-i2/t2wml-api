@@ -198,8 +198,8 @@ class Block:
         if sheet:
             if not self.is_2D:
                 (x1, y1), (x2, y2) = self.cell_args
-                cells = sheet.data.iloc[y1:y2+1, x1:x2+1]
-                cells = cells.to_numpy().flatten().tolist()
+                cells = sheet[y1:y2+1, x1:x2+1]
+                cells = cells.flatten().tolist()
                 sample_length = min(10, len(cells))
                 empty=0
                 for i in range(sample_length):
@@ -668,7 +668,7 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
     
     if dataframe_rows:
         df=pd.DataFrame(dataframe_rows, columns=columns)
-        project.add_df_to_wikifier_file(sheet.data_file_path, df)
+        project.add_df_to_wikifier_file(sheet, df)
         wikifier.add_dataframe(df)
         
     

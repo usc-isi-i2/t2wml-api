@@ -69,7 +69,7 @@ class Sheet:
 
     def __getitem__(self, params):
         try:
-            return self.data.iloc[params]
+            return self.data.values[params]
         except IndexError:
             raise T2WMLExceptions.CellOutsideofBoundsException(
                 "Cell " + to_excel(params[1], params[0]) + " is outside the bounds of the current data file")

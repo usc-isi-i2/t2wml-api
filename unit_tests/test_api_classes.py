@@ -2,7 +2,7 @@ import os
 from t2wml.wikification.wikidata_provider import DictionaryProvider
 import pandas as pd
 from t2wml.api import Sheet
-from t2wml.wikification.item_table import convert_old_wikifier_to_new
+#from t2wml.wikification.item_table import convert_old_wikifier_to_new
 from t2wml.utils.t2wml_exceptions import FileNotPresentInProject
 import unittest
 from pathlib import Path
@@ -29,9 +29,9 @@ class ClassesTest(unittest.TestCase):
         df = pd.DataFrame.from_dict({"column": ['0'], "row": ['5'],
                                      "value": 'Comoros', "item": ['Q99'], "context": [''], 
                                      "file":["input_1.csv"], "sheet":["input_1.csv"]})
-        wf.add_dataframe(df)
-        wf.save(output_file)
-        new_wf = Wikifier.load(output_file)
+        wf.add_dataframe(df, replace=True)
+        wf.save_to_file(output_file)
+        new_wf = Wikifier.load_from_file(output_file)
         assert new_wf.item_table.get_item(0, 3, sheet=sheet) == "Q967"
         assert new_wf.item_table.get_item(0, 5, sheet=sheet) == "Q99"
 
@@ -107,7 +107,7 @@ class ProjectTest(unittest.TestCase):
         sh = Sheet(os.path.join(project_folder, "homicide_report_total_and_sex.xlsx"), "table-1a")
         #convert_old_wikifier_to_new(wikifier_file, sh, wikifier_file)
         df = pd.read_csv(wikifier_file)
-        sp.add_df_to_wikifier_file("homicide_report_total_and_sex.xlsx", df)
+        sp.add_df_to_wikifier_file(sh, df)
         yaml_file=sp.add_yaml_file(os.path.join("t2wml","table-1a.yaml"))
         sp.associate_yaml_with_sheet(yaml_file, "homicide_report_total_and_sex.xlsx", "table-1a")
         save_file=sp.save()
@@ -126,7 +126,6 @@ class ProjectTest(unittest.TestCase):
         sp.add_entity_file("homicide_properties.tsv")
         wikifier_file = os.path.join(project_folder, "wikifier_general.csv")
         df = pd.read_csv(wikifier_file)
-        sp.add_df_to_wikifier_file("homicide_report_total_and_sex.xlsx", df)
         for file_name in os.listdir(yaml_folder):
             yaml_file=os.path.join("t2wml", file_name)
             sheet_name=file_name.split(".")[0]
