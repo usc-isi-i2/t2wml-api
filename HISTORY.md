@@ -1,6 +1,11 @@
 T2WML API History
 ===================================
 
+Changes in version 0.6.1:
+------------------------
+* faster wikifier
+* improved alignment algorithm
+
 Changes in version 0.6.0:
 ------------------------
 * treat multi-column date blocks as concatenated dates
