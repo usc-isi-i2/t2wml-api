@@ -8,7 +8,6 @@ last updated Jun 06 2021 - version 0.4.3
 * [KnowledgeGraph](#kg)
 * [SpreadsheetFile and Sheet](#sheet)
 * [Wikifier](#wikifier)
-* [WikifierService](#wikifierservice)
 * [StatementMapper](#statementmapper)
   + [YamlMapper](#yamlmapper)
   + [A custom mapper class](#custommapper)
@@ -167,27 +166,6 @@ Example code:
 > Wikifier update overwrote existing values: {"('', '', 'Burundi')": 'Q967'}
 > The wikifier contains 1 wiki files, and a total of 2 dataframes
 > The files are: my_wikifier.csv
-
-## WikifierService
-
-<span id="wikifierservice"></span>
-
-You can send a spreadsheet, a region, and optionally a context to a wikifier service for wikification, and receive back a wikified dataframe plus a list of any cells that were not successfully wikified. 
-
-The wikifier service has a default endpoint but a different one can be set, as long as the endpoint in question knows how to receive wikification requests. (standardizing the API for this is a work in progress that has not yet been completed)
-
-The service returns a dataframe. This dataframe can be loaded into the Wikifier class with the Wikifier's function `add_dataframe` .
-
-Example code:
-
-```python 
-from t2wml.api import WikifierService, Sheet, Wikifier
-ws=WikifierService()
-sheet=Sheet("mydata.xlsx", "sheet2")
-df, problem_cells= ws.wikify_region("A4:B7", sheet, "from wikifier service")
-wf=Wikifier()
-wf.add_dataframe(df)
-```
 
 ## StatementMapper
 
