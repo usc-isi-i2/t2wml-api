@@ -47,8 +47,9 @@ def clean_id(input):
     remove non alphanumeric characters and lowercase
     replace whitespace by _ (underscore)
     '''
-    output = str(input).strip().lower()
+    output = str(input)
     output = nonalphanumeric.sub('', output)
+    output = output.strip().lower() #needs to be here to prevent trailing underscore
     output = spaces.sub("_", output)
     if not output:
         raise ValueError(f"Cleaning {input} returned empy string for id")
