@@ -14,7 +14,7 @@ class SpreadsheetFile(Mapping):
     All immutable dict methods are available (access by key, iteration, len, etc)
     Keys are sheet names, values are initialized Sheet instances.
     """
-    @basic_debug
+    #@basic_debug
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.dict = {}
@@ -40,7 +40,7 @@ class SpreadsheetFile(Mapping):
 
 class Sheet:
     # all access to spreadsheet goes through here
-    @basic_debug
+    #@basic_debug
     def __init__(self, data_file_path: str, sheet_name: str, data=None):
         """[summary]
 
@@ -102,7 +102,7 @@ class Sheet:
         # number of columns
         return self.data.shape[1]
     
-    @basic_debug
+    #@basic_debug
     def to_json(self):
         if self.cleaned_data is not None:
             cleaned=json.loads(self.cleaned_data.to_json(orient='values'))

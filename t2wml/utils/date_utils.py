@@ -56,7 +56,7 @@ def translate_precision_to_integer(precision: str) -> int:
     return precision_map[precision.lower()]
 
 
-@basic_debug
+#@basic_debug
 def parse_datetime(value, additional_formats=None, precisions=None):
     used_format=None
     additional_formats=additional_formats or []

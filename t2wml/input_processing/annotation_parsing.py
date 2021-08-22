@@ -287,7 +287,7 @@ class Block:
 
 
 class Annotation():
-    @basic_debug
+    #@basic_debug
     def __init__(self, annotation_blocks_array=None):
         self.annotations_array = self._preprocess_annotation(annotation_blocks_array or [])        
         self.data_annotations = []
@@ -574,7 +574,7 @@ class Annotation():
 
         return qualifier_string
 
-    @basic_debug
+    #@basic_debug
     def generate_yaml(self, sheet=None, item_table=None):
         if not self.data_annotations:
             return ["# cannot create yaml without a dependent variable\n"]
@@ -684,7 +684,7 @@ class AnnotationNodeGenerator:
         
         return custom_properties, list(custom_items)
         
-    @basic_debug
+    #@basic_debug
     def preload(self, sheet, wikifier):
         properties, items = self.get_custom_properties_and_qnodes()
         create_nodes(items, self.project, sheet, wikifier)

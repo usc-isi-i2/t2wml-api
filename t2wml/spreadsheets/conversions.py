@@ -1,6 +1,8 @@
 import re
 from typing import Sequence, Union, Tuple, List, Dict, Any
 
+regex_az = re.compile(r'[a-zA-Z]+')
+regex_09 = re.compile(r'[0-9]+')
 
 def cell_tuple_to_str(col, row) -> str:
     """
@@ -24,8 +26,8 @@ def cell_str_to_tuple(cell: str): #aka from excel
     :param cell_index: (col, row)
     :return:
     """
-    column = re.search(r'[a-zA-Z]+', cell).group(0)
-    row = re.search(r'[0-9]+', cell).group(0)
+    column = regex_az.search(cell).group(0)
+    row = regex_09.search(cell).group(0)
     return column_letter_to_index(column), int(row)-1
 
 

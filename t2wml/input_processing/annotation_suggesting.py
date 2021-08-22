@@ -28,7 +28,7 @@ def get_types(cell_content):
     return is_country, is_numeric, is_date
 
 
-@basic_debug
+#@basic_debug
 def annotation_suggester(sheet, selection, annotation_blocks_array):
     already_has_subject=False
     already_has_var=False

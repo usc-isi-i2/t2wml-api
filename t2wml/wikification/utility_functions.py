@@ -15,7 +15,7 @@ def get_default_provider():
     wikidata_provider = DictionaryProvider(preloaded_properties)
     return wikidata_provider
 
-@basic_debug
+#@basic_debug
 def get_provider():
     wikidata_provider = t2wml_settings.wikidata_provider
     if wikidata_provider is None:
@@ -23,7 +23,7 @@ def get_provider():
         t2wml_settings.wikidata_provider = wikidata_provider
     return wikidata_provider
 
-@basic_debug
+#@basic_debug
 def get_property_type(prop):
     try:
         prop_type = _get_property_type(prop)
@@ -57,7 +57,7 @@ def validate_id(node_id):
     except ValueError: #conversion to int failed, is not Pnum or Qnum
         pass
 
-@basic_debug
+#@basic_debug
 def kgtk_to_dict(file_path):
     #if label is P2010050001 (datamart tag), the key is tags and a dict is generated
     input_dict=defaultdict(dict)
@@ -82,7 +82,7 @@ def kgtk_to_dict(file_path):
                 input_dict[node1][label]=value
     return dict(input_dict)
 
-@basic_debug
+#@basic_debug
 def dict_to_kgtk(in_dict, out_path):
     tsv_dict_columns=["id", "node1", "label", "node2"]
     tsv_dict_arr=[]
@@ -106,7 +106,7 @@ def dict_to_kgtk(in_dict, out_path):
             dw.writerow(line)
 
 
-@basic_debug
+#@basic_debug
 def add_entities_from_file(file_path: str, validate_ids=True):
     """load wikidata entries from a file and add them to the current WikidataProvider as defined in settings.
     If a kgtk-format tsv file, the property information will be loaded as follows:

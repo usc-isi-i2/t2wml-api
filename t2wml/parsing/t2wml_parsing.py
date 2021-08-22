@@ -31,7 +31,7 @@ class T2WMLCode:
         return self.unmodified_str
 
 
-@basic_debug
+#@basic_debug
 def t2wml_parse(e_str, context={}):
     value = CellExpression()
     item = ItemExpression()

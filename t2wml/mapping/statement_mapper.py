@@ -25,7 +25,7 @@ class StatementMapper(ABC):
     def do_init(self, sheet, wikifier):
         pass
 
-    @basic_debug
+    #@basic_debug
     def get_statements(self, sheet, wikifier, start_index=0, end_index=None, count=None):
         self.do_init(sheet, wikifier)
         statements = {}

@@ -5,6 +5,10 @@ import ftfy as FTFY
 from t2wml.parsing.classes import ReturnClass, RangeClass
 from text_unidecode import unidecode
 
+numeric_beginning = re.compile(r"^[^\d.-]*")
+numeric_ending = re.compile(r"[^\d.]*$")
+regex_normalize_whitespace = re.compile(r"\s{1,}")
+
 '''
 start: apply the operator starting at the beginning of the value and stop when it can no longer be applied, e.g., remove numbers and stop when a non-number is found
 end: apply the operator from the end end of the value
@@ -112,7 +116,7 @@ def normalize_whitespace(input, tab=False):
     replacement=" "
     if tab:
         replacement="\t"
-    return re.sub(r"\s{1,}", replacement, input)
+    return regex_normalize_whitespace.sub(replacement, input)
 
 @string_modifier
 def change_case(input, case="sentence"):
@@ -198,8 +202,8 @@ def make_numeric(input, decimal=".", latex=False):
         input=input.replace(".", "")
         input=input.replace(decimal, ".")
     input=input.replace(",", "")
-    input= re.sub(r"^[^\d.-]*", "", input) #begining
-    input= re.sub(r"[^\d.]*$", "", input) #end
+    input = numeric_beginning.sub("", input)
+    input = numeric_ending.sub("", input)
     try:
         float(input)
     except:

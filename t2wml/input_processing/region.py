@@ -28,7 +28,7 @@ class Region:
 
 
 class YamlRegion(CodeParser, Region):
-    @basic_debug
+    #@basic_debug
     def __init__(self, yaml_data, context=None):
         self.context= context or {}
         self.yaml_data=yaml_data

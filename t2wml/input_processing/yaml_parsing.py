@@ -86,7 +86,7 @@ class TemplateParser(CodeParser):
 
 
 class Template:
-    @basic_debug
+    #@basic_debug
     def __init__(self, dict_template, eval_template):
         self.dict_template = dict_template
         self.eval_template = eval_template

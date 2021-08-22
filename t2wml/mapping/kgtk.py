@@ -163,7 +163,7 @@ def handle_additional_edges(project, statements):
             result_dict["node2;kgtk:symbol"] = value
     return tsv_data
 
-@basic_debug
+#@basic_debug
 def create_kgtk(statements, file_path, sheet_name, project=None):
     file_name = Path(file_path).name
 
@@ -233,7 +233,7 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
     string_stream.close()
     return output
 
-@basic_debug
+#@basic_debug
 def get_all_variables(project, statements, validate_for_datamart=False):
     tsv_data=[]
     tsv_data+=create_metadata_for_project(project)

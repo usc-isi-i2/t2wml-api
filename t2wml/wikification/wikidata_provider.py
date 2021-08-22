@@ -81,7 +81,7 @@ class SparqlProvider(WikidataProvider):
             return failure_dict
         return dict(data_type=data_type, label=label, description=description)
 
-    @basic_debug
+    #@basic_debug
     def get_property_type(self, wikidata_id: str):
         property_args = self.cache.get(wikidata_id, False)
         if not property_args:
@@ -113,7 +113,7 @@ class FallbackSparql(SparqlProvider):
     falling back to sparql queries (and then optionally saving query response to the main source)
     '''
 
-    @basic_debug
+    #@basic_debug
     def get_property_type(self, wikidata_property, *args, **kwargs):
         try:
             data_type = self.try_get_property_type(
