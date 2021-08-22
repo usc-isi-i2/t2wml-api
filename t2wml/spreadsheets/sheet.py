@@ -66,14 +66,32 @@ class Sheet:
         if self.cleaned_data is not None:
             return self.cleaned_data
         return self.raw_data
+    
+    @property
+    def _data_values(self): #added this property beause creating .values takes too long
+        if self.cleaned_data is not None:
+            try:
+                return self._cleaned_data_values
+            except:
+                self._cleaned_data_values = self.cleaned_data.values
+                return self._cleaned_data_values
+        else:
+            try:
+                return self._raw_data_values
+            except:
+                self._raw_data_values = self.raw_data.values
+                return self._raw_data_values
+
+
+
 
     def __getitem__(self, params):
         try:
-            return self.data.values[params]
+            return self._data_values[params]
         except IndexError:
             raise T2WMLExceptions.CellOutsideofBoundsException(
                 "Cell " + to_excel(params[1], params[0]) + " is outside the bounds of the current data file")
-
+    
     @property
     def row_len(self): 
         # number of rows

@@ -696,7 +696,6 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
     update_bindings(item_table=item_table, sheet=sheet)
     
     columns=['row', 'column', 'value', 'context', 'item', 'file', 'sheet']
-    dataframe_rows=[]
     created=set()
 
     #part one: wikification
@@ -713,17 +712,23 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
                     int(exists[1:]) #will raise error for custom properties, which may need data_type updated
                 if not is_property and exists[0]!="Q":
                     raise KeyError
-            except (KeyError,ItemNotFoundException) :
-                if is_property:
-                    id = get_Pnode(project, label)
-                else:
-                    id=get_Qnode(project, label)
-
-                dataframe_rows.append([row, col, label, '', id, sheet.data_file_name, sheet.name])
-                created.add((col, row, label))
-            except ValueError:
+            except:
                 created.add((col, row, label))
     
+    dataframe_rows=[]
+    label_ids=dict()
+    for (col, row, label) in created:
+        try:
+            id = label_ids[label]
+        except KeyError:
+            if is_property:
+                id = get_Pnode(project, label)
+            else:
+                id = get_Qnode(project, label)
+            label_ids[label]=id
+        dataframe_rows.append([row, col, label, '', id, sheet.data_file_name, sheet.name])
+
+
     if dataframe_rows:
         df=pd.DataFrame(dataframe_rows, columns=columns)
         project.add_df_to_wikifier_file(sheet, df)
@@ -741,15 +746,13 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
     
     prov=get_provider()
     with prov as p:
-        if not is_property:
-            for col, row, label in created:
-                node_id=get_Qnode(project, label)
+        for col, row, label in created:
+            node_id=label_ids[label]
+            if not is_property:
                 if node_id not in custom_nodes: #only set to auto if creating fresh
                     custom_nodes[node_id]={"label":label.strip()}
-        else:
-            for col, row, label in created:
-                node_id = wikifier.item_table.get_item(col, row, sheet=sheet, value=label)
-                if node_id==get_Pnode(project, label): #it's a custom property
+            else:
+                for col, row, label in created:
                     if node_id in custom_nodes: #just update data type
                         custom_nodes[node_id]["data_type"]=data_type
                     else:

@@ -38,19 +38,20 @@ wikidata_to_datamart = {
 'Url': 'symbol',
 }
 
+nonalphanumeric = re.compile(r'[^A-Za-z0-9\s]+')
+spaces=re.compile(r"\s")
+
 
 def clean_id(input):
     '''
     remove non alphanumeric characters and lowercase
     replace whitespace by _ (underscore)
     '''
-    output = str(input)
-    output = re.sub(r'[^A-Za-z0-9\s]+', '', output)
-    output = output.strip()
-    output = re.sub(r"\s", "_", output)
-    output = output.lower()
+    output = str(input).strip().lower()
+    output = nonalphanumeric.sub('', output)
+    output = spaces.sub("_", output)
     if not output:
-        raise ValueError(f"Cleaning {input} returned useless result")
+        raise ValueError(f"Cleaning {input} returned empy string for id")
     return output
 
 def clean_name(input):
