@@ -64,7 +64,7 @@ class Project:
     
     @property
     def autogen_dir(self):
-        auto= os.path.join(self.directory, "annotations", f"autogen-files-{self.dataset_id}")
+        auto= os.path.join(self.directory, "annotations", f"autogen-files")
         if not os.path.exists(auto):
             os.makedirs(auto, exist_ok=True)
         return auto

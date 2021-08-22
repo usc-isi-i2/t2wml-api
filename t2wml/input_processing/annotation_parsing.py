@@ -25,10 +25,12 @@ COST_MATRIX_DEFAULT = 10
 
 
 def get_Qnode(project, item):
-    return f"Q{project.dataset_id}-{clean_id(item)}"
+    return f"QCustomNode-{clean_id(item)}"
+    #return f"Q{project.dataset_id}-{clean_id(item)}"
     
 def get_Pnode(project, property):
-    return f"P{project.dataset_id}-{clean_id(property)}"
+    return f"PCustomNode-{clean_id(property)}"
+    #return f"P{project.dataset_id}-{clean_id(property)}"
 
 
 def rect_distance(rect1, rect2):
