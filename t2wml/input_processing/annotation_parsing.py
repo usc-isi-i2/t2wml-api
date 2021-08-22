@@ -57,7 +57,17 @@ def rect_distance(rect1, rect2):
     else:             # rectangles intersect
         return 0
 
+def check_overlap(ann1, ann2):
+    #NOTE selections must be normalized before sending to this function
 
+    #get rectangles from annotations
+    selection = ann1["selection"]
+    rect1 = (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
+    selection = ann2["selection"]
+    rect2 = (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
+
+    if rect_distance(rect1, rect2)==0:
+        raise InvalidAnnotationException("Overlapping selections")
 
 def normalize_rectangle(annotation):
     selection = annotation["selection"]
@@ -313,28 +323,20 @@ class Annotation():
             raise InvalidAnnotationException("Annotations must be a list")
 
         ids=set()
+
         
+        #basic validity checks and prep setting up IDs
         for block in annotations:
             if not isinstance(block, dict):
                 raise InvalidAnnotationException("Each annotation entry must be a dict")
             
-            block.pop("selectedArea", None) #if we somehow got this, remove it
-
             try:
                 id=block["id"]
             except KeyError:
                 id=block["id"]=str(uuid4())
             ids.add(id)
-
-
-        for block in annotations:
-            block["link"]="" #reset all auto-generated links each time
-            userlink=block.get("userlink")
-            if userlink:
-                if userlink not in ids: #remove links to deleted blocks
-                    block.pop("userlink")
-                else:
-                    block["link"]=userlink
+            
+            block.pop("selectedArea", None) #if we somehow got this, remove it
 
             try:
                 role = block["role"]
@@ -359,6 +361,23 @@ class Annotation():
                 else:
                     raise InvalidAnnotationException("Each annotation entry must contain a field 'selection'")
             normalize_rectangle(block)
+
+        #check for overlaps
+        for i, block in enumerate(annotations):
+            for j in range(i+1, len(annotations)):
+                check_overlap(annotations[i], annotations[j])
+
+
+        #set up userlinks
+        for block in annotations:
+            block["link"]="" #reset all auto-generated links each time
+            userlink=block.get("userlink")
+            if userlink:
+                if userlink not in ids: #remove links to deleted blocks
+                    block.pop("userlink")
+                else:
+                    block["link"]=userlink
+
 
         annotations_arr = [Block(block) for block in annotations]
 
@@ -709,6 +728,7 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
         df=pd.DataFrame(dataframe_rows, columns=columns)
         project.add_df_to_wikifier_file(sheet, df)
         wikifier.add_dataframe(df)
+        wikifier.save_to_file()
         
     
     #part two: entity creation
