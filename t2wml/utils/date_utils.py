@@ -12,6 +12,9 @@ VALID_PROPERTY_TYPES=["globecoordinate", "quantity", "time", "string", "monoling
                         "externalid", "wikibaseitem", "wikibaseproperty", "url"]
 
 
+parsed_date_cache={}
+
+
 def translate_precision_to_integer(precision: str) -> int:
     """
     This function translates the precision value to indexes used by wikidata
@@ -67,6 +70,14 @@ def parse_datetime(value, additional_formats=None, precisions=None):
         precision=translate_precision_to_integer(precisions)
     
     value = str(value)
+
+    cache_key= value+str(additional_formats)
+
+    if cache_key in parsed_date_cache:
+        if isinstance(parsed_date_cache[cache_key], ValueError):
+            raise parsed_date_cache[cache_key]
+        return parsed_date_cache[cache_key]
+
     if additional_formats: #format/s have been specified. input MUST match a format
         datetime_string=False
         for index, date_format in enumerate(additional_formats):
@@ -78,11 +89,13 @@ def parse_datetime(value, additional_formats=None, precisions=None):
                         precision=translate_precision_to_integer(precisions[index])
                     except IndexError: #no precision defined for that format
                         precision=None
-                return datetime_string.isoformat(), precision, used_format
+                parsed_date_cache[cache_key] = datetime_string.isoformat(), precision, used_format
+                return parsed_date_cache[cache_key]
             except ValueError as e:
                 pass
         if not datetime_string:
-            raise ValueError("Failed to parse datetime string with the provided format/s")
+            parsed_date_cache[cache_key] = ValueError("Failed to parse datetime string with the provided format/s")
+            raise parsed_date_cache[cache_key]
     else: #no format specified. attempt to guess date
         if has_etk:
             # use this line to make etk stop harassing us with "no lang features detected" warnings
@@ -94,11 +107,14 @@ def parse_datetime(value, additional_formats=None, precisions=None):
                 )
             if not precision: #only if user didn't hard-define a precision do we take from etk
                 precision=int(precision.value.__str__())
-            return datetime_string, precision, used_format
+            parsed_date_cache[cache_key] = datetime_string.isoformat(), precision, used_format
+            return parsed_date_cache[cache_key]
         
         try:
             datetime_string = pandas.to_datetime(value, infer_datetime_format=True)
-            return datetime_string.isoformat(), precision, used_format
+            parsed_date_cache[cache_key] = datetime_string.isoformat(), precision, used_format
+            return parsed_date_cache[cache_key]
         except:
-            raise ValueError('No date / datetime detected')
+            parsed_date_cache[cache_key] = ValueError('No date / datetime detected')
+            raise parsed_date_cache[cache_key]
 
