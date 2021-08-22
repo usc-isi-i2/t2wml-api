@@ -4,7 +4,6 @@ from t2wml.input_processing.region import YamlRegion
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
 from t2wml.parsing.t2wml_parsing import iter_on_n_for_code, T2WMLCode
 from t2wml.parsing.classes import ReturnClass
-from t2wml.spreadsheets.conversions import to_excel
 from t2wml.wikification.utility_functions import get_property_type
 from t2wml.utils.ethiopian_date import EthiopianDateConverter
 from t2wml.utils.date_utils import VALID_PROPERTY_TYPES, parse_datetime
@@ -145,7 +144,7 @@ class Node:
                 self.precision = parsed_precision
             if used_format:
                 self.format = used_format
-        except:
+        except Exception as e:
             self._errors.append(StatementError(field="value",
                                                message="Invalid datetime: " +
                                                str(self.value),
@@ -232,8 +231,9 @@ class NodeForEval(Node):
 
                 try:
                     cell_indices = (entry_parsed.col, entry_parsed.row)
-                    cell = to_excel(entry_parsed.col, entry_parsed.row)
-                    self.cells[key] = cell
+                    if None in (cell_indices[0], cell_indices[1]):
+                        raise AttributeError
+                    self.cells[key] = (entry_parsed.col, entry_parsed.row)
                 except AttributeError:
                     pass
 

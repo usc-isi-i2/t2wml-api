@@ -9,7 +9,6 @@ from t2wml.input_processing.region import YamlRegion
 from t2wml.input_processing.clean_yaml_parsing import get_cleaned_dataframe
 from t2wml.input_processing.annotation_parsing import Annotation
 from t2wml.input_processing.utils import string_is_valid
-from t2wml.spreadsheets.conversions import to_excel
 from t2wml.utils.debug_logging import basic_debug
 
 class StatementMapper(ABC):
@@ -39,8 +38,8 @@ class StatementMapper(ABC):
         i=0
         for col, row in self.iterator(start_index, end_index):
             errors=[]
+            cell = (col-1, row-1)
             if string_is_valid(str(bindings.excel_sheet[row-1, col-1])):
-                cell = to_excel(col-1, row-1)
                 try:
                     statement, inner_errors = self.get_cell_statement(
                         sheet, wikifier, col, row, do_init=False)

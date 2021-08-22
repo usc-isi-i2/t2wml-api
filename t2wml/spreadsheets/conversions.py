@@ -16,7 +16,7 @@ def cell_tuple_to_str(col, row) -> str:
     return col + row
 
 
-def cell_str_to_tuple(cell: str):
+def cell_str_to_tuple(cell: str): #aka from excel
     """
     This function converts the cell notation used by excel (letter + 1-indexed number, in a string)
     to 0-indexed tuples cell notation 
@@ -75,10 +75,6 @@ def cell_range_str_to_tuples(cell_range: str) -> Tuple[Sequence[int], Sequence[i
     start_cell = cell_str_to_tuple(cells[0])
     end_cell = cell_str_to_tuple(cells[1])
     return start_cell, end_cell
-
-
-def from_excel(cell: str):
-    return cell_str_to_tuple(cell)
 
 
 def to_excel(col, row):

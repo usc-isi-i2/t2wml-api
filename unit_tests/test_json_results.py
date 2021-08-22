@@ -1,5 +1,6 @@
 import json
 import os
+from t2wml.spreadsheets.conversions import to_excel
 import unittest
 from pathlib import Path
 from t2wml.api import KnowledgeGraph, Sheet
@@ -152,7 +153,7 @@ class TestErrorCatching(JsonTest):
         kg = KnowledgeGraph.generate_from_files(
             self.data_file, sheet_name, yaml_file, self.wikifier_file)
         result = kg.get_output("json")
-        errors = kg.errors
+        errors = {to_excel(*key):kg.errors[key] for key in kg.errors}
         result_dict = {"data": json.loads(result), "error": errors}
         expected_result_name = "results.json"
         with open(os.path.join(self.expected_result_dir, expected_result_name), 'r') as f:
