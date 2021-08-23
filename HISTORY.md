@@ -5,6 +5,7 @@ Changes in version 0.6.2:
 ------------------------
 * don't allow overlapping or identical annotations
 * remove very old defunct wikifierservice
+* performance improvements
 
 Changes in version 0.6.1:
 ------------------------
