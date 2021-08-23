@@ -49,7 +49,7 @@ class KnowledgeGraph:
 
     @classmethod
     def get_single_cell(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier, row:int, col:int):
-        statement, errors = statement_mapper.get_cell_statement(sheet, wikifier, col, row, do_init=True)
+        statement, errors = statement_mapper.get_cell_statement(col, row, True, sheet, wikifier)
 
     @classmethod
     def generate(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier, start=0, end=None, count=None):

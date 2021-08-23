@@ -50,7 +50,7 @@ class ClassesTest(unittest.TestCase):
                     for row in self.rows:
                         yield(col, row)
 
-            def get_cell_statement(self, sheet, wikifier, col, row, *args, **kwargs):
+            def get_cell_statement(self, col, row, do_init, sheet, wikifier, *args, **kwargs):
                 error = {}
                 statement = {}
                 try:
