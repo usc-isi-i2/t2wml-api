@@ -53,20 +53,20 @@ class TestEthiopianCalendarStatements(unittest.TestCase):
     def test_01_replace(self):
         t2wml_settings.handle_calendar='replace'
         kg=self.get_result()
-        assert kg.statements['D6']['qualifier'][0]['value']=='2018-09-11'
-        assert len(kg.statements['D6']['qualifier'])==1
+        assert kg.statements[(3,5)]['qualifier'][0]['value']=='2018-09-11'
+        assert len(kg.statements[(3,5)]['qualifier'])==1
 
     def test_02_add(self):
         t2wml_settings.handle_calendar='add'
         kg=self.get_result()
-        assert kg.statements['D6']['qualifier'][0]['value']=='2011-01-01T00:00:00'
-        assert kg.statements['D6']['qualifier'][1]['value']=='2018-09-11'
+        assert kg.statements[(3,5)]['qualifier'][0]['value']=='2011-01-01T00:00:00'
+        assert kg.statements[(3,5)]['qualifier'][1]['value']=='2018-09-11'
 
     def test_03_leave(self):
         t2wml_settings.handle_calendar='leave'
         kg=self.get_result()
-        assert kg.statements['D6']['qualifier'][0]['value']=='2011-01-01T00:00:00'
-        assert len(kg.statements['D6']['qualifier'])==1
+        assert kg.statements[(3,5)]['qualifier'][0]['value']=='2011-01-01T00:00:00'
+        assert len(kg.statements[(3,5)]['qualifier'])==1
     
 
 
