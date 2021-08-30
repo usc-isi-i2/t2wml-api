@@ -1,6 +1,5 @@
 import unittest
 import os
-import json
 from pathlib import Path
 from t2wml.utils.ethiopian_date import EthiopianDateConverter
 from t2wml.wikification.utility_functions import add_entities_from_file

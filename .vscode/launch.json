@@ -24,7 +24,7 @@
                 "unit_tests.test_json_results",
                 "unit_tests.test_cleaning_functions",
                 "unit_tests.test_annotations",
-                "unit_tests.test_ethiopian_date.py"
+                "unit_tests.test_ethiopian_date"
             ],
             "cwd": "${workspaceFolder}",
         },
