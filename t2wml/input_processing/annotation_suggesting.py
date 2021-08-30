@@ -10,12 +10,13 @@ time_property_node = {"id": "P585",
                 "label":"point in time", 
                 "description": "time and date something took place, existed or a statement was true",
                 "data_type": "time"}
-
+country_trans = str.maketrans("-.,", "   ")
 
 def get_types(cell_content):
-    cell_content=str(cell_content).strip()
-    country_cell_content = " ".join(str(cell_content).lower().strip().split()).replace("&", "and").replace("-", " ").replace(".", " ").replace(",", " ")
-    is_country = cell_content in countries or cell_content.lower() in countries or cell_content.lower() in causx_only_countries
+    cell_content=str(cell_content).strip().lower()
+
+    country_cell_content = " ".join((cell_content.translate(country_trans).replace("&", " and ")).split())
+    is_country = country_cell_content in countries or country_cell_content in causx_only_countries
     if strict_make_numeric(cell_content) != "" and cell_content[0] not in ["P", "Q"]:
         is_numeric=True
     else:
@@ -26,7 +27,6 @@ def get_types(cell_content):
     except:
         is_date=False
     return is_country, is_numeric, is_date
-
 
 #@basic_debug
 def annotation_suggester(sheet, selection, annotation_blocks_array):

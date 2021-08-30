@@ -4,10 +4,12 @@ import string
 import ftfy as FTFY
 from t2wml.parsing.classes import ReturnClass, RangeClass
 from text_unidecode import unidecode
+from string import digits
 
-numeric_beginning = re.compile(r"^[^\d.-]*")
-numeric_ending = re.compile(r"[^\d.]*$")
+non_numeric_beginning = re.compile(r"^[^\d.-]*")
+non_numeric_ending = re.compile(r"[^\d.]*$")
 regex_normalize_whitespace = re.compile(r"\s{1,}")
+remove_digits = str.maketrans('', '', digits)
 
 '''
 start: apply the operator starting at the beginning of the value and stop when it can no longer be applied, e.g., remove numbers and stop when a non-number is found
@@ -74,15 +76,14 @@ def replace_regex(input, to_replace, replacement="", count=0):
 
 @string_modifier
 def remove_numbers(input, where=everywhere):
-    regex=r"\d*"
     if where==everywhere:
-        input= re.sub(str(regex), "", input)
-    if where==start or where==start_and_end:
-        sub_string="^"+str(regex)
-        input= re.sub(sub_string, "", input)
-    if where==end or where ==start_and_end:
-        sub_string=str(regex)+"$"
-        input= re.sub(sub_string, "", input)
+        return input.translate(remove_digits).strip()
+    if where==start_and_end:
+        return input.strip('0123456789.-').strip()
+    if where==start:
+        return input.lstrip('0123456789.-').strip()
+    if where==end:
+        return input.rstrip('0123456789.-').strip()
     return input
 
 @string_modifier
@@ -173,6 +174,11 @@ def pad(input, length, pad_text, where=start):
 
 @string_modifier
 def strict_make_numeric(input, decimal="."):
+    try:
+        float(input) #don't bother with the rest if it converts to a number fine
+        return str(input).strip()
+    except:
+        pass #continue to the processing
     input=strip_whitespace(str(input), where="everywhere")
     if decimal!=".":
         input=input.replace(".", "")
@@ -196,14 +202,19 @@ def make_numeric(input, decimal=".", latex=False):
     removes whitespace inside the number
 
     ''' 
+    try:
+        float(input) #don't bother with the rest if it converts to a number fine
+        return str(input).strip()
+    except:
+        pass #continue to the processing
     original_input=str(input)
     input=strip_whitespace(str(input), where="everywhere")
     if decimal!=".":
         input=input.replace(".", "")
         input=input.replace(decimal, ".")
     input=input.replace(",", "")
-    input = numeric_beginning.sub("", input)
-    input = numeric_ending.sub("", input)
+    input = non_numeric_beginning.sub("", input)
+    input = non_numeric_ending.sub("", input)
     try:
         float(input)
     except:

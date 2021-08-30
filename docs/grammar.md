@@ -389,14 +389,14 @@ examples:
 * `replace_regex("dan dan dan", "dan", "bob", 1)` returns "bob dan dan"
 
 
-`remove_numbers(input, where=everywhere)`: remove the digits 0-9
+`remove_numbers(input, where=everywhere)`: remove the digits 0-9, and leading/trailing whitespace. if where is start, end, or start_and_end, also removes leading periods and dashes. 
 
 examples: 
 
-* `remove_numbers("123 hello1234hi 123")` returns " hellohi "
-* `remove_numbers("123 hello1234hi 123", where=start)` returns " hello1234hi 123"
+* `remove_numbers("123 hello1234hi 123")` returns "hellohi"
+* `remove_numbers("123 hello1234hi 123", where=start)` returns "hello1234hi 123"
 
-`remove_letters(input, where=everywhere)`: inverse of remove_numbers, leaves only digits and removes everything else (alpha version, may be redefined)
+`remove_letters(input, where=everywhere)`: removes anything that matches the '\D' regex (anything not a digit) from start, end, start and end, or everywhere.
 
 `change_case(input, case="sentence")`: Changes the case to one of "sentence", "lower", "upper", "title".
 

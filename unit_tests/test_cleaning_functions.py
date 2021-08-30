@@ -38,8 +38,8 @@ class TestScripts(unittest.TestCase):
 
     def test_remove_numbers(self):
         nums="123 hello1234hi 123"
-        assert remove_numbers(nums) == " hellohi "
-        assert remove_numbers(nums, where=start) == " hello1234hi 123"
+        assert remove_numbers(nums) == "hellohi"
+        assert remove_numbers(nums, where=start) == "hello1234hi 123"
 
     def test_remove_letters(self):
         nums="hi123 hello1234hi 123"
