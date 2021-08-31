@@ -1,6 +1,5 @@
 from pathlib import Path
-import pandas as pd
-import json
+import pandas as pd   
 from t2wml.spreadsheets.utilities import PandasLoader, post_process_data
 from t2wml.spreadsheets.conversions import to_excel
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
@@ -83,8 +82,6 @@ class Sheet:
                 return self._raw_data_values
 
 
-
-
     def __getitem__(self, params):
         try:
             return self._data_values[params]
@@ -101,29 +98,6 @@ class Sheet:
     def col_len(self):
         # number of columns
         return self.data.shape[1]
-    
-    #@basic_debug
-    def to_json(self):
-        if self.cleaned_data is not None:
-            cleaned=json.loads(self.cleaned_data.to_json(orient='values'))
-        else:
-            cleaned=None
-        return dict(cleaned=cleaned, 
-                    data=json.loads(self.data.to_json(orient='values')),
-                    data_file_path=self.data_file_path, 
-                    sheet_name=self.name)
-
-    @staticmethod
-    def from_json(in_json):
-        cleaned=in_json.pop("cleaned")
-        if cleaned:
-            cleaned=pd.DataFrame(cleaned)
-        data=in_json.pop("data")
-        if data:
-            data=pd.DataFrame(data)
-        s=Sheet(data=data, **in_json)
-        s.cleaned_data=cleaned
-        return s
 
     @classmethod
     def load_sheet_from_csv_string(cls, csv_string, data_file_path="", sheet_name="", **pandas_options):

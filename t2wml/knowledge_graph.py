@@ -28,26 +28,6 @@ class KnowledgeGraph:
         self.sheet = sheet
 
     @classmethod
-    def load_json(cls, filename: str):
-        """load a KnowledgeGraph instance from a saved json file.
-
-        Args:
-            filename (str): location of the json file
-
-        Returns:
-            KnowledgeGraph: an initialized KnowledgeGraph instance
-        """
-        with open(filename, 'r', encoding="utf-8") as f:
-            loaded = json.load(f)
-        statements = loaded["statements"]
-        errors = loaded.get("errors", [])
-        metadata = loaded.get("metadata", {})
-        sheet=loaded.get("sheet", None)
-        if sheet:
-            sheet=Sheet.from_json(sheet)
-        return cls(statements, errors, metadata, sheet)
-
-    @classmethod
     def get_single_cell(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier, row:int, col:int):
         statement, errors = statement_mapper.get_cell_statement(col, row, True, sheet, wikifier)
 
