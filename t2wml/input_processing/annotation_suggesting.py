@@ -1,6 +1,7 @@
 from collections import Counter, defaultdict
 from math import floor
-from t2wml.input_processing.utils import string_is_valid
+from t2wml.input_processing.annotation_parsing import rect_distance
+from t2wml.input_processing.utils import string_is_valid, rect_distance
 from t2wml.wikification.country_wikifier_cache import countries, causx_only_countries
 from t2wml.utils.date_utils import parse_datetime
 from t2wml.parsing.cleaning_functions import strict_make_numeric
@@ -165,8 +166,9 @@ class HistogramSelection:
         date_block=self.get_1d_block(date_index, date_is_vertical, date_count, dates, blanks)
         country_block=self.get_1d_block(country_index, country_is_vertical, country_count, countries, blanks)
         number_block=self.get_2d_block(horizontal_numbers, vertical_numbers, numbers, blanks, [date_block, country_block])
-        date_block=self.normalize_to_selection(date_block, number_block)
-        country_block=self.normalize_to_selection(country_block, number_block)
+        number_block = self.fix_overlaps(number_block, [(date_block, date_is_vertical), (country_block, country_is_vertical)])
+        #date_block=self.normalize_to_selection(date_block, number_block)
+        #country_block=self.normalize_to_selection(country_block, number_block)
 
 
         return self._create_annotations(date_block, country_block, number_block)
@@ -208,6 +210,8 @@ class HistogramSelection:
         return annotations
 
     def get_most_common(self, horizontal, vertical):
+        num_rows = self.sheet.row_len
+        num_cols = self.sheet.col_len
         if horizontal:
             h_index, h_count = horizontal.most_common(1)[0]
         else:
@@ -216,9 +220,12 @@ class HistogramSelection:
             v_index, v_count = vertical.most_common(1)[0]
         else:
             v_count=0
-        if v_count==h_count==0:
+        h_count_norm = h_count/num_cols
+        v_count_norm = v_count/num_rows
+        
+        if v_count_norm==h_count_norm==0:
             return None, None, 0
-        if h_count>v_count:
+        if h_count_norm>v_count_norm:
             return h_index, False, h_count
         return v_index, True, v_count
     
@@ -334,9 +341,44 @@ class HistogramSelection:
         start_column=max(contiguous_columns, key=lambda p: contiguous_columns[p]["count"])
         end_column=contiguous_columns[start_column]["finish"]
         v_index, v_count = vertical_count.most_common(1)[0]
-        ((initial_row, column), (final_row, column))=self.get_1d_block(start_column, True, v_count, block_set, blank_set)
+        two_d_block=self.get_1d_block(start_column, True, v_count, block_set, blank_set)
+        ((initial_row, column), (final_row, column)) = two_d_block        
         return (initial_row, start_column), (final_row, end_column)
             
+    def fix_overlaps(self, base_block, blocks_to_avoid):
+        (base_start_r, base_start_c), (base_end_r, base_end_c) = base_block
+        for block, is_vertical in blocks_to_avoid:
+            test=rect_distance(base_block, block)
+            if test!=0: #no overlap
+                continue
+            (start_r, start_c), (end_r, end_c) = block
+            if is_vertical: #need to adjust columns
+                if start_c==base_start_c:
+                    base_start_c+=1
+                elif end_c==base_end_c:
+                    base_end_c-=1
+                else: #is somewhere in the middle
+                    left = start_c - base_start_c
+                    right = base_end_c - end_c
+                    if left>right:
+                        base_end_c = start_c-1 #take the left rectangle
+                    else:
+                        base_start_c = end_c+1 #take the right rectangle
+            else: #need to adjust rows
+                if start_r==base_start_r:
+                    base_start_r+=1
+                elif end_r==base_end_r:
+                    base_end_r-=1
+                else: #is somewhere in the middle
+                    top = start_r - base_start_r
+                    bottom = base_end_r - end_r
+                    if top>bottom:
+                        base_end_r = start_r-1 #take the left rectangle
+                    else:
+                        base_start_r = end_r+1 #take the right rectangle
+        return (base_start_r, base_start_c), (base_end_r, base_end_c)
+
+
 
 def block_finder(sheet): #convenience function
     h=HistogramSelection(sheet)
