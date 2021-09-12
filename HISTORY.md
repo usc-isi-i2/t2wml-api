@@ -1,6 +1,11 @@
 T2WML API History
 ===================================
 
+Changes in version 0.6.3:
+------------------------
+* improve algorithm for detecting 1D blocks
+* fix bug where block suggestions returned overlapping blocks
+
 Changes in version 0.6.2:
 ------------------------
 * don't allow overlapping or identical annotations
