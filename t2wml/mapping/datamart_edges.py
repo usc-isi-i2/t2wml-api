@@ -1,6 +1,7 @@
 
 import re
 import datetime
+from t2wml.input_processing.utils import clean_id
 
 #translate from lower-case (case insensitive) OR from wikidata standard OR for full uppercase URL, to wikidata standard
 wikidata_sparql_to_wikidata = {
@@ -38,22 +39,7 @@ wikidata_to_datamart = {
 'Url': 'symbol',
 }
 
-nonalphanumeric = re.compile(r'[^A-Za-z0-9\s]+')
-spaces=re.compile(r"\s")
 
-
-def clean_id(input):
-    '''
-    remove non alphanumeric characters and lowercase
-    replace whitespace by _ (underscore)
-    '''
-    output = str(input)
-    output = nonalphanumeric.sub('', output)
-    output = output.strip().lower() #needs to be here to prevent trailing underscore
-    output = spaces.sub("_", output)
-    if not output:
-        raise ValueError(f"Cleaning {input} returned empy string for id")
-    return output
 
 def clean_name(input):
     input = input.strip()
