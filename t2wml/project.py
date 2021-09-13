@@ -214,16 +214,16 @@ class Project:
                     return True
         return False
     
-    def get_wikifier_file(self, sheet):
-        data_file_path=self._normalize_path(sheet.data_file_path)
-        wikifier_name=clean_id(data_file_path) +"_"+sheet.name+ ".json"
+    def get_wikifier_file(self, file_path):
+        data_file_path=self._normalize_path(file_path)
+        wikifier_name=clean_id(data_file_path) + ".json"
         wikifier_file_path=os.path.join(self.directory, "wikifiers", wikifier_name)
         if os.path.exists(wikifier_file_path):
             return wikifier_file_path, True
         return wikifier_file_path, False
     
     def add_dict_to_wikifier_file(self, sheet, wiki_dict, overwrite_existing=True):
-        wikifier_file_path, exists=self.get_wikifier_file(sheet)
+        wikifier_file_path, exists=self.get_wikifier_file(sheet.data_file_path)
         if exists:
             wikifier = Wikifier.load_from_file(wikifier_file_path)
         else:
