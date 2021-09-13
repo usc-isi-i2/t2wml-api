@@ -166,7 +166,7 @@ class HistogramSelection:
         date_block=self.get_1d_block(date_index, date_is_vertical, date_count, dates, blanks)
         country_block=self.get_1d_block(country_index, country_is_vertical, country_count, countries, blanks)
         number_block=self.get_2d_block(horizontal_numbers, vertical_numbers, numbers, blanks, [date_block, country_block])
-        number_block = self.fix_overlaps(number_block, [(date_block, date_is_vertical), (country_block, country_is_vertical)])
+        #number_block = self.fix_overlaps(number_block, [(date_block, date_is_vertical), (country_block, country_is_vertical)])
         
         date_block=self.normalize_to_selection(date_block, number_block)
         country_block=self.normalize_to_selection(country_block, number_block)
