@@ -1,3 +1,5 @@
+import json
+from typing import DefaultDict
 from t2wml.wikification.item_table import Wikifier, convert_old_df_to_dict, convert_old_wikifier_to_new
 from t2wml.mapping.datamart_edges import clean_id
 import yaml
@@ -53,6 +55,7 @@ class Project:
         if not os.path.isdir(os.path.join(self.directory, "wikifiers")):
             os.mkdir(os.path.join(self.directory, "wikifiers"))
         
+        #backwards compatibility 1 (<0.5.0)
         if wikifier_files:
             warnings.warn("wikifier files are being removed from project", DeprecationWarning)
             for wf in wikifier_files:
@@ -60,6 +63,46 @@ class Project:
                 wf_path = self.get_full_path(wf)
                 self.add_old_style_wikifier_to_project(wf_path)
             self.save()
+        
+        #backwards comptibility 2 (<0.6.3)
+        wikifier_dir=os.path.join(self.directory, "wikifiers")
+        if os.path.exists(wikifier_dir):
+            expected_filenames_with_ext = set([clean_id(filename)+".json" for filename in self.data_files])
+            expected_filenames_without_ext = {clean_id(filename):filename for filename in self.data_files}
+            problem_filenames=[]
+            for filename in os.listdir(wikifier_dir):
+                if filename not in expected_filenames_with_ext:
+                    problem_filenames.append(filename)
+            
+            corrected_filenames=DefaultDict(list)
+
+            for problem in problem_filenames:
+                for key in expected_filenames_without_ext:
+                    if key in problem:
+                        proper_name = expected_filenames_without_ext[key]
+                        corrected_filenames[proper_name].append(problem)
+            
+            for actual_file_path in corrected_filenames:
+                problem_arr=corrected_filenames[actual_file_path]
+                wikifier_file_path, exists=self.get_wikifier_file(actual_file_path)
+                wikifier = Wikifier(filepath=wikifier_file_path)
+                for problem_file in problem_arr:
+                    with open(os.path.join(wikifier_dir, problem_file), 'r') as f:
+                        wiki_dict=json.load(f)
+                    wikifier.update_from_dict(wiki_dict)
+                    wikifier.save_to_file(wikifier_file_path)
+            
+            for problem_file in problem_filenames:
+                try:
+                    os.remove(os.path.join(wikifier_dir, problem_file))
+                except Exception as e:
+                    print(e)
+
+
+
+
+
+
 
     
     @property

@@ -84,8 +84,13 @@ class Wikifier:
 
     def update_from_dict(self, wiki_dict, replace=True):
         for context in wiki_dict:
-            for (col, row, value), item in wiki_dict[context].items():
-                self.add_or_replace(replace, context, col, row, value, item)
+            if isinstance(wiki_dict[context], list): #backwards compatible
+                for (col, row, value), item in wiki_dict[context]:
+                    self.add_or_replace(replace, context, col, row, value, item)
+
+            else:
+                for (col, row, value), item in wiki_dict[context].items():
+                    self.add_or_replace(replace, context, col, row, value, item)
     
     def add_dataframe(self, df, replace=True): #TODO: replace all instances
         wiki_dict=convert_old_df_to_dict(df)
