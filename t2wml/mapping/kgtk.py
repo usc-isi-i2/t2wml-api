@@ -183,7 +183,7 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
 
     for cell, statement in statements.items():
         try:
-            id = file_name + sheet_name + ";" + to_excel(cell)
+            id = file_name + sheet_name + ";" + to_excel(cell[0], cell[1])
 
             if project:
                 tsv_data.append(link_statement_to_dataset(project, id))
