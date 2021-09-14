@@ -87,9 +87,15 @@ class Project:
                 wikifier_file_path, exists=self.get_wikifier_file(actual_file_path)
                 wikifier = Wikifier(filepath=wikifier_file_path)
                 for problem_file in problem_arr:
-                    with open(os.path.join(wikifier_dir, problem_file), 'r') as f:
-                        wiki_dict=json.load(f)
-                    wikifier.update_from_dict(wiki_dict)
+                    if Path(problem_file).suffix==".json":
+                        with open(os.path.join(wikifier_dir, problem_file), 'r') as f:
+                            wiki_dict=json.load(f)
+                        wikifier.update_from_dict(wiki_dict)
+                    elif Path(problem_file).suffix==".csv":
+                        df = pd.read_csv(os.path.join(wikifier_dir, problem_file))
+                        wiki_dict = convert_old_df_to_dict(df)
+                        wikifier.update_from_dict(wiki_dict)
+
                     wikifier.save_to_file(wikifier_file_path)
             
             for problem_file in problem_filenames:
