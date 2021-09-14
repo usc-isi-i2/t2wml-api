@@ -2,6 +2,7 @@
 import csv
 from io import StringIO
 from pathlib import Path
+from t2wml.spreadsheets.conversions import to_excel
 from t2wml.mapping.datamart_edges import (clean_id, create_metadata_for_custom_qnode, create_metadata_for_project, create_metadata_for_variable, 
                 create_metadata_for_qualifier_property, link_statement_to_dataset)
 from t2wml.utils.date_utils import VALID_PROPERTY_TYPES
@@ -182,7 +183,7 @@ def create_kgtk(statements, file_path, sheet_name, project=None):
 
     for cell, statement in statements.items():
         try:
-            id = file_name + sheet_name + ";" + cell
+            id = file_name + sheet_name + ";" + to_excel(cell)
 
             if project:
                 tsv_data.append(link_statement_to_dataset(project, id))
