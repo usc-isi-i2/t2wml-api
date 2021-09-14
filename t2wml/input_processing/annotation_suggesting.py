@@ -211,7 +211,7 @@ class HistogramSelection:
         return annotations
 
     def get_most_common(self, horizontal, vertical):
-        num_rows = self.sheet.row_len
+        num_rows = len(self.rows)
         num_cols = self.sheet.col_len
         if horizontal:
             h_index, h_count = horizontal.most_common(1)[0]
