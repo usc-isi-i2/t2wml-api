@@ -166,49 +166,10 @@ class HistogramSelection:
         date_block=self.get_1d_block(date_index, date_is_vertical, date_count, dates, blanks)
         country_block=self.get_1d_block(country_index, country_is_vertical, country_count, countries, blanks)
         number_block=self.get_2d_block(horizontal_numbers, vertical_numbers, numbers, blanks, [date_block, country_block])
-        #number_block = self.fix_overlaps(number_block, [(date_block, date_is_vertical), (country_block, country_is_vertical)])
         
-        date_block=self.normalize_to_selection(date_block, number_block)
-        country_block=self.normalize_to_selection(country_block, number_block)
-
-
+        date_block, country_block, number_block = self.normalization_and_overlaps(date_block, date_is_vertical, country_block, country_is_vertical, number_block)
         return self._create_annotations(date_block, country_block, number_block)
-        
-    def normalize_to_selection(self, selection, normalize_against):
-        if not normalize_against or not selection:
-            return selection
-        (nr1, nc1), (nr2, nc2) = normalize_against
-        (r1, c1),(r2, c2) = selection
-        if r1==r2 and c1!=c2: #row
-            return (r1, nc1), (r2, nc2)
-        if c1==c2 and r1!=r2: #column
-            return (nr1, c1),(nr2, c2)
-        return selection
     
-    def _create_annotations(self, date_block, country_block, number_block):
-        annotations=[]
-        if date_block:
-            annotations.append({
-                    "selection":dict(x1=date_block[0][1]+1, y1=date_block[0][0]+1, x2= date_block[1][1]+1, y2=date_block[1][0]+1),
-                    "role":"qualifier",
-                    "type": "time",
-                    "property": time_property_node
-            })
-
-        if country_block:
-            annotations.append({
-                    "selection":dict(x1=country_block[0][1]+1, y1=country_block[0][0]+1, x2= country_block[1][1]+1, y2=country_block[1][0]+1),
-                    "role":"mainSubject",
-                    "type": "wikibaseitem",
-            })
-        if number_block:
-            annotations.append({
-                    "selection":dict(x1=number_block[0][1]+1, y1=number_block[0][0]+1, x2= number_block[1][1]+1, y2=number_block[1][0]+1),
-                    "role":"dependentVar",
-                    "type": "quantity",
-            })
-
-        return annotations
 
     def get_most_common(self, horizontal, vertical):
         num_rows = len(self.rows)
@@ -346,38 +307,93 @@ class HistogramSelection:
         ((initial_row, column), (final_row, column)) = two_d_block        
         return (initial_row, start_column), (final_row, end_column)
             
-    def fix_overlaps(self, base_block, blocks_to_avoid):
-        (base_start_r, base_start_c), (base_end_r, base_end_c) = base_block
-        for block, is_vertical in blocks_to_avoid:
-            test=rect_distance(base_block, block)
-            if test!=0: #no overlap
-                continue
-            (start_r, start_c), (end_r, end_c) = block
-            if is_vertical: #need to adjust columns
-                if start_c==base_start_c:
-                    base_start_c+=1
-                elif end_c==base_end_c:
-                    base_end_c-=1
-                else: #is somewhere in the middle
-                    left = start_c - base_start_c
-                    right = base_end_c - end_c
-                    if left>right:
-                        base_end_c = start_c-1 #take the left rectangle
-                    else:
-                        base_start_c = end_c+1 #take the right rectangle
-            else: #need to adjust rows
-                if start_r==base_start_r:
-                    base_start_r+=1
-                elif end_r==base_end_r:
-                    base_end_r-=1
-                else: #is somewhere in the middle
-                    top = start_r - base_start_r
-                    bottom = base_end_r - end_r
-                    if top>bottom:
-                        base_end_r = start_r-1 #take the left rectangle
-                    else:
-                        base_start_r = end_r+1 #take the right rectangle
+    def fix_overlaps(self, block_to_shrink, other_block, is_vertical):
+        (base_start_r, base_start_c), (base_end_r, base_end_c) = block_to_shrink
+
+        test=rect_distance(block_to_shrink, other_block)
+        if test!=0: #no overlap
+            return block_to_shrink
+
+        (start_r, start_c), (end_r, end_c) = other_block
+        if is_vertical: #need to adjust columns
+            if start_c==base_start_c:
+                base_start_c+=1
+            elif end_c==base_end_c:
+                base_end_c-=1
+            else: #is somewhere in the middle
+                left = start_c - base_start_c
+                right = base_end_c - end_c
+                if left>right:
+                    base_end_c = start_c-1 #take the left rectangle
+                else:
+                    base_start_c = end_c+1 #take the right rectangle
+        else: #need to adjust rows
+            if start_r==base_start_r:
+                base_start_r+=1
+            elif end_r==base_end_r:
+                base_end_r-=1
+            else: #is somewhere in the middle
+                top = start_r - base_start_r
+                bottom = base_end_r - end_r
+                if top>bottom:
+                    base_end_r = start_r-1 #take the left rectangle
+                else:
+                    base_start_r = end_r+1 #take the right rectangle
         return (base_start_r, base_start_c), (base_end_r, base_end_c)
+
+    def normalize_to_selection(self, selection, normalize_against):
+        if not normalize_against or not selection:
+            return selection
+        (nr1, nc1), (nr2, nc2) = normalize_against
+        (r1, c1),(r2, c2) = selection
+        if r1==r2 and c1!=c2: #row
+            return (r1, nc1), (r2, nc2)
+        if c1==c2 and r1!=r2: #column
+            return (nr1, c1),(nr2, c2)
+        return selection
+    
+    def normalization_and_overlaps(self, date_block, date_is_vertical, country_block, country_is_vertical, number_block):
+        number_block = self.fix_overlaps(number_block, date_block, date_is_vertical)
+        number_block = self.fix_overlaps(number_block, country_block, country_is_vertical)
+        
+        normalized_country_block=self.normalize_to_selection(country_block, number_block)
+        if rect_distance(normalized_country_block, number_block)!=0 and \
+            rect_distance(normalized_country_block, date_block)!=0:
+                country_block=normalized_country_block
+
+        normalized_date_block=self.normalize_to_selection(date_block, number_block)
+        if rect_distance(normalized_date_block, number_block)!=0 and \
+            rect_distance(normalized_date_block, country_block)!=0:
+                date_block=normalized_date_block
+        
+        return date_block, country_block, number_block
+    
+    def _create_annotations(self, date_block, country_block, number_block):
+        annotations=[]
+        if date_block:
+            annotations.append({
+                    "selection":dict(x1=date_block[0][1]+1, y1=date_block[0][0]+1, x2= date_block[1][1]+1, y2=date_block[1][0]+1),
+                    "role":"qualifier",
+                    "type": "time",
+                    "property": time_property_node
+            })
+
+        if country_block:
+            annotations.append({
+                    "selection":dict(x1=country_block[0][1]+1, y1=country_block[0][0]+1, x2= country_block[1][1]+1, y2=country_block[1][0]+1),
+                    "role":"mainSubject",
+                    "type": "wikibaseitem",
+            })
+        if number_block:
+            annotations.append({
+                    "selection":dict(x1=number_block[0][1]+1, y1=number_block[0][0]+1, x2= number_block[1][1]+1, y2=number_block[1][0]+1),
+                    "role":"dependentVar",
+                    "type": "quantity",
+            })
+        
+
+        return annotations
+
 
 
 
