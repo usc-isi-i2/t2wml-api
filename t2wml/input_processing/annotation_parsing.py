@@ -5,7 +5,7 @@ import pandas as pd
 from t2wml.utils.bindings import update_bindings
 from t2wml.wikification.utility_functions import get_provider, dict_to_kgtk, kgtk_to_dict
 from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
-from t2wml.input_processing.utils import get_Pnode, get_Qnode, rect_distance, check_overlap, normalize_rectangle
+from t2wml.input_processing.utils import get_Pnode, get_Qnode, rect_distance, normalize_rectangle
 import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
@@ -14,7 +14,17 @@ from t2wml.utils.debug_logging import basic_debug
 
 COST_MATRIX_DEFAULT = 10
 
+def check_overlap(ann1, ann2):
+    #NOTE selections must be normalized before sending to this function
 
+    #get rectangles from annotations
+    selection = ann1["selection"]
+    rect1 = (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
+    selection = ann2["selection"]
+    rect2 = (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
+
+    if rect_distance(rect1, rect2)==0:
+        raise InvalidAnnotationException("Overlapping selections")
 
 
 

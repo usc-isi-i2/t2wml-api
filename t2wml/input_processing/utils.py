@@ -82,17 +82,7 @@ def rect_distance(rect1, rect2):
     else:             # rectangles intersect
         return 0
 
-def check_overlap(ann1, ann2):
-    #NOTE selections must be normalized before sending to this function
 
-    #get rectangles from annotations
-    selection = ann1["selection"]
-    rect1 = (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
-    selection = ann2["selection"]
-    rect2 = (selection["x1"]-1, selection["y1"]-1), (selection["x2"]-1, selection["y2"]-1)
-
-    if rect_distance(rect1, rect2)==0:
-        raise InvalidAnnotationException("Overlapping selections")
 
 def normalize_rectangle(annotation):
     selection = annotation["selection"]
