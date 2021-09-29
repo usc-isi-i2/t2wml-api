@@ -308,6 +308,11 @@ class HistogramSelection:
         return (initial_row, start_column), (final_row, end_column)
             
     def fix_overlaps(self, block_to_shrink, other_block, is_vertical):
+        if block_to_shrink is None:
+            return None
+        if other_block is None:
+            return block_to_shrink
+
         (base_start_r, base_start_c), (base_end_r, base_end_c) = block_to_shrink
 
         test=rect_distance(block_to_shrink, other_block)
@@ -353,18 +358,23 @@ class HistogramSelection:
         return selection
     
     def normalization_and_overlaps(self, date_block, date_is_vertical, country_block, country_is_vertical, number_block):
+        if not number_block:
+            return date_block, country_block, number_block
+        
         number_block = self.fix_overlaps(number_block, date_block, date_is_vertical)
         number_block = self.fix_overlaps(number_block, country_block, country_is_vertical)
         
-        normalized_country_block=self.normalize_to_selection(country_block, number_block)
-        if rect_distance(normalized_country_block, number_block)!=0 and \
-            rect_distance(normalized_country_block, date_block)!=0:
-                country_block=normalized_country_block
+        if country_block:
+            normalized_country_block=self.normalize_to_selection(country_block, number_block)
+            if rect_distance(normalized_country_block, number_block)!=0 and \
+                rect_distance(normalized_country_block, date_block)!=0:
+                    country_block=normalized_country_block
 
-        normalized_date_block=self.normalize_to_selection(date_block, number_block)
-        if rect_distance(normalized_date_block, number_block)!=0 and \
-            rect_distance(normalized_date_block, country_block)!=0:
-                date_block=normalized_date_block
+        if date_block:
+            normalized_date_block=self.normalize_to_selection(date_block, number_block)
+            if rect_distance(normalized_date_block, number_block)!=0 and \
+                rect_distance(normalized_date_block, country_block)!=0:
+                    date_block=normalized_date_block
         
         return date_block, country_block, number_block
     

@@ -57,6 +57,8 @@ def get_Pnode(project, property):
 
 
 def rect_distance(rect1, rect2):
+    if rect1 is None or rect2 is None:
+        return None
     ((x1, y1), (x1b, y1b)) = rect1
     ((x2, y2), (x2b, y2b)) = rect2
     left = x2b < x1
