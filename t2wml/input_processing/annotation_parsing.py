@@ -701,13 +701,12 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
                 if node_id not in custom_nodes: #only set to auto if creating fresh
                     custom_nodes[node_id]={"label":label.strip()}
             else:
-                for col, row, label in created:
-                    if node_id in custom_nodes: #just update data type
-                        custom_nodes[node_id]["data_type"]=data_type
-                    else:
-                        custom_nodes[node_id]=dict(data_type=data_type, 
-                                    label=label, 
-                                    description="")
+                if node_id in custom_nodes: #just update data type
+                    custom_nodes[node_id]["data_type"]=data_type
+                else:
+                    custom_nodes[node_id]=dict(data_type=data_type, 
+                                label=label, 
+                                description="")
     prov.update_cache(custom_nodes)
     
     if custom_nodes:
