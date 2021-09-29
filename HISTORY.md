@@ -1,6 +1,12 @@
 T2WML API History
 ===================================
 
+Changes in version 0.6.4:
+------------------------
+* fix some backwards compatibility problems n 0.6.3
+* fix bug when fixing overlapping bocks and one block is None
+* fix bug that assigned all properties the same label
+
 Changes in version 0.6.3:
 ------------------------
 * improve algorithm for detecting 1D blocks
