@@ -1,9 +1,12 @@
 T2WML API History
 ===================================
+Changes in version 0.6.5:
+------------------------
+* refactor node creation to be in its own module
 
 Changes in version 0.6.4:
 ------------------------
-* fix some backwards compatibility problems n 0.6.3
+* fix some backwards compatibility problems in 0.6.3
 * fix bug when fixing overlapping bocks and one block is None
 * fix bug that assigned all properties the same label
 
