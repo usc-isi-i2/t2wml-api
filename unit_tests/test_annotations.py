@@ -1,7 +1,7 @@
 import unittest
 import json
 from pathlib import Path
-from t2wml.input_processing.annotation_parsing import Annotation, AnnotationNodeGenerator
+from t2wml.input_processing.annotation_parsing import Annotation
 
 repo_folder = Path(__file__).parents[2]
 unit_test_folder = Path(repo_folder)/"t2wml-api"/"unit_tests"/"ground_truth"/"annotations"
