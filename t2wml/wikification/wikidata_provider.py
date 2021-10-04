@@ -3,7 +3,6 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 from t2wml.settings import t2wml_settings
 from t2wml.utils.debug_logging import basic_debug
 
-
 class WikidataProvider(ABC):
     @abstractmethod
     def get_property_type(self, wikidata_property, *args, **kwargs):
@@ -118,7 +117,9 @@ class FallbackSparql(SparqlProvider):
         try:
             data_type = self.try_get_property_type(
                 wikidata_property, *args, **kwargs)
-        except:
+        except Exception as e:
+            if self.sparql_endpoint== "DO NOT QUERY":
+                raise e
             data_type = super().get_property_type(wikidata_property)
         return data_type
 
