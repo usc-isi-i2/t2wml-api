@@ -22,7 +22,7 @@ class AnnotationNodeGenerator:
 
 
     def _get_properties(self, region):
-        #const_property=region.annotation.get_from_annotation("property")
+        #const_property=region.annotation.get("property")
         #if const_property:
         #    return [ (const_property, region.type)]
         #else:

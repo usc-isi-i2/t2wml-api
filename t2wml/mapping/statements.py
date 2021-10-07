@@ -6,7 +6,8 @@ from t2wml.parsing.t2wml_parsing import iter_on_n_for_code, T2WMLCode
 from t2wml.parsing.classes import ReturnClass
 from t2wml.wikification.utility_functions import get_property_type
 from t2wml.utils.ethiopian_date import EthiopianDateConverter
-from t2wml.utils.date_utils import VALID_PROPERTY_TYPES, parse_datetime
+from t2wml.input_processing.utils import VALID_PROPERTY_TYPES
+from t2wml.utils.date_utils import parse_datetime
 from t2wml.settings import t2wml_settings
 
 

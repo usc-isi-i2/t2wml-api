@@ -2,7 +2,7 @@ from collections import defaultdict
 import json
 import csv
 from pathlib import Path
-from t2wml.utils.date_utils import VALID_PROPERTY_TYPES
+from t2wml.input_processing.utils import VALID_PROPERTY_TYPES
 from SPARQLWrapper.SPARQLExceptions import QueryBadFormed
 from t2wml.utils import t2wml_exceptions as T2WMLExceptions
 from t2wml.wikification.wikidata_provider import DictionaryProvider

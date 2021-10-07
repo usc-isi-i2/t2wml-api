@@ -8,9 +8,6 @@ except (ImportError, OSError):
     has_etk = False
 from t2wml.utils.debug_logging import basic_debug
 
-VALID_PROPERTY_TYPES=["globecoordinate", "quantity", "time", "string", "monolingualtext",
-                        "externalid", "wikibaseitem", "wikibaseproperty", "url"]
-
 
 parsed_date_cache={}
 

@@ -1,7 +1,10 @@
 import math
 import re
 from string import punctuation
-from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
+
+
+VALID_PROPERTY_TYPES=["globecoordinate", "quantity", "time", "string", "monolingualtext",
+                        "externalid", "wikibaseitem", "wikibaseproperty", "url"]
 
 try:
     from math import dist
@@ -86,10 +89,9 @@ def rect_distance(rect1, rect2):
 
 
 
-def normalize_rectangle(annotation):
-    selection = annotation["selection"]
+def normalize_rectangle_selection(selection):
     top=min(selection["y1"], selection["y2"])
     bottom=max(selection["y1"], selection["y2"])
     left=min(selection["x1"], selection["x2"])
     right=max(selection["x1"], selection["x2"])
-    annotation["selection"]={"x1": left, "x2": right, "y1":top, "y2":bottom}
+    return {"x1": left, "x2": right, "y1":top, "y2":bottom}
