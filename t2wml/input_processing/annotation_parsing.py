@@ -490,7 +490,7 @@ class Annotation():
         match_candidates=self._winnow_match_candidates(match_candidates)
         if not len(match_candidates):
             return
-        match_targets = self._create_targets(
+        match_targets = self._winnow_targets(
             match_candidates[0].role, targets_collection)
 
         if len(match_targets) < len(match_candidates):
