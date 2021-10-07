@@ -129,14 +129,12 @@ class Block:
     def get(self, key):
         """get key from block_dictionary
         """
-        val = self.annotation.get(key, None)
+        val = self.block_dictionary.get(key, None)
         try:
             #if its a P/QNode dictionary, like some properties, we want to return the ID not the whole dictionary with label, description, etc
             return val["id"] 
         except:
             return val
-
-        return self.block_dictionary.get(key, None)
 
 
     def create_link(self, linked_block):
