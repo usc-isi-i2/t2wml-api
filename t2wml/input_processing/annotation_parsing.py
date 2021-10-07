@@ -566,13 +566,13 @@ class Annotation():
         if unit is not None:
             optionalsLines += YamlCreator.get_optionals_string(
                 "unit: " + unit.get_expression(region, use_q, sheet=sheet)+"\n", use_q)
-        for key in region.annotation:
+        for key in region.block_dictionary:
             if key in ["changed", "id", "title", "links", "link"]: 
                 continue
             if key not in ["role", "selection", "type", "property"]:
                 try:
                     optionalsLines += YamlCreator.get_optionals_string(
-                        key+": "+region.annotation[key]+"\n", use_q)
+                        key+": "+region.block_dictionary[key]+"\n", use_q)
                 except Exception as e:
                     optionalsLines +=YamlCreator.get_optionals_string(
                         "# error parsing annotation for key: "+key+" : "+str(e), use_q)
