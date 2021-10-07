@@ -30,7 +30,7 @@ def get_types(cell_content):
     return is_country, is_numeric, is_date
 
 #@basic_debug
-def annotation_suggester(sheet, selection, annotation_blocks_array):
+def guess_block(sheet, selection, annotation_blocks_array):
     already_has_subject=False
     already_has_var=False
     for block in annotation_blocks_array:
@@ -407,6 +407,7 @@ class HistogramSelection:
 
 
 
-def block_finder(sheet): #convenience function
+def guess_annotation(sheet):
+    """A convenience function for """
     h=HistogramSelection(sheet)
     return h.block_finder()
