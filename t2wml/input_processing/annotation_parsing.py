@@ -1,9 +1,8 @@
 
 import json
 from uuid import uuid4
-from build.lib.t2wml.utils.date_utils import VALID_PROPERTY_TYPES
 from t2wml.utils.t2wml_exceptions import InvalidAnnotationException
-from t2wml.input_processing.utils import rect_distance, normalize_rectangle_selection
+from t2wml.input_processing.utils import rect_distance, normalize_rectangle_selection, VALID_PROPERTY_TYPES
 import numpy as np
 from munkres import Munkres
 from t2wml.spreadsheets.conversions import cell_tuple_to_str, column_index_to_letter
