@@ -230,22 +230,24 @@ class HistogramSelection:
         return v_index, True, v_count
     
     def get_1d_block(self, index, is_column, count, block_set, blank_set):
-        """[summary]
+        """get the rectangle coordinates for a "1-dimensional" block
 
         Args:
-            index ([type]): [description]
-            is_column (bool): [description]
-            count ([type]): [description]
-            block_set ([type]): [description]
-            blank_set ([type]): [description]
+            index (int): index of row or column
+            is_column (bool): is it a columns, or a row?
+            count (int): how many cells of the type are in the chosen row/column
+            block_set (set): a set with index tuples (row, col) for each cell that fits the block category
+            blank_set (set): a set with index tuples (row, col) for each cell that are blank
 
         Returns:
-            tuple: ((x1, y1), (x2, y2)) 0-indexed
+            tuple: ((x1, y1), (x2, y2)) 0-indexed rectangle coordinates. can also return None.
         """
         sheet = self.sheet
         if index is None:
             return None
         
+        #if we are using a row subset and we are checking a column, there's no checking of threshold for blanks
+        # (as our row sample is already "skewing" results)
         if self.use_row_subset and is_column:
             column = index
             for initial_row in range(0, sheet.row_len):
@@ -256,78 +258,90 @@ class HistogramSelection:
                     break
             return ((column, initial_row), (column, final_row))
 
-            
-        else:
-            threshold= max(floor(0.1 * count), 1)
-            contig_dict={}
-            if is_column:
-                column=index
-                start_row=0
-                while start_row<sheet.row_len:
-                    total=0
-                    for initial_row in range(start_row, sheet.row_len):
-                        if (initial_row, column) in block_set:
-                            break
-                    
-                    row=initial_row
-                    while row < sheet.row_len:
-                        bad_skips=0
-                        while not ((row, column) in block_set):
-                            if not ((row, column) in blank_set):
-                                bad_skips+=1
-                                if bad_skips>threshold:
-                                    break
-                            row+=1
+        # in all other cases, have a threshold of blank cells where past a certain number we assume the block has ended
+        threshold= max(floor(0.1 * count), 1)
+        contig_dict={}
 
-                        if bad_skips>threshold:
-                            break
+        if is_column:
+            column=index
+            start_row=0
+            while start_row<sheet.row_len:
+                total=0
+                for initial_row in range(start_row, sheet.row_len):
+                    if (initial_row, column) in block_set:
+                        break
+                
+                row=initial_row
+                while row < sheet.row_len:
+                    bad_skips=0
+                    while not ((row, column) in block_set):
+                        if not ((row, column) in blank_set):
+                            bad_skips+=1
+                            if bad_skips>threshold:
+                                break
                         row+=1
-                        total+=1
-                    
-                    #remove blanks and invalids
-                    final_row=row
-                    for final_row in range(row, 0, -1):
-                        if (final_row, column) in block_set:
-                            break
-                        total-=1
-                    contig_dict[((column, initial_row), (column, final_row))] = total
-                    start_row=row+1
-                return max(contig_dict, key=lambda p: contig_dict[p])
 
-            else:        #horizontal:
-                row=index
-                start_column=0
-                while start_column<sheet.col_len:
-                    total=0
-                    for initial_column in range(start_column, sheet.col_len):
-                        if (row, initial_column) in block_set:
-                            break
+                    if bad_skips>threshold:
+                        break
+                    row+=1
+                    total+=1
+                
+                #remove blanks and invalids
+                final_row=row
+                for final_row in range(row, 0, -1):
+                    if (final_row, column) in block_set:
+                        break
+                    total-=1
+                contig_dict[((column, initial_row), (column, final_row))] = total
+                start_row=row+1
+            return max(contig_dict, key=lambda p: contig_dict[p])
 
-                    col=initial_column
-                    while row < sheet.row_len:
-                        bad_skips=0
-                        while not ((row, col) in block_set):
-                            if not ((row, col) in blank_set):
-                                bad_skips+=1
-                                if bad_skips>threshold:
-                                    break
-                            col+=1
-                        if bad_skips>threshold:
-                            break
+        else:  #is row
+            row=index
+            start_column=0
+            while start_column<sheet.col_len:
+                total=0
+                for initial_column in range(start_column, sheet.col_len):
+                    if (row, initial_column) in block_set:
+                        break
+
+                col=initial_column
+                while row < sheet.row_len:
+                    bad_skips=0
+                    while not ((row, col) in block_set):
+                        if not ((row, col) in blank_set):
+                            bad_skips+=1
+                            if bad_skips>threshold:
+                                break
                         col+=1
-                        total+=1
+                    if bad_skips>threshold:
+                        break
+                    col+=1
+                    total+=1
 
-                    for final_column in range(col, 0, -1):
-                        total-=1
-                        if (row, final_column) in block_set:
-                            break
-                    contig_dict[((initial_column, row), (final_column, row))] = total
-                    start_column=col+1
+                for final_column in range(col, 0, -1):
+                    total-=1
+                    if (row, final_column) in block_set:
+                        break
+                contig_dict[((initial_column, row), (final_column, row))] = total
+                start_column=col+1
 
-                return max(contig_dict, key=lambda p: contig_dict[p])
+            return max(contig_dict, key=lambda p: contig_dict[p])
         
 
     def get_2d_block(self, horizontal_count, vertical_count, block_set, blank_set, blocks_to_avoid):
+        """[summary]
+
+        Args:
+            horizontal_count ([type]): [description]
+            vertical_count ([type]): [description]
+            block_set ([type]): [description]
+            blank_set ([type]): [description]
+            blocks_to_avoid ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
         sheet=self.sheet
         for block in blocks_to_avoid:
             if block:
