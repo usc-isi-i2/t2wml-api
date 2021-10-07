@@ -507,7 +507,7 @@ class Annotation():
         cost_matrix.fill(COST_MATRIX_DEFAULT)
         for c_i, candidate in enumerate(match_candidates):
             for r_i, target in enumerate(match_targets):
-                cost_matrix[c_i][r_i] = candidate.get_alignment_value(target)
+                cost_matrix[c_i][r_i] = candidate.get_match_score(target)
 
         m = Munkres()
         try:
