@@ -14,7 +14,6 @@ COST_MATRIX_DEFAULT = 10
 
 def check_overlap(ann_block1, ann_block2):
     """convenience function for validating that two annotation blocks do not overlap
-    NOTE: selections must be normalized before sending to this function
 
     Args:
         ann_block1 (Block): first block to compare
@@ -309,7 +308,26 @@ class Block:
 
 
 class Annotation():
-    #@basic_debug
+    """A class to represent an annotation block
+
+    Args:
+        annotation_blocks_array (list, optional): an array of block dictonaries that, together, form an annotation. Defaults to None -> an empty list.
+    
+    
+    Attributes:
+        annotation_array (list of Blocks): a list of all the blocks in the annotation, after normalization, backwards-compatibility adjustment, id generation, etc
+        annotation_blocks_array (list): an array of block dictonaries that, together, form an annotation. 
+             This is not necessarily identical to argument of same name- it is calculated from annotation_array, after processing
+        data_annotations (list): subset of annotations_block_array entries whose role is "data"
+        subject_annotations (list): subset of annotations_block_array entries whose role is "subject"
+        qualifier_annotations (list): subset of annotations_block_array entries whose role is "qualifier"
+        property_annotations (list): subset of annotations_block_array entries whose role is "property"
+        unit_annotations (list): subset of annotations_block_array entries whose role is "unit"
+        comment_messages (str): a list of (yaml) comment returned to the user at the start of the generated yaml string
+        has_been_initialized (bool): an initialized annotation has had the links between blocks calculated, and switches this flag to True
+        potentially_enough_annotation_information (bool): does the annotation have enough block information for it to be possible to generate statements?
+
+    """
     def __init__(self, annotation_blocks_array=None):
         self.annotations_array = self._preprocess_annotation(annotation_blocks_array or [])        
         self.data_annotations = []
@@ -342,7 +360,15 @@ class Annotation():
             block.block_dictionary["links"]={key:block.matches[key].id for key in block.matches}
         return [block.block_dictionary for block in self.annotations_array]
     
+    @property
+    def potentially_enough_annotation_information(self):
+        if self.data_annotations and self.subject_annotations:
+            return True
+        return False
+
     def _preprocess_annotation(self, annotations):
+        """basic validity checks, backwards compatibility conversions, id generation, etc,
+        to create a fully normalized list of Block instances"""
         if not isinstance(annotations, list):
             raise InvalidAnnotationException("Annotations must be a list")
 
@@ -407,13 +433,16 @@ class Annotation():
 
         return annotations_arr
 
-    @property
-    def potentially_enough_annotation_information(self):
-        if self.data_annotations and self.subject_annotations:
-            return True
-        return False
+    def _winnow_targets(self, role, targets_collection):
+        """get the final list of possible targets for matching for a given role
 
-    def _create_targets(self, role, targets_collection):
+        Args:
+            role (str): role to be matched on
+            targets_collection (list of lists): combination of dependent variable blocks and qualifier blocks arrays
+
+        Returns:
+            list: a single list of blocks for matching, with unusable ones removed
+        """
         match_targets = []
         for arr in targets_collection: #combine the arrays
             match_targets += arr
@@ -435,6 +464,14 @@ class Annotation():
         return match_targets
     
     def _winnow_match_candidates(self, match_candidates):
+        """get the final list of possible candidates for matching
+
+        Args:
+            match_candidates (list): list of candidates for a role
+
+        Returns:
+            list: list of candidates for a role, with unusable ones removed
+        """
         new_match_candidates=[]
         for cand in match_candidates:
             if not cand.userlink:
@@ -442,10 +479,14 @@ class Annotation():
         return new_match_candidates
 
     def _run_cost_matrix(self, match_candidates, targets_collection):
-        '''
-        match_candidates: eg property, unit
-        targets_collection: array of arrays of qualifiers, dependent variables
-        '''
+        """run the cost matrix to generate matches between candidates (multiple blocks of the same role, eg unit)
+        and targets (qualifier and dependent variable blocks)
+        edits the blocks in-place with their assigned links
+
+        Args:
+            match_candidates (list): list of blocks of the same role
+            targets_collection (list of lists): list of dependent variable blocks and list of qualifier blocks, in a list
+        """
 
         match_candidates=self._winnow_match_candidates(match_candidates)
         if not len(match_candidates):
@@ -472,7 +513,7 @@ class Annotation():
         m = Munkres()
         try:
             indexes = m.compute(cost_matrix)
-        except Exception as e:  # more candidates than targets
+        except Exception as e:  # more candidates than targets, create a larger matrix
             square_mat = np.empty(
                 (len(match_candidates),
                  len(match_candidates)),
@@ -492,7 +533,9 @@ class Annotation():
             match_can.create_link(match_targ)
 
     
-    def initialize(self, sheet=None, item_table=None):
+    def initialize(self):
+        """initializes the links between blocks in an annotation
+        """
         if not self.has_been_initialized:
             self._run_cost_matrix(
                 self.property_annotations, [self.data_annotations, self.qualifier_annotations])
@@ -508,6 +551,7 @@ class Annotation():
         return self.data_annotations, self.subject_annotations, self.qualifier_annotations
 
     def get_optionals_and_property(self, region:Block, use_q, sheet=None):
+        """get the yaml lines for property and any optional lines like unit"""
         const_property=region.get("property")
         if const_property:
             propertyLine=str(const_property)
@@ -538,6 +582,7 @@ class Annotation():
         return propertyLine, optionalsLines
 
     def _get_qualifier_yaml(self, qualifier_region: Block, data_region: Block, sheet=None):
+        """get yaml lines for qualifier"""
         propertyLine, optionalsLines = self.get_optionals_and_property(
             qualifier_region, use_q=True)
         region = None
@@ -592,9 +637,10 @@ class Annotation():
 
     #@basic_debug
     def generate_yaml(self, sheet=None, item_table=None):
+        """generate the yaml for the annotation"""
         if not self.data_annotations:
             return ["# cannot create yaml without a dependent variable\n"]
-        data_region, subject_region, qualifier_regions=self.initialize(sheet, item_table)
+        data_region, subject_region, qualifier_regions=self.initialize()
 
         if data_region.use_item:
             dataLine= "=item[$col, $row]"
@@ -629,11 +675,13 @@ class Annotation():
         return [yaml] #array for now... 
     
     def save(self, filepath):
+        """save annotation to file"""
         with open(filepath, 'w', encoding="utf-8") as f:
             f.write(json.dumps(self.annotation_block_array))
 
     @classmethod
     def load(cls, filepath):
+        """load annotation from file"""
         with open(filepath, 'r', encoding="utf-8") as f:
             annotations = json.load(f)
         instance = cls(annotations)
