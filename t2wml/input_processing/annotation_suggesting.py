@@ -192,9 +192,9 @@ class HistogramSelection:
 
         date_block=self.get_1d_block(date_index, date_is_column, date_count, dates, blanks)
         country_block=self.get_1d_block(country_index, country_is_column, country_count, countries, blanks)
-        number_block=self.get_2d_block(count_by_row_numbers, count_by_col_numbers, numbers, blanks, [date_block, country_block])
+        number_block=self.get_2d_block(count_by_col_numbers, numbers, blanks, [date_block, country_block])
         
-        date_block, country_block, number_block = self.normalization_and_overlaps(date_block, date_is_column, country_block, country_is_column, number_block)
+        date_block, country_block, number_block = self.alignment_and_overlaps(date_block, date_is_column, country_block, country_is_column, number_block)
         return self._create_annotations(date_block, country_block, number_block)
     
 
@@ -230,7 +230,7 @@ class HistogramSelection:
         return v_index, True, v_count
     
     def get_1d_block(self, index, is_column, count, block_set, blank_set):
-        """get the rectangle coordinates for a "1-dimensional" block
+        """get the rectangle coordinates for a "1d" block (where only one side at most is greater>1)
 
         Args:
             index (int): index of row or column
@@ -329,18 +329,17 @@ class HistogramSelection:
             return max(contig_dict, key=lambda p: contig_dict[p])
         
 
-    def get_2d_block(self, horizontal_count, vertical_count, block_set, blank_set, blocks_to_avoid):
-        """[summary]
+    def get_2d_block(self, col_counter: Counter, block_set: set, blank_set: set, blocks_to_avoid):
+        """get the rectangle coordinates for a "2d" block (both sides can have length>1)
 
         Args:
-            horizontal_count ([type]): [description]
-            vertical_count ([type]): [description]
-            block_set ([type]): [description]
-            blank_set ([type]): [description]
-            blocks_to_avoid ([type]): [description]
+            col_counter (Counter): a counter with count per column
+            block_set (set): a set with index tuples (row, col) for each cell that fits the block category
+            blank_set (set): a set with index tuples (row, col) for each cell that are blank
+            blocks_to_avoid (list of tuples): list of ((x1, y1), (x2, y2)) tuples bounding rectangles that should not be overlapped when constructing our block
 
         Returns:
-            [type]: [description]
+            tuple: ((x1, y1), (x2, y2)) 0-indexed rectangle coordinates.
         """
         sheet=self.sheet
         for block in blocks_to_avoid:
@@ -350,28 +349,37 @@ class HistogramSelection:
                     for c in range(start_c, end_c+1):
                         if (r,c) in block_set:
                             block_set.remove((r,c))
-                            vertical_count[c]-=1
-                            horizontal_count[r]-=1
+                            col_counter[c]-=1
 
         contiguous_columns=dict()
         start_i=0
         while start_i<sheet.col_len:
             contiguous_columns[start_i]=dict(count=0)
             for j in range(start_i, sheet.col_len+1):
-                if vertical_count[j]:
-                    contiguous_columns[start_i]["count"]+=vertical_count[j]
+                if col_counter[j]:
+                    contiguous_columns[start_i]["count"]+=col_counter[j]
                 else:
                     break
             contiguous_columns[start_i]["finish"]=j-1
             start_i=j+1
         start_column=max(contiguous_columns, key=lambda p: contiguous_columns[p]["count"])
         end_column=contiguous_columns[start_column]["finish"]
-        v_index, v_count = vertical_count.most_common(1)[0]
+        v_index, v_count = col_counter.most_common(1)[0]
         two_d_block=self.get_1d_block(start_column, True, v_count, block_set, blank_set)
         ((column, initial_row), (column, final_row)) = two_d_block        
         return (start_column, initial_row), (end_column, final_row)
             
     def fix_overlaps(self, block_to_shrink, other_block, is_column):
+        """checks for and fixed overlaps between blocks
+
+        Args:
+            block_to_shrink (tuple): ((x1, y1), (x2, y2)). the selection whose size will be reduced if there is overlap
+            other_block (tuple): ((x1, y1), (x2, y2)) selection used to check for overlap
+            is_column (bool): is other_block a column or a row
+
+        Returns:
+            [type]: [description]
+        """
         if block_to_shrink is None:
             return None
         if other_block is None:
@@ -410,7 +418,16 @@ class HistogramSelection:
                     base_start_r = end_r+1 #take the right rectangle
         return (base_start_c, base_start_r), (base_end_c, base_end_r)
 
-    def normalize_to_selection(self, selection, normalize_against):
+    def align_to_selection(self, selection, normalize_against):
+        """expand/contract a selection to make it perfectly aligned (same start/end in one dimension)
+        with another selection
+
+        Args:
+            selection (tuple): ((x1, y1), (x2, y2))  selection whose dimensions will be changed
+            normalize_against (tuple): ((x1, y1), (x2, y2)) selection being aligning to
+        Returns:
+            tuple: ((x1, y1), (x2, y2)) adjusted coordinates
+        """
         if not normalize_against or not selection:
             return selection
         (nc1, nr1), (nc2, nr2) = normalize_against
@@ -421,7 +438,8 @@ class HistogramSelection:
             return (c1, nr1),(c2, nr2)
         return selection
     
-    def normalization_and_overlaps(self, date_block, date_is_column, country_block, country_is_column, number_block):
+    def alignment_and_overlaps(self, date_block, date_is_column, country_block, country_is_column, number_block):
+        """run the alignment and overlap adjustment functions on the blocks"""
         if not number_block:
             return date_block, country_block, number_block
         
@@ -429,13 +447,13 @@ class HistogramSelection:
         number_block = self.fix_overlaps(number_block, country_block, country_is_column)
         
         if country_block:
-            normalized_country_block=self.normalize_to_selection(country_block, number_block)
+            normalized_country_block=self.align_to_selection(country_block, number_block)
             if rect_distance(normalized_country_block, number_block)!=0 and \
                 rect_distance(normalized_country_block, date_block)!=0:
                     country_block=normalized_country_block
 
         if date_block:
-            normalized_date_block=self.normalize_to_selection(date_block, number_block)
+            normalized_date_block=self.align_to_selection(date_block, number_block)
             if rect_distance(normalized_date_block, number_block)!=0 and \
                 rect_distance(normalized_date_block, country_block)!=0:
                     date_block=normalized_date_block
@@ -443,6 +461,16 @@ class HistogramSelection:
         return date_block, country_block, number_block
     
     def _create_annotations(self, date_block, country_block, number_block):
+        """create an annotation array of block dicts using the found selections
+
+        Args:
+            date_block (tuple): ((x1, y1), (x2, y2)) selection for dates
+            country_block (tuple): ((x1, y1), (x2, y2)) selection for countries
+            number_block (tuple): ((x1, y1), (x2, y2)) selection for dependent variable
+
+        Returns:
+            list(dict): array of annotation blocks
+        """
         annotations=[]
         if date_block:
             annotations.append({
