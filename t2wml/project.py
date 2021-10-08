@@ -1,7 +1,7 @@
 import json
 from typing import DefaultDict
 from t2wml.wikification.item_table import Wikifier, convert_old_df_to_dict, convert_old_wikifier_to_new
-from t2wml.mapping.datamart_edges import clean_id
+from t2wml.outputs.datamart_edges import clean_id
 import yaml
 import os
 import warnings

@@ -1,11 +1,11 @@
 import json
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
-from t2wml.mapping.kgtk import create_kgtk
 from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet
 from t2wml.spreadsheets.conversions import to_excel
 from t2wml.mapping.statement_mapper import YamlMapper, StatementMapper
-from t2wml.mapping.canonical_spreadsheet import create_canonical_spreadsheet
+from t2wml.outputs.canonical_spreadsheet import create_canonical_spreadsheet
+from t2wml.outputs.kgtk import create_kgtk
 
 
 class KnowledgeGraph:

@@ -3,7 +3,7 @@ import csv
 from io import StringIO
 from pathlib import Path
 from t2wml.spreadsheets.conversions import to_excel
-from t2wml.mapping.datamart_edges import (clean_id, create_metadata_for_custom_qnode, create_metadata_for_project, create_metadata_for_variable, 
+from t2wml.outputs.datamart_edges import (clean_id, create_metadata_for_custom_qnode, create_metadata_for_project, create_metadata_for_variable, 
                 create_metadata_for_qualifier_property, link_statement_to_dataset)
 from t2wml.input_processing.utils import VALID_PROPERTY_TYPES
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
