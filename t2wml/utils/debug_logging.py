@@ -1,3 +1,5 @@
+#Just some basic debugging wrappers
+
 import logging
 t2wml_log=logging.getLogger("t2wml-api")
 t2wml_log.addHandler(logging.NullHandler())

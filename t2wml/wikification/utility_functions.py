@@ -17,6 +17,7 @@ def get_default_provider():
 
 #@basic_debug
 def get_provider():
+    """get current provider or default"""
     wikidata_provider = t2wml_settings.wikidata_provider
     if wikidata_provider is None:
         wikidata_provider = get_default_provider()
@@ -26,7 +27,10 @@ def get_provider():
 #@basic_debug
 def get_property_type(prop):
     try:
-        prop_type = _get_property_type(prop)
+        provider = get_provider()
+        prop_type = provider.get_property_type(prop)
+        if prop_type == "Property Not Found":
+            raise T2WMLExceptions.UnsupportedPropertyType("Property "+prop+" not found")
         return str(prop_type).lower()
     except QueryBadFormed:
         raise T2WMLExceptions.UnsupportedPropertyType(
@@ -34,14 +38,6 @@ def get_property_type(prop):
     except ValueError:
         raise T2WMLExceptions.UnsupportedPropertyType(
             "Property not found:" + str(prop))
-
-
-def _get_property_type(wikidata_property):
-    provider = get_provider()
-    property_type = provider.get_property_type(wikidata_property)
-    if property_type == "Property Not Found":
-        raise T2WMLExceptions.UnsupportedPropertyType("Property "+wikidata_property+" not found")
-    return property_type
 
 
 def validate_id(node_id):
@@ -59,7 +55,15 @@ def validate_id(node_id):
 
 #@basic_debug
 def kgtk_to_dict(file_path):
-    #if label is P2010050001 (datamart tag), the key is tags and a dict is generated
+    """loads kgtk file with entities and converts to entity dict
+
+    Args:
+        file_path (str): file to load
+
+    Returns:
+        dict: entity dict loaded from file
+    """
+
     input_dict=defaultdict(dict)
     input_dict["filepath"]=dict(node1="", node2="", value=file_path)
     with open(file_path, 'r', encoding="utf-8") as f:
@@ -68,6 +72,8 @@ def kgtk_to_dict(file_path):
             node1 = row_dict["node1"]
             label = row_dict["label"]
             value = row_dict["node2"]
+            
+            #if label is P2010050001 (datamart tag), the key is tags and a dict is generated
             if label == "P2010050001":
                 if ":" in value:
                     key, val = value.split(":", 1)
@@ -84,6 +90,12 @@ def kgtk_to_dict(file_path):
 
 #@basic_debug
 def dict_to_kgtk(in_dict, out_path):
+    """converts dictionary of entities to kgtk file and saves to file
+
+    Args:
+        in_dict (dict): entity dictionary
+        out_path (string): file path to save to
+    """
     tsv_dict_columns=["id", "node1", "label", "node2"]
     tsv_dict_arr=[]
     in_dict.pop("filepath", None)
