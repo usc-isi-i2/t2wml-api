@@ -13,10 +13,12 @@ parsed_date_cache={}
 
 
 def translate_precision_to_integer(precision: str) -> int:
-    """
-    This function translates the precision value to indexes used by wikidata
-    :param precision:
-    :return:
+    """This function translates the precision value to indexes used by wikidata
+    Args:
+        precision (str): [description]
+
+    Returns:
+        int: wikidata index for precision
     """
     if isinstance(precision, int):
         return precision
@@ -54,17 +56,31 @@ def translate_precision_to_integer(precision: str) -> int:
 
 
 #@basic_debug
-def parse_datetime(value, additional_formats=None, precisions=None):
+def parse_datetime(value, additional_formats=None, precision=None):
+    """given a string, parse it to a datetime
+
+    Args:
+        value (str): date string
+        additional_formats (str or list of str, optional): REQUIRED formats for the string to match one of them. Defaults to None.
+        precision (string/int, optional): wikidata precision. Defaults to None.
+
+    Raises:
+        ValueError: Failed to parse datetime string with the provided format/s
+        ValueError: No date / datetime detected
+
+    Returns:
+        string: datetime_string.isoformat()
+        int (or None): precision
+        str or None: format used
+    """
     used_format=None
     additional_formats=additional_formats or []
-    precisions= precisions or []
     # check if additional formats is a string and convert to single entry array:
     if isinstance(additional_formats, str):
         additional_formats = [additional_formats]
     
-    precision=None
-    if precisions and isinstance(precisions, str):
-        precision=translate_precision_to_integer(precisions)
+    if precision:
+        precision=translate_precision_to_integer(precision)
     
     value = str(value)
 
@@ -81,11 +97,6 @@ def parse_datetime(value, additional_formats=None, precisions=None):
             try:
                 datetime_string = datetime.strptime(value, date_format)
                 used_format=date_format
-                if not precision:
-                    try:
-                        precision=translate_precision_to_integer(precisions[index])
-                    except IndexError: #no precision defined for that format
-                        precision=None
                 parsed_date_cache[cache_key] = datetime_string.isoformat(), precision, used_format
                 return parsed_date_cache[cache_key]
             except ValueError as e:
