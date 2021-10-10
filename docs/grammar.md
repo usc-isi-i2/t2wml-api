@@ -479,3 +479,11 @@ The format of a block is:
 ```
 
 When running code with the AnnotationMapper, the code runs an algorithm to calculate alignment between blocks and generate yaml code accordingly.
+
+In order to successflly generate statements, the blocks must include a block whose role is "dependentVar", as well as:
+1. a block whose role is "mainSubject" or a field "mainSubject" in the dependentVar block
+2. a block whose role is "property" or a field "property" in the dependentVar block
+
+any qualifier blocks must have a matching block whose role is property, or a field property, as well.
+
+Annotations do not support several of the more advanced yaml features, like skipping rows, conditional booleans, or cleaning functions.

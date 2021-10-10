@@ -1,3 +1,6 @@
+# this module is supposed to contain all functions that are part of the *public* api that is meant to stay backwards compatible as much as possible
+# it is not necessarily entirely up to date on what should be included...
+
 import warnings
 from t2wml.settings import t2wml_settings
 from t2wml.wikification.utility_functions import add_entities_from_file, kgtk_to_dict, dict_to_kgtk
