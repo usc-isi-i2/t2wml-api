@@ -40,6 +40,7 @@ def ends_with(input, section):
 
 @boolean_modifer
 def instance_of(input, qnode):
+    """send a query to the t2wml_settings sparql endpoint checking if input has an instance of relationship with qnode"""
     query = "ASK {wd:"+str(input)+" wdt:P31/wdt:P279* wd:" + str(qnode) + "}"
     sparql = SPARQLWrapper(t2wml_settings.sparql_endpoint)
     sparql.setQuery(query)
