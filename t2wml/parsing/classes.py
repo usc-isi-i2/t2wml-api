@@ -14,6 +14,7 @@ def index_converter(arg):
 
 
 class ReturnClass:
+    """class for storing results for a cell"""
     def __init__(self, col, row, value=None):
         self.col = col
         self.row = row
@@ -87,7 +88,7 @@ class RangeClass:
         return self.data[row, col]
 
 
-class Item(ReturnClass):
+class Item(ReturnClass): 
     def __init__(self, col, row, context):
         super().__init__(col, row)
         item_table = bindings.item_table
@@ -122,6 +123,8 @@ class ItemRange(RangeClass):
 
 
 class ItemExpression:
+    """class for interpreting `item[]` as an Item or ItemRange
+    """
     def __getitem__(self, args):
         if len(args) > 2:
             context = args[2]
@@ -173,6 +176,8 @@ class CellRange(RangeClass):
 
 class CellExpression:
     def __getitem__(self, item):
+        """class for interpreting `value[]` as a Cell or CellRange
+        """
         col = index_converter(item[0])
         row = index_converter(item[1])
         if isinstance(col, int) and isinstance(row, int):

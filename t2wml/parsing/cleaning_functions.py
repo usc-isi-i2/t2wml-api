@@ -1,3 +1,5 @@
+#please note that cleaning functions are documented pretty extensively in grammar.md
+
 import math
 import re
 import string
@@ -24,6 +26,7 @@ start_and_end="start_and_end"
 everywhere="everywhere"
 
 def string_modifier(func):
+    """wrapper function for handling different kinds of inputs (range, str, cell) and standardizing output properly"""
     def wrapper(input, *args, **kwargs):
         where=kwargs.get("where")
         if where:
@@ -47,19 +50,13 @@ def string_modifier(func):
 
 @string_modifier
 def ftfy(input):
+    """ Uses the ftfy package to clean the input"""
     return FTFY.fix_text(input)
 
 @string_modifier
 def strip_whitespace(input, char=None, where=start_and_end):
-    """
-    Args:
-        input ([type]): [description]
-        char ([type], optional): [description]. Defaults to None- remove all whitespace. Can also accept " " space or "\t" tab
-        where (["start", "end", "start_and_end", "everywhere"], optional): [description]. Defaults to start_and_end.
-
-    Returns:
-        [type]: [description]
-    """
+    """Remove whitespace. By default will remove all whitespace, 
+    but if char argument (" " or "\t") is provided, will only remove that."""
     if where == everywhere:
         return "".join(input.split(sep=char))
     if where == start:
@@ -71,6 +68,7 @@ def strip_whitespace(input, char=None, where=start_and_end):
 
 @string_modifier
 def replace_regex(input, to_replace, replacement="", count=0):
+    """will use to_replace as a regex argument to re.sub"""
     input=re.sub(to_replace, replacement, input, count)
     return input
 
@@ -88,6 +86,7 @@ def remove_numbers(input, where=everywhere):
 
 @string_modifier
 def remove_letters(input, where=everywhere):
+    """removes anything that matches the '\D' regex (anything not a digit) from start, end, start and end, or everywhere."""
     regex=r"\D*"
     if where==everywhere:
         input= re.sub(str(regex), "", input)
@@ -174,6 +173,8 @@ def pad(input, length, pad_text, where=start):
 
 @string_modifier
 def strict_make_numeric(input, decimal="."):
+    """a variant of make_numeric that returns an empty cell if it cannot be easily converted to a number
+    (so, for example, it will not strip alphabetic character to help force number conversion"""
     try:
         float(input) #don't bother with the rest if it converts to a number fine
         return str(input).strip()
@@ -227,6 +228,8 @@ def make_alphanumeric(input):
 
 @string_modifier
 def make_ascii(input, translate=False):
+    """either removes all non-ascii non-printable characters 
+    or, if translate=true,  uses text-unidecode to translate to closest equivalent"""
     if translate:
         return unidecode(input)
     else:
@@ -235,6 +238,7 @@ def make_ascii(input, translate=False):
 
 @string_modifier
 def fill_empty(input, replacement):
+    """ if a cell is empty (contains only whitespace characters or an empty string), fill it with `replacement`. """
     if "".join(input.split())=="":
         return replacement
     return input

@@ -480,7 +480,7 @@ The format of a block is:
 
 When running code with the AnnotationMapper, the code runs an algorithm to calculate alignment between blocks and generate yaml code accordingly.
 
-In order to successflly generate statements, the blocks must include a block whose role is "dependentVar", as well as:
+In order to successfully generate statements, the blocks must include a block whose role is "dependentVar", as well as:
 1. a block whose role is "mainSubject" or a field "mainSubject" in the dependentVar block
 2. a block whose role is "property" or a field "property" in the dependentVar block
 
