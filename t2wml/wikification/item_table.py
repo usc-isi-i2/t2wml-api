@@ -2,7 +2,6 @@ import json
 from collections import defaultdict
 import pandas as pd
 from t2wml.utils.t2wml_exceptions import ItemNotFoundException
-from t2wml.utils.bindings import bindings
 from t2wml.utils.debug_logging import basic_debug
 
 
@@ -25,9 +24,7 @@ class ItemTable:
         except KeyError:
              raise ItemNotFoundException(str(key)+ " not found")
 
-    def get_item(self, column:int, row:int, context:str='', sheet=None, value=None):
-        if not sheet:
-            sheet = bindings.excel_sheet
+    def get_item(self, column:int, row:int, sheet=None, context:str='', value=None):
         if value is None:
             value = str(sheet[row, column])
         try:
@@ -40,7 +37,7 @@ class ItemTable:
         # used to serialize table
         value = str(sheet[row, column])
         for context in self.lookup_table:
-            item = self.get_item(column, row, context, sheet=sheet, value=value)
+            item = self.get_item(column, row, sheet, context=context, value=value)
             if item:
                 return item, context, value
         return None, None, None

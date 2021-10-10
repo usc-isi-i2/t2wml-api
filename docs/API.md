@@ -259,7 +259,7 @@ class SimpleSheetMapper(StatementMapper):
         error={}
         statement={}
         try:
-            item=wikifier.item_table.get_item(col-1, row, sheet=sheet)
+            item=wikifier.item_table.get_item(col-1, row, sheet)
             statement["subject"]=item
         except Exception as e:
             error["subject"]=str(e)

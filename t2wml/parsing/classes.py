@@ -96,7 +96,7 @@ class Item(ReturnClass):
             data_sheet = bindings.excel_sheet
             self._value = data_sheet[row, col]
         else:
-            self._value = item_table.get_item(self.col, self.row, context)
+            self._value = item_table.get_item(self.col, self.row, bindings.excel_sheet, context=context)
 
 
 class ItemRange(RangeClass):
