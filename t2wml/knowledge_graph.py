@@ -29,7 +29,9 @@ class KnowledgeGraph:
 
     @classmethod
     def get_single_cell(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier, row:int, col:int):
+        """get result for a single cell. does not create a KnowledgeGraph instance"""
         statement, errors = statement_mapper.get_cell_statement(col, row, True, sheet, wikifier)
+        return statement, errors
 
     @classmethod
     def generate(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier, start=0, end=None, count=None):
