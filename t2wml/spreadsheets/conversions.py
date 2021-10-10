@@ -10,8 +10,6 @@ def cell_tuple_to_str(col, row) -> str:
     This function converts 0-indexed tuples cell notation
     to the cell notation used by excel (letter + 1-indexed number, in a string)
     Eg: (0,5) to A6, (51, 5) to AZ6
-    :param cell_index: (col, row)
-    :return:
     """
     col = column_index_to_letter(col)
     row = str(int(row) + 1)
@@ -23,8 +21,6 @@ def cell_str_to_tuple(cell: str): #aka from excel
     This function converts the cell notation used by excel (letter + 1-indexed number, in a string)
     to 0-indexed tuples cell notation 
     Eg:  A6 to 0,5
-    :param cell_index: (col, row)
-    :return:
     """
     column = regex_az.search(cell).group(0)
     row = regex_09.search(cell).group(0)
@@ -37,8 +33,9 @@ def column_letter_to_index(column: str) -> int:
     This function converts a letter column to its respective 0-indexed column index
     viz. 'A' to 0
     'AZ' to 51
-    :param column:
-    :return: column index of type int
+
+    Returns:
+        int: column index
     """
     index = 0
     column = column.upper()
@@ -54,8 +51,6 @@ def column_index_to_letter(n: int) -> str:
     This function converts the 0-indexed column index to column letter
     0 to A,
     51 to AZ, etc
-    :param n:
-    :return:
     """
     string = ""
     n = n+1
@@ -69,9 +64,7 @@ def cell_range_str_to_tuples(cell_range: str) -> Tuple[Sequence[int], Sequence[i
     """
     used elsewhere in the code
     This function parses the cell range and returns 0-index row and column indices
-    For eg: A4:B5 to (0, 3), (1, 4)
-    :param cell_range:
-    :return:
+    eg: A4:B5 to (0, 3), (1, 4)
     """
     cells = cell_range.split(":")
     start_cell = cell_str_to_tuple(cells[0])
@@ -80,6 +73,9 @@ def cell_range_str_to_tuples(cell_range: str) -> Tuple[Sequence[int], Sequence[i
 
 
 def to_excel(col, row):
+    """onverts 0-indexed tuples cell notation
+    to the cell notation used by excel (letter + 1-indexed number, in a string)
+    Eg: (0,5) to A6, (51, 5) to AZ6"""
     if col is None and row is None:
         return None
     return cell_tuple_to_str(col, row)
