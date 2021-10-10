@@ -25,6 +25,7 @@ class ReturnClass:
         return self._value
 
     def __eq__(self, comparator):
+        """override to enable comparing both with returnclass instances and with basic types"""
         if self.value == comparator:
             return True
         try:
@@ -35,6 +36,7 @@ class ReturnClass:
         return False
 
     def __ne__(self, comparator):
+        """override to enable comparing both with returnclass instances and with basic types"""
         if self.value == comparator:
             return False
         try:
@@ -48,11 +50,12 @@ class ReturnClass:
         return str(self.value)
 
     def __bool__(self):
-            if self.value is None: #unfindable items are False values
-                return False
-            if len(str(self.value).strip())==0: #empty cells are False values
-                return False
-            return True #for now everything else is True (may eventually need to add NaN or something...)
+        """override to make bool behave the way the t2wml syntax expects"""
+        if self.value is None: #unfindable items are False values
+            return False
+        if len(str(self.value).strip())==0: #empty cells are False values
+            return False
+        return True #for now everything else is True (may eventually need to add NaN or something...)
 
             
     def __repr__(self):
@@ -67,12 +70,14 @@ class RangeClass:
                 yield col
 
     def __eq__(self, comparator):
+        """compare in a loop"""
         for i in self.flattened:
             if comparator != i:
                 return False
         return True
 
     def __ne__(self, comparator):
+        """compare in a loop"""
         for i in self.flattened:
             if comparator == i:
                 return False

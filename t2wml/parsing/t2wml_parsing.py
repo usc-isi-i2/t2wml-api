@@ -14,12 +14,26 @@ eval_globals.update(cleaning_functions_dict)
 
 
 class T2WMLCode:
+    """A class for holding T2WML code snippers
+
+    Args:
+        code (python compiled code object): the compiled eval expression
+        code_str (str): the string sent to be compiled (used to init some variables)
+        unmodified_str (str): the user's original string (used for error messages)
+
+    Attributes:
+        code (python compiled code object): the compiled eval expression
+        code_str (str): the string sent to be compiled (used to init some variables)
+        unmodified_str (str): the user's original string (used for error messages)
+        has_n (bool): does the code contain the variable n
+        has_q_var (bool): does the code contain a qcol/qrow variable
+
+        #not actually used anywhere in the code:
+        sheet_dependent (bool): is the code sheet-dependent, for example uses sheet length or name
+        is_variable (bool): contains some variable, like $n, $qrow, etc 
+
+    """
     def __init__(self, code, code_str, unmodified_str):
-        '''
-        code: the compiled eval expression
-        code_str: the string sent to be compiled (used to init some variables)
-        unmodified_str: the user's original string (used for error messages)
-        '''
         self.code = code
         self.has_n = "t_var_n" in code_str
         self.has_q_var = "t_var_q" in code_str
@@ -33,6 +47,7 @@ class T2WMLCode:
 
 #@basic_debug
 def t2wml_parse(e_str, context={}):
+    """set the global for the evaluation and then run eval"""
     value = CellExpression()
     item = ItemExpression()
     globals = dict(value=value, item=item)
@@ -43,7 +58,7 @@ def t2wml_parse(e_str, context={}):
 
 
 def iter_on_n(expression, context={}, upper_limit=None):
-    # handle iter on variable n. if there is no variable n this will anyway return in first iteration
+    """handle iter on variable n. if there is no variable n this will anyway return in first iteration"""
     if upper_limit is None:
         upper_limit = max(bindings.excel_sheet.row_len,
                           bindings.excel_sheet.col_len)
@@ -59,6 +74,7 @@ def iter_on_n(expression, context={}, upper_limit=None):
 
 
 def iter_on_n_for_code(input, context={}):
+    """poorly named. a general purpose wrapper function to either parse, iter, or return as ReturnClass code instances and strings"""
     if isinstance(input, str):
         return ReturnClass(None, None, input)
     if isinstance(input, T2WMLCode):
