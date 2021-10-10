@@ -238,6 +238,14 @@ wf.add_file("mywikifier.csv")
 kg=KnowledgeGraph.generate(ym, sh, wf)
 ```
 
+### The AnnotationMapper
+
+<span id="annotationmapper"></span>
+
+The T2WML API contains a fully implemented version of this class. Like the YamlMapper it expected to receive a filepath to a file containing a valid set of annotations. Annotations are described briefly in
+the [grammar documentation](..\docs\grammar.md) 
+
+
 ### A custom StatementMapper class
 
 <span id="custommapper"></span>
