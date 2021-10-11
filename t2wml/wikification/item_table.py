@@ -177,9 +177,7 @@ def convert_old_wikifier_to_new(wikifier_file, sheet):
     new_df = pd.DataFrame(new_rows, columns=columns)
     new_wiki_dict = convert_old_df_to_dict(new_df)
     return new_wiki_dict
-        
-
-        
+            
     
 def convert_old_df_to_dict(df): 
     """compatiblity with versions older than 0.6.1"""
