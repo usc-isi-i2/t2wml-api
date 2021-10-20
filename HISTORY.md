@@ -1,5 +1,9 @@
 T2WML API History
 ===================================
+Changes in version 0.6.6:
+------------------------
+Slight refactor, added docs, no other significant changes in functionality
+
 Changes in version 0.6.5:
 ------------------------
 * refactor node creation to be in its own module
