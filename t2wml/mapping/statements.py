@@ -174,11 +174,12 @@ class Node:
             datetime_string, parsed_precision, used_format = parse_datetime(
                 self.value,
                 additional_formats=self.__dict__.get("format", []),
-                precision=self.__dict__.get("precision", [])
+                precisions=self.__dict__.get("precision", [])
             )
             self.value = datetime_string
             if parsed_precision:
                 self.precision = parsed_precision
+            
             if used_format:
                 self.format = used_format
         except Exception as e:

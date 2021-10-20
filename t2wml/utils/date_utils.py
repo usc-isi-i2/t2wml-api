@@ -56,13 +56,13 @@ def translate_precision_to_integer(precision: str) -> int:
 
 
 #@basic_debug
-def parse_datetime(value, additional_formats=None, precision=None):
+def parse_datetime(value, additional_formats=None, precisions=None):
     """given a string, parse it to a datetime
 
     Args:
         value (str): date string
         additional_formats (str or list of str, optional): REQUIRED formats for the string to match one of them. Defaults to None.
-        precision (string/int, optional): wikidata precision. Defaults to None.
+        precision (string/int or list of same, optional): wikidata precision. Defaults to None.
 
     Raises:
         ValueError: Failed to parse datetime string with the provided format/s
@@ -79,8 +79,10 @@ def parse_datetime(value, additional_formats=None, precision=None):
     if isinstance(additional_formats, str):
         additional_formats = [additional_formats]
     
-    if precision:
-        precision=translate_precision_to_integer(precision)
+    precision=None
+    if precisions:
+        if not isinstance(precisions, list):
+            precision = translate_precision_to_integer(precisions)
     
     value = str(value)
 
@@ -97,6 +99,11 @@ def parse_datetime(value, additional_formats=None, precision=None):
             try:
                 datetime_string = datetime.strptime(value, date_format)
                 used_format=date_format
+                if precisions and precision is None:
+                    try:
+                        precision=translate_precision_to_integer(precisions[index])
+                    except IndexError: #no precision defined for that format
+                        precision=None
                 parsed_date_cache[cache_key] = datetime_string.isoformat(), precision, used_format
                 return parsed_date_cache[cache_key]
             except ValueError as e:
