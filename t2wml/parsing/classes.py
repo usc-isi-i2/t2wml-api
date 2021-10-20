@@ -14,6 +14,7 @@ def index_converter(arg):
 
 
 class ReturnClass:
+    """class for storing results for a cell"""
     def __init__(self, col, row, value=None):
         self.col = col
         self.row = row
@@ -24,6 +25,7 @@ class ReturnClass:
         return self._value
 
     def __eq__(self, comparator):
+        """override to enable comparing both with returnclass instances and with basic types"""
         if self.value == comparator:
             return True
         try:
@@ -34,6 +36,7 @@ class ReturnClass:
         return False
 
     def __ne__(self, comparator):
+        """override to enable comparing both with returnclass instances and with basic types"""
         if self.value == comparator:
             return False
         try:
@@ -47,11 +50,12 @@ class ReturnClass:
         return str(self.value)
 
     def __bool__(self):
-            if self.value is None: #unfindable items are False values
-                return False
-            if len(str(self.value).strip())==0: #empty cells are False values
-                return False
-            return True #for now everything else is True (may eventually need to add NaN or something...)
+        """override to make bool behave the way the t2wml syntax expects"""
+        if self.value is None: #unfindable items are False values
+            return False
+        if len(str(self.value).strip())==0: #empty cells are False values
+            return False
+        return True #for now everything else is True (may eventually need to add NaN or something...)
 
             
     def __repr__(self):
@@ -66,12 +70,14 @@ class RangeClass:
                 yield col
 
     def __eq__(self, comparator):
+        """compare in a loop"""
         for i in self.flattened:
             if comparator != i:
                 return False
         return True
 
     def __ne__(self, comparator):
+        """compare in a loop"""
         for i in self.flattened:
             if comparator == i:
                 return False
@@ -87,7 +93,7 @@ class RangeClass:
         return self.data[row, col]
 
 
-class Item(ReturnClass):
+class Item(ReturnClass): 
     def __init__(self, col, row, context):
         super().__init__(col, row)
         item_table = bindings.item_table
@@ -96,7 +102,7 @@ class Item(ReturnClass):
             data_sheet = bindings.excel_sheet
             self._value = data_sheet[row, col]
         else:
-            self._value = item_table.get_item(self.col, self.row, context)
+            self._value = item_table.get_item(self.col, self.row, bindings.excel_sheet, context=context)
 
 
 class ItemRange(RangeClass):
@@ -122,6 +128,8 @@ class ItemRange(RangeClass):
 
 
 class ItemExpression:
+    """class for interpreting `item[]` as an Item or ItemRange
+    """
     def __getitem__(self, args):
         if len(args) > 2:
             context = args[2]
@@ -173,6 +181,8 @@ class CellRange(RangeClass):
 
 class CellExpression:
     def __getitem__(self, item):
+        """class for interpreting `value[]` as a Cell or CellRange
+        """
         col = index_converter(item[0])
         row = index_converter(item[1])
         if isinstance(col, int) and isinstance(row, int):

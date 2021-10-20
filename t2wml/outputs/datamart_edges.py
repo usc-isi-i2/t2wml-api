@@ -1,5 +1,4 @@
 
-import re
 import datetime
 from t2wml.input_processing.utils import clean_id
 

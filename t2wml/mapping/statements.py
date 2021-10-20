@@ -11,7 +11,27 @@ from t2wml.utils.date_utils import parse_datetime
 from t2wml.settings import t2wml_settings
 
 
+
+
 class StatementError:
+    """class for building errors
+
+    Args:
+        message (str): string describing the error
+        field (str): field which triggered the error (eg "value", "unit", etc)
+        qualifier (int, optional): array index of qualifier with the error. Defaults to -1, for non-qualifiers.
+        level ("Minor" or "Major", optional): Manually sets the error level. 
+                                Defaults to None, in which case error level is calculated from other parameters
+    
+    Attributes:
+        message (str): string describing the error
+        field (str): field which triggered the error (eg "value", "unit", etc)
+        qualifier (int): array index of qualifier with the error. -1 for non-qualifiers.
+        level ("Minor" or "Major"): Error severity (major errors will cause the statement to be removed from the statement collection)
+        role: either "qualifier", "value", "subject", "property", or "unit". 
+              This can be used for attaching errors to specific cells from which they are derived,
+              all qualifier errors are assigned "qualifier", anything not from the list is assigned to "value"
+    """
     def __init__(self, message, field, qualifier=-1, level=None):
         # set role
         if qualifier > -1:
@@ -41,29 +61,44 @@ def fake_iter():
 
 
 def handle_ethiopian_calendar(node, add_node_list):
+    """handles nodes that have a calendar field "Q215271" or "Ethiopian".
+    (does nothing to nodes without that field or whose calendar field has a different value)
+
+    Args:
+        node (Node): the node to be handled
+        add_node_list (list): a list, for appending newly created nodes if the handle_calendar setting is "add"
+    
+    changes are made in-place to node and the add_node_list
+    """
     calendar = node.__dict__.get("calendar")
     if calendar in ["Q215271", "Ethiopian"]:
-        if t2wml_settings.handle_calendar != "leave":
-            try:
-                gregorian_value = EthiopianDateConverter.iso_to_gregorian_iso(
-                    node.value)
-                if t2wml_settings.handle_calendar == "replace":
-                    node.value = gregorian_value
-                if t2wml_settings.handle_calendar == "add":
-                    new_node = Node(**deepcopy(node.__dict__), validate=False)
-                    new_node.value = gregorian_value
-                    new_node.__dict__["calendar"] = "Q1985727"
-                    # TODO: handle precision
-                    add_node_list.append(new_node)
-            except Exception as e:
-                node._errors.append(StatementError(field="calendar",
-                                                   message="Failed to convert to gregorian calendar: " +
-                                                   str(e),
-                                                   qualifier=node.qualifier_index),
-                                    level="Minor")
+        if t2wml_settings.handle_calendar == "leave": #do nothing
+            return
+
+        try:
+            gregorian_value = EthiopianDateConverter.iso_to_gregorian_iso(
+                node.value)
+            if t2wml_settings.handle_calendar == "replace":
+                node.value = gregorian_value
+            if t2wml_settings.handle_calendar == "add":
+                new_node = Node(**deepcopy(node.__dict__), validate=False) #the deepcopy is important, to avoid bugs
+                new_node.value = gregorian_value
+                new_node.__dict__["calendar"] = "Q1985727"
+                # TODO: handle precision
+                add_node_list.append(new_node)
+        except Exception as e:
+            node._errors.append(StatementError(field="calendar",
+                                                message="Failed to convert to gregorian calendar: " +
+                                                str(e),
+                                                qualifier=node.qualifier_index),
+                                level="Minor")
 
 
 class Node:
+    """
+    A node is something which has, at a minimum, the fields `value` and `property`. 
+    It can contain other fields as well, but only value and property are used in the validation code.
+    """
     def __init__(self, property=None, value=None, validate=True, qualifier_index=-1, **kwargs):
         self._errors = []
         self.property = property
@@ -78,8 +113,9 @@ class Node:
         return list(self._errors)
 
     def validate(self):
-        if t2wml_settings.no_wikification:
+        if t2wml_settings.no_wikification: #don't validate
             return
+            
         try:
             if self.property:
                 try:
@@ -143,6 +179,7 @@ class Node:
             self.value = datetime_string
             if parsed_precision:
                 self.precision = parsed_precision
+            
             if used_format:
                 self.format = used_format
         except Exception as e:
@@ -159,6 +196,10 @@ class Node:
 
 
 class Statement(Node):
+    """
+    A statement is a node which is additionally required to have the field `mainSubject`, 
+    and can also have fields which themselves are arrays of nodes (eg qualifier, reference)
+    """
     @property
     def node_class(self):
         return Node
@@ -194,6 +235,7 @@ class Statement(Node):
 
 
 class NodeForEval(Node):
+    """Node class where the node is built from code to be eval'd"""
     def __init__(self, property=None, value=None, context={}, **kwargs):
         self.context = context
         self.cells = {}
@@ -264,6 +306,7 @@ class NodeForEval(Node):
 
 
 class EvaluatedStatement(Statement, NodeForEval):
+    """Statement class where the node(S) are built from code to be eval'd"""
     @property
     def node_class(self):
         return NodeForEval
@@ -352,7 +395,7 @@ class EvaluatedStatement(Statement, NodeForEval):
 
 
 class PartialStatement(EvaluatedStatement):
+    """EvaluatedStatement class that does not raise an exception for major errors
+    """
     def validate(self):
         self._validate()
-    
-    #def serialize

@@ -1,11 +1,11 @@
 import json
 import t2wml.utils.t2wml_exceptions as T2WMLExceptions
-from t2wml.mapping.kgtk import create_kgtk
 from t2wml.wikification.item_table import Wikifier
 from t2wml.spreadsheets.sheet import Sheet
 from t2wml.spreadsheets.conversions import to_excel
 from t2wml.mapping.statement_mapper import YamlMapper, StatementMapper
-from t2wml.mapping.canonical_spreadsheet import create_canonical_spreadsheet
+from t2wml.outputs.canonical_spreadsheet import create_canonical_spreadsheet
+from t2wml.outputs.kgtk import create_kgtk
 
 
 class KnowledgeGraph:
@@ -29,7 +29,9 @@ class KnowledgeGraph:
 
     @classmethod
     def get_single_cell(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier, row:int, col:int):
+        """get result for a single cell. does not create a KnowledgeGraph instance"""
         statement, errors = statement_mapper.get_cell_statement(col, row, True, sheet, wikifier)
+        return statement, errors
 
     @classmethod
     def generate(cls, statement_mapper:StatementMapper, sheet:Sheet, wikifier:Wikifier, start=0, end=None, count=None):

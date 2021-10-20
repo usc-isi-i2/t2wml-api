@@ -75,11 +75,11 @@ for sheet_name, sheet in spreadsheet_file.items():
 
 <span id="project"></span>
 
-The Project class is essentially a container, for a single mapping calculation's various files. A central use case for the project is creating an association of files and then being able to upload the project to the T2WML UI.
+The Project class is essentially a container mapping files to each other, to organize related calculations.
 
-The project class properties' consist of a series of containers (arrays, dictionaries) for tracking the various files of the project, the current state of the project if relevant, and `directory` (required) and `title` (optional, default name of directory folder)
+The project class properties' consist of a series of containers (arrays, dictionaries) for tracking the various files of the project.
 
-All the project's files MUST be located in the project's `directory` (sub-directories of this directory are also fine). For adding files not located in the directory, see the explanation of the arguments in the adding file functions, below.
+All the project's files MUST be located in the project's `directory` (sub-directories of this directory are also fine. For adding files not located in the directory, see the explanation of the arguments in the adding file functions, below.
 
 The Project class has a variety of functions for adding files to the entire project:
 
@@ -105,11 +105,11 @@ When True, `rename` will rename the file to {filename}_1, or if that is also alr
 If both are set to True, `overwrite` will be applied.
 
 
-It is possible to `save` a Project. This creates a file t2wmlproj.yaml in the project directory that stores the contents of the Project (the file lists and associations)
+It is possible to `save` a Project. This creates a file proj.t2wml file in the project directory that stores the contents of the Project (the file lists and associations)
 
-It is also possible to `load` a project by providing the path to either the directory of a project in which a t2wmlproj.yaml file has been saved, or directly to the t2wmlproj.yaml file.
+It is also possible to `load` a project by providing the path to either the directory of a project in which a proj.t2wml file has been saved, or directly to the proj.t2wml file.
 
-When loading a file, the project directory is overwritten to wherever the t2wmlproj.yaml file was saved. In other words, if you create a project in C:\username\myprojects on one computer, and then copy it to /usr/projects on another computer, loading the project from there will adjust the directory to the new directory.
+When loading a file, the project directory is overwritten to wherever the proj.t2wml file file was saved. In other words, if you create a project in C:\username\myprojects on one computer, and then copy it to /usr/projects on another computer, loading the project from there will adjust the directory to the new directory.
 
 ## KnowledgeGraph
 
@@ -238,6 +238,14 @@ wf.add_file("mywikifier.csv")
 kg=KnowledgeGraph.generate(ym, sh, wf)
 ```
 
+### The AnnotationMapper
+
+<span id="annotationmapper"></span>
+
+The T2WML API contains a fully implemented version of this class. Like the YamlMapper it expected to receive a filepath to a file containing a valid set of annotations. Annotations are described briefly in
+the [grammar documentation](..\docs\grammar.md) 
+
+
 ### A custom StatementMapper class
 
 <span id="custommapper"></span>
@@ -259,7 +267,7 @@ class SimpleSheetMapper(StatementMapper):
         error={}
         statement={}
         try:
-            item=wikifier.item_table.get_item(col-1, row, sheet=sheet)
+            item=wikifier.item_table.get_item(col-1, row, sheet)
             statement["subject"]=item
         except Exception as e:
             error["subject"]=str(e)

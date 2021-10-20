@@ -5,11 +5,13 @@ from t2wml.parsing.cleaning_functions import cleaning_functions_dict
 from t2wml.utils.bindings import update_bindings
 
 def create_lambda(function_name, *args, **kwargs):
+    """create a composable lambda function from a cleaning function name"""
     function=cleaning_functions_dict[function_name]
     new_func= lambda input: function(input, *args, **kwargs)
     return new_func
 
 def compose(*fs):
+    """used to compose cleaning functions together"""
     def composition(x):
         for f in fs:
             x = f(x)

@@ -1,4 +1,4 @@
-from t2wml.input_processing.annotation_suggesting import annotation_suggester,  block_finder
+from t2wml.input_processing.annotation_suggesting import guess_block,  guess_annotation
 from t2wml.input_processing.annotation_parsing import Annotation
 from t2wml.api import Sheet
 
@@ -8,7 +8,7 @@ from t2wml.api import Sheet
 
 
 def add_annotation_from_suggestion(sheet, selection, annotations):
-    suggestion=annotation_suggester(sheet, selection, annotations)
+    suggestion=guess_block(sheet, selection, annotations)
     annotations.append(
         {
                 "selection":selection,
@@ -54,11 +54,11 @@ def test_blocks_from_csv():
 "July 4, 2012",200,11"""
 
     s=Sheet.load_sheet_from_csv_string(csv_string, header=None)
-    block_finder(s)
+    guess_annotation(s)
 
 def test_block_from_sheet():
     data_file=r"C:\Users\devora\C_sources\pedro\various files\coumntry-wikifier-bug\FreedomHousePressFreedomIndex.csv"
     sheet_name="FreedomHousePressFreedomIndex"
     s=Sheet(data_file, sheet_name)
-    a=block_finder(s)
+    a=guess_annotation(s)
     # a)

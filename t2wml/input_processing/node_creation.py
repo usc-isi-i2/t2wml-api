@@ -87,7 +87,7 @@ def create_nodes(indices, project, sheet, wikifier, is_property=False, data_type
         label=sheet[row, col]
         if label:
             try:
-                exists = wikifier.item_table.get_item(col, row, sheet=sheet, value=label)                
+                exists = wikifier.item_table.get_item(col, row, sheet, value=label)                
                 if not exists and label not in created:
                     raise KeyError
                 if is_property:

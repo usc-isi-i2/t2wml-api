@@ -32,8 +32,8 @@ class ClassesTest(unittest.TestCase):
         wf.add_dataframe(df, replace=True)
         wf.save_to_file(output_file)
         new_wf = Wikifier.load_from_file(output_file)
-        assert new_wf.item_table.get_item(0, 3, sheet=sheet) == "Q967"
-        assert new_wf.item_table.get_item(0, 5, sheet=sheet) == "Q99"
+        assert new_wf.item_table.get_item(0, 3, sheet) == "Q967"
+        assert new_wf.item_table.get_item(0, 5, sheet) == "Q99"
 
 
     def test_custom_statement_mapper(self):
@@ -54,7 +54,7 @@ class ClassesTest(unittest.TestCase):
                 error = {}
                 statement = {}
                 try:
-                    item = wikifier.item_table.get_item(col-1, row, sheet=sheet)
+                    item = wikifier.item_table.get_item(col-1, row, sheet)
                     statement["subject"] = item
                 except Exception as e:
                     error["subject"] = str(e)

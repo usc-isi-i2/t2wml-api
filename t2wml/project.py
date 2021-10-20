@@ -1,7 +1,7 @@
 import json
 from typing import DefaultDict
 from t2wml.wikification.item_table import Wikifier, convert_old_df_to_dict, convert_old_wikifier_to_new
-from t2wml.mapping.datamart_edges import clean_id
+from t2wml.outputs.datamart_edges import clean_id
 import yaml
 import os
 import warnings
@@ -16,7 +16,43 @@ from t2wml.utils.debug_logging import basic_debug
 
 
 class Project:
-    #@basic_debug
+    """Class to organize files all belonging to the same project
+    
+    Args:
+        directory (str): directory containing all the project files, including proj.t2wml
+        title (str, optional): project title. Defaults to directory name if not provided.
+        description (str, optional): project description. Defaults to "".
+        url (str, optional): data source url. Defaults to "".
+        data_files (dict, optional): dictionary of data files and their sheet names. Defaults to empty dict.
+        yaml_files (list, optional): list of yaml files in project. Defaults to empty list.
+        entity_files (list, optional): list of entity files for project. Defaults to empty list.
+        yaml_sheet_associations (dict, optional): dictionary mapping yaml files to sheets. Defaults to empty dict.
+        annotations (dict, optional): dictionary mapping annotation files to sheets. Defaults to empty dict.
+        sparql_endpoint (str, optional): sparql endpoint for wikidata queries for this project. Defaults to DEFAULT_SPARQL_ENDPOINT.
+        warn_for_empty_cells (bool, optional): option for warning for empty cells or not. Defaults to False.
+        handle_calendar (str, optional): option for handling supported non-Gregorian calendars. Defaults to "leave".
+        cache_id (str, optional): a unique id associated to the project. Defaults to None.
+    
+    Attributes:
+        directory (str): directory containing all the project files, including proj.t2wml
+        title (str): project title. 
+        description (str): project description. 
+        url (str): data source url.
+        data_files (dict): dictionary of data files and their sheet names. 
+        yaml_files (list): list of yaml files in project. 
+        entity_files (list): list of entity files for project.
+        yaml_sheet_associations (dict): dictionary mapping yaml files to sheets. 
+        annotations (dict): dictionary mapping annotation files to sheets. 
+        sparql_endpoint (str): sparql endpoint for wikidata queries for this project. 
+        warn_for_empty_cells (bool): option for warning for empty cells or not. 
+        handle_calendar (str): option for handling supported non-Gregorian calendars. 
+        cache_id (str): a unique id associated to the project. 
+
+        entity_file (str): path to project json entity file
+        autogen_dir (str): sub-directory in project folder to save auto-generated files
+        dataset_id (str): datamart-id compatible version of project title (no spaces, etc)
+
+    """
     def __init__(self, directory, title=None, description="", url="",
                     data_files=None, yaml_files=None, entity_files=None, wikifier_files=None,
                     yaml_sheet_associations=None, annotations=None,
@@ -103,10 +139,6 @@ class Project:
                     os.remove(os.path.join(wikifier_dir, problem_file))
                 except Exception as e:
                     print(e)
-
-
-
-
 
 
 

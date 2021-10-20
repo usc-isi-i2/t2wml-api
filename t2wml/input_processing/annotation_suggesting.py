@@ -14,6 +14,14 @@ time_property_node = {"id": "P585",
 country_trans = str.maketrans("-.,", "   ")
 
 def get_types(cell_content):
+    """given the content of the cell, check if it could be a country, numeric, or a date
+
+    Args:
+        cell_content (str): string of cell content
+
+    Returns:
+        (bool, bool, bool): is_country, is_numeric, is_date
+    """
     cell_content=str(cell_content).strip().lower()
 
     country_cell_content = " ".join((cell_content.translate(country_trans).replace("&", " and ")).split())
@@ -30,7 +38,17 @@ def get_types(cell_content):
     return is_country, is_numeric, is_date
 
 #@basic_debug
-def annotation_suggester(sheet, selection, annotation_blocks_array):
+def guess_block(sheet, selection, annotation_blocks_array):
+    """guess what the annotation for a selection on a sheet should be
+
+    Args:
+        sheet (Sheet): the sheet we are annotating
+        selection (dict): 1-indexed {x1, y1, x2, y2} dictionary
+        annotation_blocks_array (list): existing annotation, an array of blocks (can be an empty array)
+
+    Returns:
+        dict: suggestion for annotation - will contain role, type, and additional fields in key "children"
+    """
     already_has_subject=False
     already_has_var=False
     for block in annotation_blocks_array:
@@ -63,10 +81,7 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
     is_country, is_numeric, is_date = totals
 
 
-
-
-
-    children={}
+    children={} #this is a terrible name. Really it's additional fields like "property" or "unit"
     type=None
 
     if is_country:
@@ -103,28 +118,40 @@ def annotation_suggester(sheet, selection, annotation_blocks_array):
 
 
 class HistogramSelection:
+    """A class for running the histogram algorithm for finding blocks to create an annotation
+
+    Args:
+        sheet (Sheet): the sheet we are creating an annotation for
+    
+    
+    Attributes:
+        sheet (Sheet): the sheet we are creating an annotation for
+        rows (list): a list of integer indices for rows on the sheet. if sheet length<=300, is just rows 0-300. otherwise, is a sub-selection of rows
+        use_row_subset (bool): flag indicating whether rows is a sub-selection of rows or not.
+    """
     def __init__(self, sheet):
         self.sheet=sheet
 
         if sheet.row_len>300:
-            self.truncate_rows= True
+            self.use_row_subset= True
             half = floor(sheet.row_len * 0.5)
             rows = [*range(0, 100), *range(half-50, half+50), *range(sheet.row_len-100, sheet.row_len)]
         else:
-            self.truncate_rows = False
+            self.use_row_subset = False
             rows = [*range(sheet.row_len)]
         
         self.rows=rows
     
     def block_finder(self):
+        """finds all the blocks, modifies them, returns resulting annotation"""
         sheet=self.sheet
 
-        vertical_numbers=Counter()
-        horizontal_numbers=Counter()
-        horizontal_dates=Counter()
-        vertical_dates=Counter()
-        horizontal_countries=Counter()
-        vertical_countries=Counter()
+        count_by_col_numbers=Counter()
+        count_by_row_numbers=Counter()
+        count_by_row_dates=Counter()
+        count_by_col_dates=Counter()
+        count_by_row_countries=Counter()
+        count_by_col_countries=Counter()
         blanks=set()
         numbers=set()
         dates=set()
@@ -140,46 +167,57 @@ class HistogramSelection:
                 is_country, is_numeric, is_date=get_types(content)
                 if is_country:
                     if is_numeric: #for now override "numeric" countries
-                        vertical_numbers[col]+=1
-                        horizontal_numbers[row]+=1
+                        count_by_col_numbers[col]+=1
+                        count_by_row_numbers[row]+=1
                         numbers.add((row, col))
                     else:
-                        horizontal_countries[row]+=1
-                        vertical_countries[col]+=1
+                        count_by_row_countries[row]+=1
+                        count_by_col_countries[col]+=1
                         countries.add((row, col))
                 elif is_date:
-                    horizontal_dates[row]+=1
-                    vertical_dates[col]+=1
+                    count_by_row_dates[row]+=1
+                    count_by_col_dates[col]+=1
                     dates.add((row, col))
                     if is_numeric:
-                        vertical_numbers[col]+=1
-                        horizontal_numbers[row]+=1
+                        count_by_col_numbers[col]+=1
+                        count_by_row_numbers[row]+=1
                         numbers.add((row, col))
                 elif is_numeric:
-                    vertical_numbers[col]+=1
-                    horizontal_numbers[row]+=1
+                    count_by_col_numbers[col]+=1
+                    count_by_row_numbers[row]+=1
                     numbers.add((row, col))
         
-        date_index, date_is_vertical, date_count= self.get_most_common(horizontal_dates, vertical_dates)
-        country_index, country_is_vertical, country_count = self.get_most_common(horizontal_countries, vertical_countries)
+        date_index, date_is_column, date_count= self.get_most_common(count_by_row_dates, count_by_col_dates)
+        country_index, country_is_column, country_count = self.get_most_common(count_by_row_countries, count_by_col_countries)
 
-        date_block=self.get_1d_block(date_index, date_is_vertical, date_count, dates, blanks)
-        country_block=self.get_1d_block(country_index, country_is_vertical, country_count, countries, blanks)
-        number_block=self.get_2d_block(horizontal_numbers, vertical_numbers, numbers, blanks, [date_block, country_block])
+        date_block=self.get_1d_block(date_index, date_is_column, date_count, dates, blanks)
+        country_block=self.get_1d_block(country_index, country_is_column, country_count, countries, blanks)
+        number_block=self.get_2d_block(count_by_col_numbers, numbers, blanks, [date_block, country_block])
         
-        date_block, country_block, number_block = self.normalization_and_overlaps(date_block, date_is_vertical, country_block, country_is_vertical, number_block)
+        date_block, country_block, number_block = self.alignment_and_overlaps(date_block, date_is_column, country_block, country_is_column, number_block)
         return self._create_annotations(date_block, country_block, number_block)
     
 
-    def get_most_common(self, horizontal, vertical):
+    def get_most_common(self, count_by_row, count_by_column):
+        """find the row or the column with the highest count (normalized to dimensions)
+
+        Args:
+            count_by_row (Counter): counter with count for each row
+            count_by_column (Counter): counter with count for each column
+
+        Returns:
+            index (int): index of the column or row with highest normalized count
+            is_column (bool): is it a column, or a row?
+            count (int): the count (not normalized)
+        """
         num_rows = len(self.rows)
         num_cols = self.sheet.col_len
-        if horizontal:
-            h_index, h_count = horizontal.most_common(1)[0]
+        if count_by_row:
+            h_index, h_count = count_by_row.most_common(1)[0]
         else:
             h_count=0
-        if vertical:
-            v_index, v_count = vertical.most_common(1)[0]
+        if count_by_column:
+            v_index, v_count = count_by_column.most_common(1)[0]
         else:
             v_count=0
         h_count_norm = h_count/num_cols
@@ -191,12 +229,26 @@ class HistogramSelection:
             return h_index, False, h_count
         return v_index, True, v_count
     
-    def get_1d_block(self, index, is_vertical, count, block_set, blank_set):
+    def get_1d_block(self, index, is_column, count, block_set, blank_set):
+        """get the rectangle coordinates for a "1d" block (where only one side at most is greater>1)
+
+        Args:
+            index (int): index of row or column
+            is_column (bool): is it a columns, or a row?
+            count (int): how many cells of the type are in the chosen row/column
+            block_set (set): a set with index tuples (row, col) for each cell that fits the block category
+            blank_set (set): a set with index tuples (row, col) for each cell that are blank
+
+        Returns:
+            tuple: ((x1, y1), (x2, y2)) 0-indexed rectangle coordinates. can also return None.
+        """
         sheet = self.sheet
         if index is None:
             return None
         
-        if self.truncate_rows and is_vertical:
+        #if we are using a row subset and we are checking a column, there's no checking of threshold for blanks
+        # (as our row sample is already "skewing" results)
+        if self.use_row_subset and is_column:
             column = index
             for initial_row in range(0, sheet.row_len):
                 if (initial_row, column) in block_set:
@@ -204,123 +256,143 @@ class HistogramSelection:
             for final_row in range(sheet.row_len, initial_row, -1):
                 if (final_row, column) in block_set:
                     break
-            return ((initial_row, column), (final_row, column))
+            return ((column, initial_row), (column, final_row))
 
-            
-        else:
-            threshold= max(floor(0.1 * count), 1)
-            contig_dict={}
-            if is_vertical:
-                column=index
-                start_row=0
-                while start_row<sheet.row_len:
-                    total=0
-                    for initial_row in range(start_row, sheet.row_len):
-                        if (initial_row, column) in block_set:
-                            break
-                    
-                    row=initial_row
-                    while row < sheet.row_len:
-                        bad_skips=0
-                        while not ((row, column) in block_set):
-                            if not ((row, column) in blank_set):
-                                bad_skips+=1
-                                if bad_skips>threshold:
-                                    break
-                            row+=1
+        # in all other cases, have a threshold of blank cells where past a certain number we assume the block has ended
+        threshold= max(floor(0.1 * count), 1)
+        contig_dict={}
 
-                        if bad_skips>threshold:
-                            break
+        if is_column:
+            column=index
+            start_row=0
+            while start_row<sheet.row_len:
+                total=0
+                for initial_row in range(start_row, sheet.row_len):
+                    if (initial_row, column) in block_set:
+                        break
+                
+                row=initial_row
+                while row < sheet.row_len:
+                    bad_skips=0
+                    while not ((row, column) in block_set):
+                        if not ((row, column) in blank_set):
+                            bad_skips+=1
+                            if bad_skips>threshold:
+                                break
                         row+=1
-                        total+=1
-                    
-                    #remove blanks and invalids
-                    final_row=row
-                    for final_row in range(row, 0, -1):
-                        if (final_row, column) in block_set:
-                            break
-                        total-=1
-                    contig_dict[((initial_row, column), (final_row, column))] = total
-                    start_row=row+1
-                return max(contig_dict, key=lambda p: contig_dict[p])
 
-            else:        #horizontal:
-                row=index
-                start_column=0
-                while start_column<sheet.col_len:
-                    total=0
-                    for initial_column in range(start_column, sheet.col_len):
-                        if (row, initial_column) in block_set:
-                            break
+                    if bad_skips>threshold:
+                        break
+                    row+=1
+                    total+=1
+                
+                #remove blanks and invalids
+                final_row=row
+                for final_row in range(row, 0, -1):
+                    if (final_row, column) in block_set:
+                        break
+                    total-=1
+                contig_dict[((column, initial_row), (column, final_row))] = total
+                start_row=row+1
+            return max(contig_dict, key=lambda p: contig_dict[p])
 
-                    col=initial_column
-                    while row < sheet.row_len:
-                        bad_skips=0
-                        while not ((row, col) in block_set):
-                            if not ((row, col) in blank_set):
-                                bad_skips+=1
-                                if bad_skips>threshold:
-                                    break
-                            col+=1
-                        if bad_skips>threshold:
-                            break
+        else:  #is row
+            row=index
+            start_column=0
+            while start_column<sheet.col_len:
+                total=0
+                for initial_column in range(start_column, sheet.col_len):
+                    if (row, initial_column) in block_set:
+                        break
+
+                col=initial_column
+                while row < sheet.row_len:
+                    bad_skips=0
+                    while not ((row, col) in block_set):
+                        if not ((row, col) in blank_set):
+                            bad_skips+=1
+                            if bad_skips>threshold:
+                                break
                         col+=1
-                        total+=1
+                    if bad_skips>threshold:
+                        break
+                    col+=1
+                    total+=1
 
-                    for final_column in range(col, 0, -1):
-                        total-=1
-                        if (row, final_column) in block_set:
-                            break
-                    contig_dict[((row, initial_column), (row, final_column))] = total
-                    start_column=col+1
+                for final_column in range(col, 0, -1):
+                    total-=1
+                    if (row, final_column) in block_set:
+                        break
+                contig_dict[((initial_column, row), (final_column, row))] = total
+                start_column=col+1
 
-                return max(contig_dict, key=lambda p: contig_dict[p])
+            return max(contig_dict, key=lambda p: contig_dict[p])
         
 
-    def get_2d_block(self, horizontal_count, vertical_count, block_set, blank_set, blocks_to_avoid):
+    def get_2d_block(self, col_counter: Counter, block_set: set, blank_set: set, blocks_to_avoid):
+        """get the rectangle coordinates for a "2d" block (both sides can have length>1)
+
+        Args:
+            col_counter (Counter): a counter with count per column
+            block_set (set): a set with index tuples (row, col) for each cell that fits the block category
+            blank_set (set): a set with index tuples (row, col) for each cell that are blank
+            blocks_to_avoid (list of tuples): list of ((x1, y1), (x2, y2)) tuples bounding rectangles that should not be overlapped when constructing our block
+
+        Returns:
+            tuple: ((x1, y1), (x2, y2)) 0-indexed rectangle coordinates.
+        """
         sheet=self.sheet
         for block in blocks_to_avoid:
             if block:
-                (start_r, start_c), (end_r, end_c) = block
+                (start_c, start_r), (end_c, end_r) = block
                 for r in range(start_r, end_r+1):
                     for c in range(start_c, end_c+1):
                         if (r,c) in block_set:
                             block_set.remove((r,c))
-                            vertical_count[c]-=1
-                            horizontal_count[r]-=1
+                            col_counter[c]-=1
 
         contiguous_columns=dict()
         start_i=0
         while start_i<sheet.col_len:
             contiguous_columns[start_i]=dict(count=0)
             for j in range(start_i, sheet.col_len+1):
-                if vertical_count[j]:
-                    contiguous_columns[start_i]["count"]+=vertical_count[j]
+                if col_counter[j]:
+                    contiguous_columns[start_i]["count"]+=col_counter[j]
                 else:
                     break
             contiguous_columns[start_i]["finish"]=j-1
             start_i=j+1
         start_column=max(contiguous_columns, key=lambda p: contiguous_columns[p]["count"])
         end_column=contiguous_columns[start_column]["finish"]
-        v_index, v_count = vertical_count.most_common(1)[0]
+        v_index, v_count = col_counter.most_common(1)[0]
         two_d_block=self.get_1d_block(start_column, True, v_count, block_set, blank_set)
-        ((initial_row, column), (final_row, column)) = two_d_block        
-        return (initial_row, start_column), (final_row, end_column)
+        ((column, initial_row), (column, final_row)) = two_d_block        
+        return (start_column, initial_row), (end_column, final_row)
             
-    def fix_overlaps(self, block_to_shrink, other_block, is_vertical):
+    def fix_overlaps(self, block_to_shrink, other_block, is_column):
+        """checks for and fixed overlaps between blocks
+
+        Args:
+            block_to_shrink (tuple): ((x1, y1), (x2, y2)). the selection whose size will be reduced if there is overlap
+            other_block (tuple): ((x1, y1), (x2, y2)) selection used to check for overlap
+            is_column (bool): is other_block a column or a row
+
+        Returns:
+            [type]: [description]
+        """
         if block_to_shrink is None:
             return None
         if other_block is None:
             return block_to_shrink
 
-        (base_start_r, base_start_c), (base_end_r, base_end_c) = block_to_shrink
+        (base_start_c, base_start_r), (base_end_c, base_end_r) = block_to_shrink
 
         test=rect_distance(block_to_shrink, other_block)
         if test!=0: #no overlap
             return block_to_shrink
 
-        (start_r, start_c), (end_r, end_c) = other_block
-        if is_vertical: #need to adjust columns
+        (start_c, start_r), (end_c, end_r) = other_block
+        if is_column: #need to adjust columns
             if start_c==base_start_c:
                 base_start_c+=1
             elif end_c==base_end_c:
@@ -344,34 +416,44 @@ class HistogramSelection:
                     base_end_r = start_r-1 #take the left rectangle
                 else:
                     base_start_r = end_r+1 #take the right rectangle
-        return (base_start_r, base_start_c), (base_end_r, base_end_c)
+        return (base_start_c, base_start_r), (base_end_c, base_end_r)
 
-    def normalize_to_selection(self, selection, normalize_against):
+    def align_to_selection(self, selection, normalize_against):
+        """expand/contract a selection to make it perfectly aligned (same start/end in one dimension)
+        with another selection
+
+        Args:
+            selection (tuple): ((x1, y1), (x2, y2))  selection whose dimensions will be changed
+            normalize_against (tuple): ((x1, y1), (x2, y2)) selection being aligning to
+        Returns:
+            tuple: ((x1, y1), (x2, y2)) adjusted coordinates
+        """
         if not normalize_against or not selection:
             return selection
-        (nr1, nc1), (nr2, nc2) = normalize_against
-        (r1, c1),(r2, c2) = selection
+        (nc1, nr1), (nc2, nr2) = normalize_against
+        (c1, r1),(c2, r2) = selection
         if r1==r2 and c1!=c2: #row
-            return (r1, nc1), (r2, nc2)
+            return (nc1, r1), (nc2, r2)
         if c1==c2 and r1!=r2: #column
-            return (nr1, c1),(nr2, c2)
+            return (c1, nr1),(c2, nr2)
         return selection
     
-    def normalization_and_overlaps(self, date_block, date_is_vertical, country_block, country_is_vertical, number_block):
+    def alignment_and_overlaps(self, date_block, date_is_column, country_block, country_is_column, number_block):
+        """run the alignment and overlap adjustment functions on the blocks"""
         if not number_block:
             return date_block, country_block, number_block
         
-        number_block = self.fix_overlaps(number_block, date_block, date_is_vertical)
-        number_block = self.fix_overlaps(number_block, country_block, country_is_vertical)
+        number_block = self.fix_overlaps(number_block, date_block, date_is_column)
+        number_block = self.fix_overlaps(number_block, country_block, country_is_column)
         
         if country_block:
-            normalized_country_block=self.normalize_to_selection(country_block, number_block)
+            normalized_country_block=self.align_to_selection(country_block, number_block)
             if rect_distance(normalized_country_block, number_block)!=0 and \
                 rect_distance(normalized_country_block, date_block)!=0:
                     country_block=normalized_country_block
 
         if date_block:
-            normalized_date_block=self.normalize_to_selection(date_block, number_block)
+            normalized_date_block=self.align_to_selection(date_block, number_block)
             if rect_distance(normalized_date_block, number_block)!=0 and \
                 rect_distance(normalized_date_block, country_block)!=0:
                     date_block=normalized_date_block
@@ -379,10 +461,20 @@ class HistogramSelection:
         return date_block, country_block, number_block
     
     def _create_annotations(self, date_block, country_block, number_block):
+        """create an annotation array of block dicts using the found selections
+
+        Args:
+            date_block (tuple): ((x1, y1), (x2, y2)) selection for dates
+            country_block (tuple): ((x1, y1), (x2, y2)) selection for countries
+            number_block (tuple): ((x1, y1), (x2, y2)) selection for dependent variable
+
+        Returns:
+            list(dict): array of annotation blocks
+        """
         annotations=[]
         if date_block:
             annotations.append({
-                    "selection":dict(x1=date_block[0][1]+1, y1=date_block[0][0]+1, x2= date_block[1][1]+1, y2=date_block[1][0]+1),
+                    "selection":dict(x1=date_block[0][0]+1, y1=date_block[0][1]+1, x2= date_block[1][0]+1, y2=date_block[1][1]+1),
                     "role":"qualifier",
                     "type": "time",
                     "property": time_property_node
@@ -390,13 +482,13 @@ class HistogramSelection:
 
         if country_block:
             annotations.append({
-                    "selection":dict(x1=country_block[0][1]+1, y1=country_block[0][0]+1, x2= country_block[1][1]+1, y2=country_block[1][0]+1),
+                    "selection":dict(x1=country_block[0][0]+1, y1=country_block[0][1]+1, x2= country_block[1][0]+1, y2=country_block[1][1]+1),
                     "role":"mainSubject",
                     "type": "wikibaseitem",
             })
         if number_block:
             annotations.append({
-                    "selection":dict(x1=number_block[0][1]+1, y1=number_block[0][0]+1, x2= number_block[1][1]+1, y2=number_block[1][0]+1),
+                    "selection":dict(x1=number_block[0][0]+1, y1=number_block[0][1]+1, x2= number_block[1][0]+1, y2=number_block[1][1]+1),
                     "role":"dependentVar",
                     "type": "quantity",
             })
@@ -407,6 +499,7 @@ class HistogramSelection:
 
 
 
-def block_finder(sheet): #convenience function
+def guess_annotation(sheet):
+    """guess annotation for a sheet"""
     h=HistogramSelection(sheet)
     return h.block_finder()

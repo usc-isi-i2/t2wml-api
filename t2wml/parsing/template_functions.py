@@ -1,3 +1,5 @@
+#please note that template functions are documented pretty extensively in grammar.md
+
 import re
 from t2wml.utils.date_utils import parse_datetime
 from SPARQLWrapper import SPARQLWrapper, JSON
@@ -6,7 +8,7 @@ from t2wml.settings import t2wml_settings
 from t2wml.parsing.classes import ReturnClass, RangeClass
 from t2wml.parsing.cleaning_functions import string_modifier
 
-def boolean_modifer(func):
+def boolean_modifer(func): #uses OR, not AND, logic for determining true/false
     def wrapper(input, *args, **kwargs):
         if input:  # if value is not None
             if isinstance(input, RangeClass):  # handle ranges separately:
@@ -38,6 +40,7 @@ def ends_with(input, section):
 
 @boolean_modifer
 def instance_of(input, qnode):
+    """send a query to the t2wml_settings sparql endpoint checking if input has an instance of relationship with qnode"""
     query = "ASK {wd:"+str(input)+" wdt:P31/wdt:P279* wd:" + str(qnode) + "}"
     sparql = SPARQLWrapper(t2wml_settings.sparql_endpoint)
     sparql.setQuery(query)

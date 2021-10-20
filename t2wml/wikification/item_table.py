@@ -2,10 +2,7 @@ import json
 from collections import defaultdict
 import pandas as pd
 from t2wml.utils.t2wml_exceptions import ItemNotFoundException
-from t2wml.utils.bindings import bindings
 from t2wml.utils.debug_logging import basic_debug
-
-
 
 
 class ItemTable:
@@ -25,9 +22,7 @@ class ItemTable:
         except KeyError:
              raise ItemNotFoundException(str(key)+ " not found")
 
-    def get_item(self, column:int, row:int, context:str='', sheet=None, value=None):
-        if not sheet:
-            sheet = bindings.excel_sheet
+    def get_item(self, column:int, row:int, sheet=None, context:str='', value=None):
         if value is None:
             value = str(sheet[row, column])
         try:
@@ -37,10 +32,10 @@ class ItemTable:
             return None  # currently this is what the rest of the API expects. could change later
 
     def get_cell_info(self, column, row, sheet):
-        # used to serialize table
+        """used to serialize the table"""
         value = str(sheet[row, column])
         for context in self.lookup_table:
-            item = self.get_item(column, row, context, sheet=sheet, value=value)
+            item = self.get_item(column, row, sheet, context=context, value=value)
             if item:
                 return item, context, value
         return None, None, None
@@ -124,6 +119,7 @@ class Wikifier:
 
 
 def convert_old_wikifier_to_new(wikifier_file, sheet):
+    """compatibility for versions older than 0.5.0"""
     df = pd.read_csv(wikifier_file)
     df = df.fillna('')
     df = df.replace(r'^\s+$', '', regex=True)
@@ -181,11 +177,10 @@ def convert_old_wikifier_to_new(wikifier_file, sheet):
     new_df = pd.DataFrame(new_rows, columns=columns)
     new_wiki_dict = convert_old_df_to_dict(new_df)
     return new_wiki_dict
-        
-
-        
+            
     
-def convert_old_df_to_dict(df):
+def convert_old_df_to_dict(df): 
+    """compatiblity with versions older than 0.6.1"""
     wiki_dict=defaultdict(dict)
     for entry in df.itertuples():
         column = int(entry.column)

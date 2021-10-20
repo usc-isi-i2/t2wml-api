@@ -4,7 +4,7 @@ import yaml
 from pathlib import Path
 from t2wml.spreadsheets.sheet import SpreadsheetFile
 from t2wml.parsing.cleaning_functions import *
-from t2wml.mapping.datamart_edges import clean_id
+from t2wml.outputs.datamart_edges import clean_id
 from t2wml.input_processing.clean_yaml_parsing import get_cleaned_dataframe
 
 class TestScripts(unittest.TestCase):

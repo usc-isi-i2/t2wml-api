@@ -67,7 +67,7 @@ class Sheet:
         return self.raw_data
     
     @property
-    def _data_values(self): #added this property beause creating .values takes too long
+    def _data_values(self): #added this property because creating .values takes too long
         if self.cleaned_data is not None:
             try:
                 return self._cleaned_data_values
