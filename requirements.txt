@@ -4,7 +4,7 @@ pandas==1.2.2
 SPARQLWrapper==1.8.5
 ftfy==5.8
 requests==2.24.0
-wheel==0.34.2
+wheel==0.38.1
 xlrd==1.2.0
 openpyxl==3.0.5
 text-unidecode==1.3
